@@ -6,6 +6,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import Medical from "@/components/PatientForms/Medical"; 
+
 
 // ✅ Reusable InfoField with Soft Green Styling
 const InfoField = ({ label, value, name, type = "text", options = [], isEditing, handleChange }) => {
@@ -44,7 +46,7 @@ const PatientProfile = ({ patient, onClose, onSave }) => {
 
   // ✅ Save Changes & Exit Edit Mode
   const handleSave = () => {
-    if (onSave) onSave(editablePatient); 
+    if (onSave) onSave(editablePatient);
     setIsEditing(false);
   };
 
@@ -54,8 +56,8 @@ const PatientProfile = ({ patient, onClose, onSave }) => {
     const birthDate = new Date(birthdate);
     const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
-    if (today.getMonth() < birthDate.getMonth() || 
-       (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate())) {
+    if (today.getMonth() < birthDate.getMonth() ||
+      (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate())) {
       age--;
     }
     return age;
@@ -66,10 +68,10 @@ const PatientProfile = ({ patient, onClose, onSave }) => {
   return (
     <Dialog open={!!patient} onOpenChange={onClose}>
       <DialogContent className="max-w-full w-full h-[90vh] p-4 rounded-xl shadow-xl bg-green-50 flex flex-col">
-        
+
         {/* ✅ Soft Green Styled Layout */}
         <Card className="w-full h-full flex flex-col lg:flex-row overflow-hidden bg-green-100 rounded-lg shadow-lg p-4 space-y-4 lg:space-y-0 lg:space-x-6">
-          
+
           {/* Left Section: Avatar & Info */}
           <div className="flex flex-col items-center w-full lg:w-1/4 min-w-[200px] space-y-4 text-center">
             <Avatar className="w-24 h-24 sm:w-32 sm:h-32 border-4 border-green-500 shadow-md" src="/default-avatar.png" alt="Avatar" />
@@ -88,14 +90,14 @@ const PatientProfile = ({ patient, onClose, onSave }) => {
           {/* Right Section: Scrollable Patient Details */}
           <ScrollArea className="w-full lg:w-3/4 h-full overflow-auto p-4 bg-green-50 rounded-md shadow-inner">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 text-base sm:text-lg">
-              
+
               <InfoField label="Birthdate" value={editablePatient.birthdate} name="birthdate" type="date" isEditing={isEditing} handleChange={handleChange} />
               <InfoField label="Age" value={calculateAge(editablePatient.birthdate)} />
               <InfoField label="Gender" value={editablePatient.gender === "1" ? "Male" : "Female"} name="gender" type="select" options={[{ value: "1", text: "Male" }, { value: "0", text: "Female" }]} isEditing={isEditing} handleChange={handleChange} />
               <InfoField label="Civil Status" value={editablePatient.civil_status === "1" ? "Married" : "Single"} name="civil_status" type="select" options={[{ value: "1", text: "Married" }, { value: "0", text: "Single" }]} isEditing={isEditing} handleChange={handleChange} />
               <InfoField label="Address" value={editablePatient.address} name="address" type="text" isEditing={isEditing} handleChange={handleChange} />
               <InfoField label="Position/Year Level" value={editablePatient.positionYearLevel} name="positionYearLevel" type="text" isEditing={isEditing} handleChange={handleChange} />
-              
+
               <InfoField label="Department" value={editablePatient.department} name="department" type="text" isEditing={isEditing} handleChange={handleChange} />
               <InfoField label="Program" value={editablePatient.program} name="program" type="text" isEditing={isEditing} handleChange={handleChange} />
             </div>
@@ -115,7 +117,6 @@ const PatientProfile = ({ patient, onClose, onSave }) => {
           )}
         </div>
 
-        {/* Tabs Section */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
           <TabsList className="flex space-x-4 sm:space-x-6 border-b border-green-300 pb-2">
             <TabsTrigger value="medical">Medical</TabsTrigger>
@@ -124,6 +125,10 @@ const PatientProfile = ({ patient, onClose, onSave }) => {
             <TabsTrigger value="incident">Incident Reports</TabsTrigger>
             <TabsTrigger value="prescriptions">Prescriptions</TabsTrigger>
           </TabsList>
+
+          <div className="mt-4">
+            {activeTab === "medical" && <Medical activeTab={activeTab} />}
+          </div>
         </Tabs>
 
       </DialogContent>
