@@ -13,15 +13,11 @@ return new class extends Migration
     {
         Schema::create('students', function (Blueprint $table) {
             $table->string('stud_id', 10)->primary();
-            $table->unsignedInteger('curr_id')->nullable();
-            $table->unsignedInteger('year_id')->default(0);
             $table->boolean('is_vaccinated')->nullable();
             $table->string('father_name', 200);
-            $table->boolean('father_gender')->default(1);
             $table->date('father_birthdate')->nullable();
             $table->string('father_occupation', 255);
             $table->string('mother_name', 200);
-            $table->boolean('mother_gender')->default(0);
             $table->date('mother_birthdate')->nullable();
             $table->string('mother_occupation', 255);
             $table->string('guardian_name', 200);

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Patient;
+use App\Models\College;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -11,8 +12,20 @@ class PatientController extends Controller
     public function index()
     {
         $patients = Patient::latest()->get();
+        $colleges = College::where('is_active', 1)
+            ->orderBy('college_id')
+            ->select('college_id', 'description as college_description', 'college_code')
+            ->distinct() // Ensure unique college_id
+            ->with(['programs' => function ($query) {
+                $query->where('is_active', 1)
+                    ->orderBy('program_id')
+                    ->select('program_id', 'college_id', 'description as program_description', 'program_code', 'section_code', 'type');
+            }])
+            ->get();
+
         return Inertia::render('Patients/Index', [
-            'patients' => $patients
+            'patients' => $patients,
+            'colleges' => $colleges
         ]);
     }
 

@@ -10,8 +10,6 @@ class Patient extends Model
 
     protected $primaryKey = 'patient_id'; // Set custom primary key
 
-    public $timestamps = true; // Enable timestamps (created_at, updated_at)
-
     protected $fillable = [
         'type',
         'lname',
@@ -30,5 +28,10 @@ class Patient extends Model
     public function updater()
     {
         return $this->belongsTo(User::class, 'updated_by', 'user_id')->withDefault();
+    }
+
+    public function student()
+    {
+        return $this->hasOne(Student::class);
     }
 }

@@ -6,11 +6,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { usePage } from "@inertiajs/react";
 import PatientProfile from "./Profile";
-import AddPatient from "@/components/add-patient";
+import AddStudentDialog from "@/components/Patients/add-student-dialog";
 import FilterDropdown from "@/components/patient-filter"; // Import Patient Filter
 
-const PatientIndex = () => {
-    const { patients } = usePage().props;
+const Index = () => {
+    const { patients, colleges } = usePage().props;
     const [selectedPatient, setSelectedPatient] = useState(null);
     const [openAdd, setOpenAdd] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
@@ -50,6 +50,12 @@ const PatientIndex = () => {
 
         return matchesSearch && matchesFilters;
     });
+
+    // Handle closing the Add Student modal
+    const handleCloseDialog = () => {
+        setOpenAdd(false);
+        window.scrollTo({ top: 0, behavior: "smooth" }); // Reset scroll to top
+    };
 
     return (
         <Layout>
@@ -92,12 +98,12 @@ const PatientIndex = () => {
                                             </CardHeader>
                                             <CardContent className="p-4 space-y-2 text-gray-700">
                                                 <p><strong>Birthdate:</strong> {patient.birthdate || "-"}</p>
-                                                <p className="flex items-center gap-2">
+                                                <div className="flex items-center gap-2">
                                                     <strong>Gender:</strong>
                                                     <Badge variant="outline" className={patient.gender ? "bg-blue-200" : "bg-pink-200"}>
                                                         {patient.gender ? "Male" : "Female"}
                                                     </Badge>
-                                                </p>
+                                                </div>
                                                 <p><strong>Type:</strong> {formatType(patient.type)}</p>
                                                 <p><strong>Email:</strong> {patient.email || "-"}</p>
                                                 <p>
@@ -125,9 +131,10 @@ const PatientIndex = () => {
             {selectedPatient && <PatientProfile patient={selectedPatient} onClose={() => setSelectedPatient(null)} />}
 
             {/* Add Patient Dialog */}
-            <AddPatient open={openAdd} onClose={() => setOpenAdd(false)} />
+            <AddStudentDialog key={openAdd ? "open" : "closed"} open={openAdd} onClose={handleCloseDialog} colleges={colleges} />
+            
         </Layout>
     );
 };
 
-export default PatientIndex;
+export default Index;

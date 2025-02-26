@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('patients', function (Blueprint $table) {
-            $table->id('patient_id'); // Primary key
+            $table->bigIncrements('patient_id'); // Auto-increment primary key
             $table->enum('type', ['student', 'employee', 'non_personnel']);
             $table->string('lname', 100)->nullable();
             $table->string('fname', 100)->nullable();
@@ -29,7 +29,7 @@ return new class extends Migration
             // Ensure 'updated_by' matches the type in 'users'
             $table->unsignedInteger('updated_by')->nullable();
             $table->foreign('updated_by')->references('user_id')->on('users')->nullOnDelete();
-        });        
+        });         
     }
 
     /**

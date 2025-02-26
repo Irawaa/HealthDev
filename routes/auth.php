@@ -15,6 +15,8 @@ use App\Http\Controllers\AuthenticateController;
 use App\Http\Controllers\ClinicStaffController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\StudentController;
+use App\Http\Controllers\CollegeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -49,15 +51,15 @@ Route::middleware(['web', 'auth'])->group(function () {
 
 
     // --- Patients --- //
-    Route::get('/patients', function () {
-        return Inertia::render('Patients/Index');
-    })->name('patients');
-
     Route::get('/patients', [PatientController::class, 'index'])->name('patients.index');
     Route::post('/patients', [PatientController::class, 'store'])->name('patients.store');
     Route::get('/patients/{patient}', [PatientController::class, 'show'])->name('patients.show');
     Route::put('/patients/{patient}', [PatientController::class, 'update'])->name('patients.update');
     Route::delete('/patients/{patient}', [PatientController::class, 'destroy'])->name('patients.destroy');
+
+    // Patient - Students //
+
+    Route::post('/students', [StudentController::class, 'store'])->name('students.store');
 
     // --- Logout ---
     Route::post('/logout', [AuthenticateController::class, 'destroy'])->name('logout');
