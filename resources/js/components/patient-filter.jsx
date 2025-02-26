@@ -26,6 +26,28 @@ const FilterDropdown = ({ filters, setFilters }) => {
         }));
     };
 
+    const departments = {
+        "College of Business, Administration and Accountancy": ["Bachelor of Science in Business Administration", "Bachelor of Science in Accountancy"],
+        "Graduate School": ["Master of Arts in Education", "Master in Business Administration", "Master of Arts in Psychology"],
+        "Senior High School": ["Technical Vocational Livelihood", "Science, Technology, Engineering, and Mathematics", "Accountancy, Business and Management", "General Academic Strand", "Humanities and Social Sciences"],
+        "College of Computing Studies": ["Bachelor of Science in Information Technology", "Bachelor of Science in Computer Science"],
+        "College of Engineering": ["Bachelor of Science in Electronics Engineering", "Bachelor of Science in Industrial Engineering", "Bachelor of Science in Computer Engineering"],
+        "College of Arts and Sciences": ["Bachelor of Science in Psychology"],
+        "College of Education": ["Bachelor of Elementary Education", "Bachelor of Secondary Education", "Teacher Certification Program"],
+        "College of Health and Allied Sciences": ["Bachelor of Science in Nursing"]
+    };
+
+    const staffOnlyDepartments = ["Graduate School", "College of Business, Administration and Accountancy"];
+
+    const selectedType = filters.type?.[0];
+    const selectedDepartments = (selectedType === "Non-Personnel" || selectedType === "Staff")
+        ? filters.department.filter(dept => !staffOnlyDepartments.includes(dept))
+        : filters.department || [];
+    
+    const programs = selectedDepartments.length > 0 
+        ? selectedDepartments.flatMap(dept => departments[dept] || [])
+        : (selectedType === "Student" ? Object.values(departments).flat() : []);
+
     return (
         <div className="relative">
             <Button onClick={() => setIsOpen(!isOpen)}>Filters</Button>
@@ -46,7 +68,7 @@ const FilterDropdown = ({ filters, setFilters }) => {
                     </div>
 
                     {/* Filter Categories */}
-                    {["department", "program", "type", "medicalStatus"].map((category) => (
+                    {["type", "department", "program"].map((category) => (
                         <div key={category} className="relative mb-2">
                             <div 
                                 className="flex justify-between items-center cursor-pointer bg-gray-100 p-2 rounded-lg"
@@ -62,10 +84,9 @@ const FilterDropdown = ({ filters, setFilters }) => {
                             {openDropdown === category && (
                                 <div className="absolute left-0 mt-1 w-full bg-white shadow-lg rounded-lg border z-10">
                                     {[
-                                        category === "department" && ["Cardiology", "Neurology", "Pediatrics"],
-                                        category === "program" && ["Child Health", "Surgical Training"],
                                         category === "type" && ["Student", "Staff", "Non-Personnel"],
-                                        category === "medicalStatus" && ["Stable", "Critical", "Recovering"]
+                                        category === "department" && (selectedType === "Non-Personnel" ? [] : Object.keys(departments)),
+                                        category === "program" && programs
                                     ].filter(Boolean).flat().map(option => (
                                         <div
                                             key={option}

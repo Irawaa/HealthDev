@@ -6,12 +6,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
 import { CalendarIcon, StethoscopeIcon, HeartPulseIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const PatientProfile = ({ patient, onClose, onSave }) => {
+  if (!patient) return null; // Ensure patient is not undefined
+
   const [isEditing, setIsEditing] = useState(false);
   const [editablePatient, setEditablePatient] = useState({ ...patient });
-
-  if (!patient) return null;
+  const [activeTab, setActiveTab] = useState("medical"); // Added activeTab state
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -106,16 +108,14 @@ const PatientProfile = ({ patient, onClose, onSave }) => {
                 )}
 
                 {isStudent && (
-                  <>
-                    <div className="flex flex-col">
-                      <label className="font-semibold flex items-center gap-1"><HeartPulseIcon size={18} /> Program</label>
-                      {isEditing ? (
-                        <input type="text" name="program" value={editablePatient.program || ""} onChange={handleChange} className="border rounded p-2 w-full" />
-                      ) : (
-                        <p className="p-2 bg-gray-100 rounded">{patient.program || "N/A"}</p>
-                      )}
-                    </div>
-                  </>
+                  <div className="flex flex-col">
+                    <label className="font-semibold flex items-center gap-1"><HeartPulseIcon size={18} /> Program</label>
+                    {isEditing ? (
+                      <input type="text" name="program" value={editablePatient.program || ""} onChange={handleChange} className="border rounded p-2 w-full" />
+                    ) : (
+                      <p className="p-2 bg-gray-100 rounded">{patient.program || "N/A"}</p>
+                    )}
+                  </div>
                 )}
               </div>
             </ScrollArea>
@@ -132,6 +132,22 @@ const PatientProfile = ({ patient, onClose, onSave }) => {
             </div>
           </CardContent>
         </Card>
+
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
+          <TabsList className="flex space-x-2 border-b pb-2">
+            <TabsTrigger value="medical">Medical</TabsTrigger>
+            <TabsTrigger value="dental">Dental</TabsTrigger>
+            <TabsTrigger value="bp">BP</TabsTrigger>
+            <TabsTrigger value="incident">Incident Reports</TabsTrigger>
+            <TabsTrigger value="prescriptions">Prescriptions</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="medical">Medical Records</TabsContent>
+          <TabsContent value="dental">Dental Records</TabsContent>
+          <TabsContent value="bp">Blood Pressure Records</TabsContent>
+          <TabsContent value="incident">Incident Reports</TabsContent>
+          <TabsContent value="prescriptions">Prescriptions</TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
