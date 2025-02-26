@@ -3,20 +3,22 @@ import MedicalTabs from "./MedicalTabs";
 import { Button } from "@/components/ui/button";
 
 const MedicalModal = ({ onClose, record, onSave, onDelete }) => {
-  const isNewRecord = !record; // Check if it's a new record
-  const [formData, setFormData] = useState(record || { 
-    createdBy: "Dr. John Doe", 
-    date: new Date().toISOString().split("T")[0], 
-    status: "draft" // Default status for new records
-  });
+  const isNewRecord = !record; // Determine if it's a new record
+  const [formData, setFormData] = useState(
+    record || { 
+      createdBy: "Dr. John Doe", 
+      date: new Date().toISOString().split("T")[0], 
+      status: "draft", // Default status for new records
+      data: {} 
+    }
+  );
 
   const [isEditing, setIsEditing] = useState(isNewRecord); // New records start in edit mode
-  const [isDraftSaved, setIsDraftSaved] = useState(false);
 
   // Auto-save draft when closing without saving
   useEffect(() => {
     return () => {
-      if (!isNewRecord && !isDraftSaved) {
+      if (!isNewRecord && formData.status !== "saved") {
         console.log("Auto-saving draft...");
         onSave({ ...formData, status: "draft" });
       }
@@ -24,9 +26,9 @@ const MedicalModal = ({ onClose, record, onSave, onDelete }) => {
   }, [onClose]);
 
   const handleSave = () => {
-    setIsDraftSaved(true);
     onSave({ ...formData, status: "saved" });
     setIsEditing(false);
+    onClose();
   };
 
   const handleDelete = () => {
@@ -45,7 +47,9 @@ const MedicalModal = ({ onClose, record, onSave, onDelete }) => {
           <h2 className="text-lg font-semibold text-green-700">
             {isNewRecord ? "New Medical Record" : "Edit Medical Record"}
           </h2>
-          <p className="text-sm text-gray-600">Created by: {formData.createdBy} on {formData.date}</p>
+          <p className="text-sm text-gray-600">
+            Created by: {formData.createdBy} on {formData.date}
+          </p>
         </div>
 
         {/* Content Area - Scrollable Form */}
@@ -55,18 +59,28 @@ const MedicalModal = ({ onClose, record, onSave, onDelete }) => {
 
         {/* Footer Buttons */}
         <div className="px-6 py-4 border-t bg-gray-50 flex justify-end space-x-3">
-          <Button onClick={onClose} className="bg-gray-500 text-white hover:bg-gray-600">Close</Button>
+          <Button onClick={onClose} className="bg-gray-500 text-white hover:bg-gray-600">
+            Close
+          </Button>
 
           {isNewRecord ? (
-            <Button onClick={handleSave} className="bg-green-600 text-white">Save</Button>
+            <Button onClick={handleSave} className="bg-green-600 text-white">
+              Save
+            </Button>
           ) : (
             <>
               {isEditing ? (
-                <Button onClick={handleSave} className="bg-green-600 text-white">Save</Button>
+                <Button onClick={handleSave} className="bg-green-600 text-white">
+                  Save
+                </Button>
               ) : (
-                <Button onClick={() => setIsEditing(true)} className="bg-blue-500 text-white">Edit</Button>
+                <Button onClick={() => setIsEditing(true)} className="bg-blue-500 text-white">
+                  Edit
+                </Button>
               )}
-              <Button onClick={handleDelete} className="bg-red-600 text-white">Delete</Button>
+              <Button onClick={handleDelete} className="bg-red-600 text-white">
+                Delete
+              </Button>
             </>
           )}
         </div>
