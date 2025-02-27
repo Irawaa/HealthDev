@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { router, useForm } from "@inertiajs/react";
+import { router, useForm, Head } from "@inertiajs/react";
 import { LoginForm } from "@/components/login-form";
 import { LoadingDialog } from "@/components/loading-dialog";
 import { toast, Toaster } from "react-hot-toast";
@@ -44,30 +44,33 @@ const Login = () => {
   };
 
   return (
-    <div className="grid min-h-screen lg:grid-cols-10">
-      <div className="flex flex-col gap-4 p-6 md:p-10 lg:col-span-3">
-        <div className="flex flex-1 items-center justify-center">
-          <div className="w-full max-w-xs">
-            <LoginForm
-              onSubmit={handleSubmit}
-              loading={loading}
-              data={data}
-              setData={setData}
-              errors={errors}
-            />
+    <>
+      <Head title="Login" />
+      <div className="grid min-h-screen lg:grid-cols-10">
+        <div className="flex flex-col gap-4 p-6 md:p-10 lg:col-span-3">
+          <div className="flex flex-1 items-center justify-center">
+            <div className="w-full max-w-xs">
+              <LoginForm
+                onSubmit={handleSubmit}
+                loading={loading}
+                data={data}
+                setData={setData}
+                errors={errors}
+              />
+            </div>
           </div>
         </div>
+        <div className="relative hidden bg-muted lg:block lg:col-span-7">
+          <img
+            src="images/pnc-bg.jpg"
+            alt="Image"
+            className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+          />
+        </div>
+        <LoadingDialog isOpen={loading} status={status} />
+        <Toaster position="top-right" />
       </div>
-      <div className="relative hidden bg-muted lg:block lg:col-span-7">
-        <img
-          src="images/pnc-bg.jpg"
-          alt="Image"
-          className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-        />
-      </div>
-      <LoadingDialog isOpen={loading} status={status} />
-      <Toaster position="top-right" />
-    </div>
+    </>
   );
 };
 

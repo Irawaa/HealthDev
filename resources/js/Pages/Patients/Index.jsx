@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { usePage } from "@inertiajs/react";
+import { usePage, Head } from "@inertiajs/react";
 import PatientProfile from "./Profile";
-import AddStudentDialog from "@/components/Patients/add-student-dialog";
+import AddStudentDialog from "@/components/StudentPatients/add-student-dialog";
 import FilterDropdown from "@/components/patient-filter"; // Import Patient Filter
 
 const Index = () => {
@@ -58,6 +58,8 @@ const Index = () => {
     };
 
     return (
+        <>
+        <Head title="Patients" />
         <Layout>
             <div className="space-y-4 p-6">
                 <div className="flex justify-between items-center">
@@ -134,6 +136,7 @@ const Index = () => {
             <AddStudentDialog key={openAdd ? "open" : "closed"} open={openAdd} onClose={handleCloseDialog} colleges={colleges} />
             
         </Layout>
+        </>
     );
 };
 

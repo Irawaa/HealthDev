@@ -120,4 +120,4 @@ const PatientProfile = ({ patient, onClose, onSave }) => {
   );
 };
 
-export default PatientProfile;
+export default PatientProfile; // ✅ Ensure this is present
