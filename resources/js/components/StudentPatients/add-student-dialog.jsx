@@ -55,9 +55,6 @@ export default function AddStudentDialog({ open, onClose, colleges }) {
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
-            <DialogTrigger asChild>
-                <Button variant="default">Add Student</Button>
-            </DialogTrigger>
             <DialogContent className="max-w-4xl">
                 <DialogHeader>
                     <DialogTitle>Step {step}: {["Basic Info", "Personal Details", "Address Info", "Review & Submit"][step - 1]}</DialogTitle>

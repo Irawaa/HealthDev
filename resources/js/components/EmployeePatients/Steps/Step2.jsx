@@ -1,101 +1,104 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
 
-export default function Step2({ data, setData }) {
+export default function Step2({ data, setData, departments = [], colleges = [] }) {
+    const handleDepartmentChange = (value) => {
+        setData("dept_id", value);
+        setData("college_id", ""); // Reset college selection when department changes
+    };
+
+    const handleCollegeChange = (value) => {
+        setData("college_id", value);
+    };
+
     return (
         <div className="max-w-screen-lg mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Parent Information Section */}
+            {/* Employment Information Section */}
             <div className="col-span-1 md:col-span-3 border-b pb-2 mt-4">
-                <h2 className="text-lg font-semibold">Parent's Information</h2>
+                <h2 className="text-lg font-semibold">Employment Details</h2>
+            </div>
+            
+            {/* Employee Number */}
+            <div>
+                <Label>Employee Number</Label>
+                <Input type="text" value={data.employee_no} onChange={(e) => setData("employee_no", e.target.value)} />
             </div>
 
-            {/* Father's Details */}
+            {/* Date Hired */}
             <div>
-                <Label>Father Name</Label>
-                <Input type="text" value={data.father_name} onChange={(e) => setData("father_name", e.target.value)} />
-            </div>
-            <div>
-                <Label>Birthdate</Label>
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <Button variant="outline" className="w-full justify-start text-left py-2">
-                            {data.father_birthdate ? format(new Date(data.father_birthdate), "yyyy-MM-dd") : "Select Date"}
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                        <Calendar 
-                            mode="single" 
-                            selected={data.father_birthdate ? new Date(data.father_birthdate) : null} 
-                            onSelect={(date) => setData("father_birthdate", date ? date.toISOString().split("T")[0] : "")} 
-                        />
-                    </PopoverContent>
-                </Popover>
-            </div>
-            <div>
-                <Label>Occupation</Label>
-                <Input type="text" value={data.father_occupation} onChange={(e) => setData("father_occupation", e.target.value)} />
+                <Label>Date Hired</Label>
+                <Input type="date" value={data.date_hired} onChange={(e) => setData("date_hired", e.target.value)} />
             </div>
 
-            {/* Mother's Details */}
+            {/* Employment Status */}
             <div>
-                <Label>Mother Name</Label>
-                <Input type="text" value={data.mother_name} onChange={(e) => setData("mother_name", e.target.value)} />
-            </div>
-            <div>
-                <Label>Birthdate</Label>
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <Button variant="outline" className="w-full justify-start text-left py-2">
-                            {data.mother_birthdate ? format(new Date(data.mother_birthdate), "yyyy-MM-dd") : "Select Date"}
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                        <Calendar 
-                            mode="single" 
-                            selected={data.mother_birthdate ? new Date(data.mother_birthdate) : null} 
-                            onSelect={(date) => setData("mother_birthdate", date ? date.toISOString().split("T")[0] : "")} 
-                        />
-                    </PopoverContent>
-                </Popover>
-            </div>
-            <div>
-                <Label>Occupation</Label>
-                <Input type="text" value={data.mother_occupation} onChange={(e) => setData("mother_occupation", e.target.value)} />
+                <Label>Active Status</Label>
+                <Input type="text" value={data.is_active} onChange={(e) => setData("is_active", e.target.value)} />
             </div>
 
-            {/* Guardian & Emergency Contact */}
+            {/* Physical Attributes */}
+            <div>
+                <Label>Height (cm)</Label>
+                <Input type="text" value={data.height} onChange={(e) => setData("height", e.target.value)} />
+            </div>
+            <div>
+                <Label>Weight (kg)</Label>
+                <Input type="text" value={data.weight} onChange={(e) => setData("weight", e.target.value)} />
+            </div>
+            <div>
+                <Label>Blood Type</Label>
+                <Input type="text" value={data.blood_type} onChange={(e) => setData("blood_type", e.target.value)} />
+            </div>
+
+            {/* Department Information Section */}
             <div className="col-span-1 md:col-span-3 border-b pb-2 mt-4">
-                <h2 className="text-lg font-semibold">Guardian & Emergency Contact</h2>
+                <h2 className="text-lg font-semibold">Department Information</h2>
             </div>
-
-            {/* Guardian's Details */}
+            
+            {/* Department Selection */}
             <div>
-                <Label>Guardian Name</Label>
-                <Input type="text" value={data.guardian_name} onChange={(e) => setData("guardian_name", e.target.value)} />
+                <Label htmlFor="department">Department</Label>
+                <select
+                    id="department"
+                    value={data.dept_id || ""}
+                    onChange={(e) => handleDepartmentChange(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                    <option value="" disabled>Select Department</option>
+                    {departments.length > 0 ? (
+                        departments.map((department) => (
+                            <option key={`dept-${String(department.dept_id)}`} value={String(department.dept_id)}>
+                                {department.dept_description} ({department.dept_code})
+                            </option>
+                        ))
+                    ) : (
+                        <option key="no-dept-placeholder" disabled>No departments available</option>
+                    )}
+                </select>
             </div>
+            
+            {/* College Selection (Disabled unless Department is selected) */}
             <div>
-                <Label>Relation</Label>
-                <Input type="text" value={data.guardian_relation} onChange={(e) => setData("guardian_relation", e.target.value)} />
+                <Label htmlFor="college">College</Label>
+                <select
+                    id="college"
+                    value={data.college_id || ""}
+                    onChange={(e) => handleCollegeChange(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
+                    disabled={!data.dept_id}
+                >
+                    <option value="" disabled>Select College</option>
+                    {colleges.length > 0 ? (
+                        colleges.map((college) => (
+                            <option key={`college-${String(college.college_id)}`} value={String(college.college_id)}>
+                                {college.college_description} ({college.college_code})
+                            </option>
+                        ))
+                    ) : (
+                        <option key="no-college-placeholder" disabled>No colleges available</option>
+                    )}
+                </select>
             </div>
-            <div>
-                <Label>Contact Number</Label>
-                <Input type="text" value={data.guardian_contactno} onChange={(e) => setData("guardian_contactno", e.target.value)} />
-            </div>
-
-            {/* Emergency Contact */}
-            <div>
-                <Label>Emergency Contact Name</Label>
-                <Input type="text" value={data.emergency_contact_name} onChange={(e) => setData("emergency_contact_name", e.target.value)} />
-            </div>
-            <div>
-                <Label>Contact Number</Label>
-                <Input type="text" value={data.emergency_contact_no} onChange={(e) => setData("emergency_contact_no", e.target.value)} />
-            </div>
-            <div></div> {/* Empty div for spacing alignment */}
         </div>
     );
 }
