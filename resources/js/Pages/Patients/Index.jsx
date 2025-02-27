@@ -12,7 +12,7 @@ import PatientRoleDialog from "@/components/patient-role-dialog"; // Import Pati
 import AddEmployeeDialog from "@/components/EmployeePatients/add-employee-dialog"; // Assuming the employee dialog exists
 
 const Index = () => {
-    const { patients, colleges } = usePage().props;
+    const {patients, colleges } = usePage().props;
     const [selectedPatient, setSelectedPatient] = useState(null);
     const [openStudent, setOpenStudent] = useState(false);  // For AddStudentDialog
     const [openEmployee, setOpenEmployee] = useState(false); // For AddEmployeeDialog
