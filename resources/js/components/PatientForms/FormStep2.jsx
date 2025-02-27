@@ -105,7 +105,7 @@ const FormStep2 = ({ formData, setFormData, isEditing }) => {
       <h3 className="text-xl font-semibold text-green-700 mb-4">Vital Signs</h3>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* BP Input with Tooltip on Focus & Warning Icon Inside Field */}
+        {/* BP Input with High BP Warning Only */}
         <div className="flex flex-col relative">
           <label className="font-medium text-green-700">BP (mmHg):</label>
           <div className="relative w-full">
@@ -117,21 +117,21 @@ const FormStep2 = ({ formData, setFormData, isEditing }) => {
               onFocus={handleBpFocus}
               onBlur={handleBpBlur}
               disabled={!isEditing}
-              className="border border-gray-300 rounded p-2 w-full pr-10 focus:ring-green-500 focus:border-green-500"
+              className={`border rounded p-2 w-full pr-10 focus:ring-green-500 focus:border-green-500 
+          ${bpSeverity === "text-red-600" || bpSeverity === "text-orange-500" ? "border-red-500" : "border-gray-300"}`}
               placeholder="120/80"
             />
-            {bpWarning && (
+            {(bpSeverity === "text-red-600" || bpSeverity === "text-orange-500") && (
               <ExclamationTriangleIcon
                 className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${bpSeverity}`}
               />
             )}
           </div>
-          {bpWarning && isBpFocused && (
-            <div className={`absolute top-full left-0 mt-1 p-2 rounded shadow-lg w-max text-xs ${
-              bpSeverity === "text-red-600" ? "bg-red-100 text-red-800" : 
-              bpSeverity === "text-orange-500" ? "bg-orange-100 text-orange-800" : 
-              "bg-yellow-100 text-yellow-800"
-            }`}>
+
+          {(bpSeverity === "text-red-600" || bpSeverity === "text-orange-500") && isBpFocused && (
+            <div className={`absolute top-full left-0 mt-1 p-2 rounded shadow-lg w-max text-xs transition-opacity duration-200 
+        ${bpSeverity === "text-red-600" ? "bg-red-100 text-red-800" : "bg-orange-100 text-orange-800"}`}
+            >
               {bpWarning}
             </div>
           )}
@@ -172,7 +172,7 @@ const FormStep2 = ({ formData, setFormData, isEditing }) => {
           />
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 
