@@ -16,7 +16,7 @@ use App\Http\Controllers\ClinicStaffController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\StudentController;
-use App\Http\Controllers\CollegeController;
+use App\Http\Controllers\EmployeeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -58,8 +58,10 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::delete('/patients/{patient}', [PatientController::class, 'destroy'])->name('patients.destroy');
 
     // Patient - Students //
-
     Route::post('/students', [StudentController::class, 'store'])->name('students.store');
+
+    // Patient - Personnel //
+    Route::post('/employees', [EmployeeController::class, 'store'])->name('employees.store');
 
     // --- Logout ---
     Route::post('/logout', [AuthenticateController::class, 'destroy'])->name('logout');

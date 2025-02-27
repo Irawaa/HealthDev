@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('employees', function (Blueprint $table) {
-            $table->id('p_id'); // Explicit primary key
+            $table->id('employee_id'); // Explicit primary key
             $table->string('employee_no', 255)->nullable();
             $table->date('date_hired')->nullable();
             $table->boolean('is_active')->nullable();
@@ -33,16 +33,15 @@ return new class extends Migration
             $table->unsignedBigInteger('dept_id')->nullable(); // Department reference
             $table->unsignedTinyInteger('college_id')->nullable(); // College reference (if applicable)
 
-        
+
             // Foreign key to patients
             $table->unsignedBigInteger('patient_id');
             $table->foreign('patient_id')->references('patient_id')->on('patients')->cascadeOnDelete();
             $table->foreign('dept_id')->references('dept_id')->on('departments')->nullOnDelete();
             $table->foreign('college_id')->references('college_id')->on('colleges')->nullOnDelete();
 
-
             $table->timestamps();
-        });              
+        });
     }
 
     /**
