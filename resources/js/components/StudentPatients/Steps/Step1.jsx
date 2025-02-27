@@ -7,7 +7,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { format } from "date-fns";
 
-export default function Step1({ data, setData, colleges = [] }) {
+export default function Step1({ data, setData, colleges = [] }) { 
     const [filteredPrograms, setFilteredPrograms] = useState([]);
 
     const handleCollegeChange = (collegeId) => {
@@ -57,6 +57,19 @@ export default function Step1({ data, setData, colleges = [] }) {
                 <Input type="text" value={data.lname} onChange={(e) => setData("lname", e.target.value)} required className="border-green-500 focus:ring-green-500 w-full" />
             </div>
 
+            {/* Mobile Number */}
+            <div className="w-full">
+                <Label className="text-green-700">Mobile Number</Label>
+                <Input
+                    type="tel"
+                    value={data.mobile}
+                    onChange={(e) => setData("mobile", e.target.value)}
+                    placeholder="e.g., 09123456789"
+                    required
+                    className="border-green-500 focus:ring-green-500 w-full"
+                />
+            </div>
+
             <div className="w-full">
                 <Label className="text-green-700">Birthdate</Label>
                 <Popover>
@@ -82,6 +95,23 @@ export default function Step1({ data, setData, colleges = [] }) {
                     <SelectContent className="bg-green-50 border-green-400">
                         <SelectItem value="1">Male</SelectItem>
                         <SelectItem value="0">Female</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+
+            {/* Civil Status */}
+            <div className="w-full">
+                <Label className="text-green-700">Civil Status</Label>
+                <Select
+                    value={data.civil_status !== undefined ? String(data.civil_status) : ""}
+                    onValueChange={(value) => setData("civil_status", Number(value))}
+                >
+                    <SelectTrigger className="border-green-500 focus:ring-green-500 w-full">
+                        <SelectValue placeholder="Select Civil Status" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-green-50 border-green-400">
+                        <SelectItem value="0">Single</SelectItem>
+                        <SelectItem value="1">Married</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
