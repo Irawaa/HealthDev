@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { usePage } from "@inertiajs/react";
 import PatientProfile from "./Profile";
 import AddPatient from "@/components/add-patient";
-import FilterDropdown from "@/components/patient-filter"; // Import Patient Filter
+import FilterDropdown from "@/components/patient-filter";
 
 const PatientIndex = () => {
     const { patients } = usePage().props;
