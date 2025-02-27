@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "@inertiajs/react";
 import toast from "react-hot-toast";
 import {
-    Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription
+    Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
@@ -17,47 +17,23 @@ export default function AddEmployeeDialog({ open, onClose, colleges }) {
     const [step, setStep] = useState(1);
 
     const { data, setData, post, processing, reset } = useForm({
-        // Patient Fields
         type: "employee",
         lname: "", fname: "", mname: "", ext: "",
         birthdate: "", gender: "1", civil_status: "",
         email: "", mobile: "", telephone: "",
         updated_by: null, // Foreign key for users
 
-        // Employee Fields
         employee_no: "", date_hired: "",
         is_active: "1", height: "", weight: "", blood_type: "",
         father_name: "", mother_name: "",
         spouse_name: "", spouse_occupation: "",
         emergency_contact_person: "", emergency_contact_number: "",
         
-        // Address
         res_brgy: "", res_city: "", res_prov: "",
         res_region: "", res_zipcode: "",
         
-        // Foreign Keys
         dept_id: "", college_id: "", patient_id: ""
     });
-
-    const departments = [
-        { dept_id: "1", dept_description: "Office of the University President", dept_code: "OUP" },
-        { dept_id: "2", dept_description: "Office of the Executive Vice President", dept_code: "OEVP" },
-        { dept_id: "3", dept_description: "Office of the Vice President for Academic Affairs", dept_code: "OVPAA" },
-        { dept_id: "4", dept_description: "Office of the Vice President for Administration & Finance", dept_code: "OVPAF" },
-        { dept_id: "5", dept_description: "Office of the Vice President for Planning, Research & Extension", dept_code: "OVPPRE" },
-        { dept_id: "6", dept_description: "Office of the Vice President for Student Development & Auxiliary Services", dept_code: "OVPSDAS" },
-        { dept_id: "7", dept_description: "Office of the University Secretary", dept_code: "OUS" },
-        { dept_id: "8", dept_description: "Management Information Systems Department", dept_code: "MISD" },
-        { dept_id: "9", dept_description: "College of Business, Accountancy & Administration", dept_code: "CBAA" },
-        { dept_id: "10", dept_description: "College of Computing Studies", dept_code: "CCS" },
-        { dept_id: "12", dept_description: "College of Engineering", dept_code: "COE" },
-        { dept_id: "13", dept_description: "College of Health & Allied Sciences", dept_code: "CHAS" },
-        { dept_id: "14", dept_description: "Graduate School", dept_code: "GS" },
-        { dept_id: "18", dept_description: "University Library", dept_code: "ULIB" },
-        { dept_id: "19", dept_description: "Office of the University Registrar", dept_code: "OUR" },
-        { dept_id: "38", dept_description: "College of Arts and Sciences", dept_code: "CAS" },
-        { dept_id: "39", dept_description: "College of Education", dept_code: "COED" }
-    ];    
 
     const nextStep = () => setStep((prev) => prev + 1);
     const prevStep = () => setStep((prev) => prev - 1);
@@ -85,32 +61,83 @@ export default function AddEmployeeDialog({ open, onClose, colleges }) {
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
-            <DialogTrigger asChild>
-                <Button variant="default">Add Employee</Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl">
-                <DialogHeader>
-                    <DialogTitle>Step {step}: {["Basic Info", "Employment Details", "Address Info", "Review & Submit"][step - 1]}</DialogTitle>
-                    <DialogDescription>Fill out the necessary information to proceed.</DialogDescription>
-                </DialogHeader>
-                <form onSubmit={handleSubmit}>
-                    {step === 1 && <Step1 data={data} setData={setData} colleges={colleges} />}
-                    {step === 2 && <Step2 data={data} setData={setData} departments={departments}/>}
-                    {step === 3 && <Step3 data={data} setData={setData} />}
-                    {step === 4 && <Step4 data={data} setData={setData} />}
-                    {step === 5 && <Step5 data={data} />}
+            <DialogContent className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-5xl w-full bg-white border border-green-400 shadow-2xl rounded-2xl flex flex-col p-6 md:p-8 max-h-[95vh]">
+                    
+                {/* ✅ Step Progress Indicator */}
+                <div className="sticky top-0 bg-white z-10 pb-3">
+                    <div className="flex justify-between items-center mb-3">
+                        {["Basic Info", "Employment Details", "Address Info", "Other Details", "Review & Submit"].map((title, index) => (
+                            <div key={index} className="flex flex-col items-center">
+                                <div className={`w-9 h-9 flex items-center justify-center font-bold rounded-full transition-all duration-300 text-sm ${
+                                    step === index + 1 
+                                        ? "bg-green-600 text-white ring-2 ring-green-300 shadow-md"
+                                        : "bg-gray-300 text-gray-600"
+                                }`}>
+                                    {index + 1}
+                                </div>
+                                <p className={`text-xs md:text-sm mt-1 font-medium transition-all ${
+                                    step === index + 1 ? "text-green-700" : "text-gray-500"
+                                }`}>
+                                    {title}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
 
-                    <DialogFooter className="flex gap-4 mt-2">
-                        {step > 1 && <Button type="button" onClick={prevStep}>Back</Button>}
+                {/* ✅ Compact Form Header */}
+                <DialogHeader className="mb-2">
+                    <DialogTitle className="text-lg md:text-xl font-bold text-green-700">
+                        Step {step}: {["Basic Info", "Employment Details", "Address Info", "Other Details", "Review & Submit"][step - 1]}
+                    </DialogTitle>
+                    <DialogDescription className="text-gray-600 text-xs md:text-sm">
+                        Fill out the necessary information to proceed.
+                    </DialogDescription>
+                </DialogHeader>
+
+                {/* ✅ Scrollable Form Content */}
+                <div className="flex-1 overflow-y-auto pr-4 max-h-[80vh] pb-3">
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        {step === 1 && <Step1 data={data} setData={setData} colleges={colleges} />}
+                        {step === 2 && <Step2 data={data} setData={setData} />}
+                        {step === 3 && <Step3 data={data} setData={setData} />}
+                        {step === 4 && <Step4 data={data} setData={setData} />}
+                        {step === 5 && <Step5 data={data} />}
+                    </form>
+                </div>
+
+                {/* ✅ Compact Footer */}
+                <div className="w-full bg-white py-2 mt-3 flex justify-between items-center shadow-md border-t border-gray-300 px-6">
+                    {step > 1 && (
+                        <Button 
+                            type="button" 
+                            onClick={prevStep} 
+                            className="bg-gray-300 text-gray-700 hover:bg-gray-400 transition px-5 py-2 rounded-lg text-sm"
+                        >
+                            Back
+                        </Button>
+                    )}
+                    <div>
                         {step < 5 ? (
-                            <Button type="button" onClick={nextStep}>Next</Button>
+                            <Button 
+                                type="button" 
+                                onClick={nextStep} 
+                                className="bg-green-600 text-white hover:bg-green-700 transition px-5 py-2 rounded-lg text-sm shadow-md"
+                            >
+                                Next
+                            </Button>
                         ) : (
-                            <Button type="submit" disabled={processing}>
+                            <Button 
+                                type="submit" 
+                                disabled={processing} 
+                                className="bg-green-700 text-white hover:bg-green-800 transition px-5 py-2 rounded-lg text-sm shadow-md"
+                            >
                                 {processing ? "Submitting..." : "Submit"}
                             </Button>
                         )}
-                    </DialogFooter>
-                </form>
+                    </div>
+                </div>
+
             </DialogContent>
         </Dialog>
     );
