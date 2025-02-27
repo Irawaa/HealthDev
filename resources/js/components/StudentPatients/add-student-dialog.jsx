@@ -7,10 +7,10 @@ import {
 import { Button } from "@/components/ui/button";
 
 // Import Steps
-import Step1 from "@/components/Patients/Steps/Step1";
-import Step2 from "@/components/Patients/Steps/Step2";
-import Step3 from "@/components/Patients/Steps/Step3";
-import Step4 from "@/components/Patients/Steps/Step4";
+import Step1 from "@/components/StudentPatients/Steps/Step1";
+import Step2 from "@/components/StudentPatients/Steps/Step2";
+import Step3 from "@/components/StudentPatients/Steps/Step3";
+import Step4 from "@/components/StudentPatients/Steps/Step4";
 
 export default function AddStudentDialog({ open, onClose, colleges }) {
     const [step, setStep] = useState(1);

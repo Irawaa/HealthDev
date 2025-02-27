@@ -4,7 +4,7 @@ import Layout from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
-import { useForm } from "@inertiajs/react";
+import { useForm, Head } from "@inertiajs/react";
 import AddStaffDialog from "@/components/add-staff-dialog";
 import EditStaffTab from "@/components/edit-staff-tab";
 import EditStaffDialog from "@/components/edit-staff-dialog";
@@ -60,6 +60,8 @@ const Index = () => {
   };
 
   return (
+    <>
+    <Head title="Clinic Staff" />
     <Layout>
       <div className="space-y-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-2 md:space-y-0">
@@ -176,6 +178,7 @@ const Index = () => {
         </DialogContent>
       </Dialog>
     </Layout>
+    </>
   );
 };
 
