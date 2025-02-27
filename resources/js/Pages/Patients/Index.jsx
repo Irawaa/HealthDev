@@ -12,7 +12,7 @@ import PatientRoleDialog from "@/components/patient-role-dialog";
 import AddEmployeeDialog from "@/components/EmployeePatients/add-employee-dialog";
 
 const Index = () => {
-    const { patients, colleges } = usePage().props;
+    const { patients, colleges, departments } = usePage().props;
     const [selectedPatient, setSelectedPatient] = useState(null);
     const [openStudent, setOpenStudent] = useState(false);
     const [openEmployee, setOpenEmployee] = useState(false);
@@ -98,10 +98,15 @@ const Index = () => {
                                     filteredPatients.map((patient) => {
                                         const bgColor = patientTypeColors[patient.type] || patientTypeColors.default;
 
+                                        // Find the corresponding college and program
+                                        const college = colleges.find(col => col.college_id === patient.student?.college_id);
+                                        const program = college?.programs.find(prog => prog.program_id === patient.student?.program_id);
+
+
                                         return (
                                             <Card
                                                 key={patient.patient_id}
-                                                className={`cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-transform duration-300 ease-in-out border rounded-lg ${bgColor}`}
+                                                className={`cursor-pointer border rounded-lg ${bgColor}`}
                                                 onClick={() => setSelectedPatient(patient)}
                                             >
                                                 <CardHeader className="p-4 border-b border-green-300">
@@ -136,6 +141,14 @@ const Index = () => {
                                                             "-"
                                                         )}
                                                     </p>
+
+                                                    {/* Fix: Use divs instead of <p> inside the condition */}
+                                                    {patient.type === "student" && (
+                                                        <div>
+                                                            <div><strong>College:</strong> {college?.college_description || "N/A"}</div>
+                                                            <div><strong>Program:</strong> {program?.program_description || "N/A"}</div>
+                                                        </div>
+                                                    )}
                                                 </CardContent>
                                             </Card>
                                         );
@@ -149,7 +162,7 @@ const Index = () => {
                 </div>
 
                 {/* Patient Profile Popup */}
-                {selectedPatient && <PatientProfile patient={selectedPatient} onClose={() => setSelectedPatient(null)} />}
+                {selectedPatient && <PatientProfile patient={selectedPatient} onClose={() => setSelectedPatient(null)} colleges={colleges} departments={departments} />}
 
                 {/* Add Student Dialog */}
                 <AddStudentDialog key={`add-student-${openStudent}`} open={openStudent} onClose={handleCloseDialog} colleges={colleges} />

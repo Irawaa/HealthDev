@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Patient;
 use App\Models\College;
+use App\Models\Department;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -11,7 +12,36 @@ class PatientController extends Controller
 {
     public function index()
     {
-        $patients = Patient::latest()->get();
+        $patients = Patient::with([
+            'student' => function ($query) {
+                $query->select(
+                    'patient_id',
+                    'stud_id',
+                    'address_house',
+                    'address_brgy',
+                    'address_citytown',
+                    'address_province',
+                    'address_zipcode',
+                    'program_id',
+                    'college_id'
+                );
+            },
+
+            'personnel' => function ($query) {
+                $query->select(
+                    'patient_id',
+                    'employee_id',
+                    'res_brgy', 
+                    'res_city', 
+                    'res_prov',
+                    'res_region', 
+                    'res_zipcode',
+                    'dept_id',
+                    'college_id',
+                );
+            }
+        ])->latest()->get();
+
         $colleges = College::where('is_active', 1)
             ->orderBy('college_id')
             ->select('college_id', 'description as college_description', 'college_code')
@@ -23,9 +53,12 @@ class PatientController extends Controller
             }])
             ->get();
 
+        $departments = Department::select('dept_id', 'name', 'acronym')->get();
+
         return Inertia::render('Patients/Index', [
             'patients' => $patients,
-            'colleges' => $colleges
+            'colleges' => $colleges,
+            'departments' => $departments
         ]);
     }
 

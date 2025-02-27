@@ -32,6 +32,11 @@ class Patient extends Model
 
     public function student()
     {
-        return $this->hasOne(Student::class);
+        return $this->hasOne(Student::class, 'patient_id', 'patient_id');
+    }
+
+    public function personnel()
+    {
+        return $this->hasOne(Employee::class, 'patient_id', 'patient_id');
     }
 }

@@ -1396,6 +1396,7 @@ namespace App\Models {
      * @property int $patient_id
      * @property-read \App\Models\User $updater
      * @property-read \App\Models\Student $student
+     * @property-read \App\Models\Employee $personnel
      * @method static \Illuminate\Database\Eloquent\Builder|Patient wherePatientId($value)
      * @method static \Illuminate\Database\Eloquent\Builder|Patient whereType($value)
      * @method static \Illuminate\Database\Eloquent\Builder|Patient whereLname($value)

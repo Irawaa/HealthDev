@@ -1,11 +1,12 @@
-import React, { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import React, { useState, useEffect } from "react";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import Medical from "@/components/PatientForms/Medical";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 const InfoField = ({ label, value, name, type = "text", options = [], isEditing, handleChange }) => (
   <div className="flex flex-col w-full space-y-1">
@@ -39,30 +40,74 @@ const InfoField = ({ label, value, name, type = "text", options = [], isEditing,
   </div>
 );
 
-const PatientProfile = ({ patient, onClose, onSave }) => {
+const PatientProfile = ({ patient, onClose, onSave, colleges, departments }) => {
   if (!patient) return null;
 
+  console.log(patient);
   const [isEditing, setIsEditing] = useState(false);
   const [editablePatient, setEditablePatient] = useState({ ...patient });
   const [activeTab, setActiveTab] = useState("medical");
   const [showInfo, setShowInfo] = useState(false);
+  const [age, setAge] = useState("0"); // State for age
+
+  const college = colleges.find(col =>
+    col.college_id === patient.student?.college_id ||
+    col.college_id === patient.personnel?.college_id // ✅ Include personnel
+  );
+  const program = college?.programs.find(prog => prog.program_id === patient.student?.program_id);
+
+  const department = departments.find(dept => dept.dept_id === patient.personnel?.dept_id);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setEditablePatient((prev) => ({ ...prev, [name]: value }));
+
+    setEditablePatient((prev) => {
+      const updatedPatient = { ...prev, [name]: value };
+
+      if (name === "birthdate") {
+        const newAge = calculateAge(value);
+        setAge(newAge);
+      }
+
+      return updatedPatient;
+    });
   };
 
+  useEffect(() => {
+    if (patient && patient.birthdate) {
+      const calculatedAge = calculateAge(patient.birthdate);
+      setAge(calculatedAge);
+
+      console.log("Patient Birthdate:", patient.birthdate);
+      console.log("Calculated Age:", calculatedAge);
+    }
+  }, [patient]); // Ensure it runs when `patient` changes
+
   const calculateAge = (birthdate) => {
-    if (!birthdate) return "N/A";
+    if (!birthdate) {
+      console.log("Birthdate is missing or invalid.");
+      return "N/A";
+    }
+
     const birthDate = new Date(birthdate);
+    if (isNaN(birthDate.getTime())) {
+      console.log("Invalid birthdate format:", birthdate);
+      return "Invalid Date";
+    }
+
     const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
-    if (
-      today.getMonth() < birthDate.getMonth() ||
-      (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate())
-    ) {
+
+    // Check if the birthday has already occurred this year
+    const hasBirthdayPassed =
+      today.getMonth() > birthDate.getMonth() ||
+      (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate());
+
+    if (!hasBirthdayPassed) {
       age--;
     }
+
+    console.log(`Birthdate: ${birthDate.toISOString()} | Age: ${age}`);
     return age;
   };
 
@@ -71,6 +116,11 @@ const PatientProfile = ({ patient, onClose, onSave }) => {
   return (
     <Dialog open={!!patient} onOpenChange={onClose}>
       <DialogContent className="w-screen h-screen sm:max-w-[95vw] sm:max-h-[95vh] p-6 rounded-xl shadow-xl bg-gray-50 flex flex-col overflow-hidden">
+        {/* ✅ Accessibility Fix: Add DialogTitle */}
+        <VisuallyHidden>
+          <DialogTitle>Patient Profile</DialogTitle>
+          <DialogDescription>View and manage patient details.</DialogDescription>
+        </VisuallyHidden>
         {/* ✅ Scrollable Content Wrapper - Fullscreen */}
         <div className="w-full h-full flex flex-col overflow-y-auto">
           <Card className="w-full flex flex-col bg-white rounded-lg shadow-lg p-6 space-y-6">
@@ -105,18 +155,17 @@ const PatientProfile = ({ patient, onClose, onSave }) => {
                 {showInfo ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
               </button>
 
-              {/* 🔥 Scrollable Dropdown for Easy Access */}
               <div
-                className={`w-full bg-white shadow-md rounded-lg border border-gray-300 transition-all duration-300 ${
-                  showInfo ? "max-h-[400px] p-6 mt-4 overflow-y-auto" : "max-h-0 overflow-hidden"
-                }`}
+                className={`w-full bg-white shadow-md rounded-lg border border-gray-300 transition-all duration-300 ${showInfo ? "max-h-[400px] p-6 mt-4 overflow-y-auto" : "max-h-0 overflow-hidden"
+                  }`}
               >
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm sm:text-md">
-                  <InfoField label="Birthdate" value={editablePatient.birthdate} name="birthdate" type="date" isEditing={isEditing} handleChange={handleChange} />
-                  <InfoField label="Age" value={calculateAge(editablePatient.birthdate)} />
+                  <InfoField label="Birthdate" value={patient.birthdate} name="birthdate" type="date" isEditing={isEditing} handleChange={handleChange} />
+                  <InfoField label="Age" value={age} />
+
                   <InfoField
                     label="Gender"
-                    value={editablePatient.gender === "1" ? "Male" : "Female"}
+                    value={editablePatient.gender === "0" ? "Female" : "Male"}
                     name="gender"
                     type="select"
                     options={[
@@ -126,9 +175,41 @@ const PatientProfile = ({ patient, onClose, onSave }) => {
                     isEditing={isEditing}
                     handleChange={handleChange}
                   />
-                  <InfoField label="Address" value={editablePatient.address} name="address" type="text" isEditing={isEditing} handleChange={handleChange} />
-                  <InfoField label="Department" value={editablePatient.department} name="department" type="text" isEditing={isEditing} handleChange={handleChange} />
-                  <InfoField label="Program" value={editablePatient.program} name="program" type="text" isEditing={isEditing} handleChange={handleChange} />
+                  <InfoField
+                    label="Address"
+                    value={
+                      patient.type === "student"
+                        ? `${patient.student?.address_house || ''}, 
+                          ${patient.student?.address_brgy || ''}, 
+                          ${patient.student?.address_citytown || ''}, 
+                          ${patient.student?.address_province || ''} 
+                          ${patient.student?.address_zipcode || ''}`
+                        : patient.type === "employee"
+                          ? `${patient.personnel?.res_brgy || ''}, 
+                            ${patient.personnel?.res_city || ''}, 
+                            ${patient.personnel?.res_prov || ''}, 
+                            ${patient.personnel?.res_region || ''} 
+                            ${patient.personnel?.res_zipcode || ''}`
+                          : patient.type === "non_personnel" // 🆕 New Patient Type
+                            ? `${patient.visitor?.address || "N/A"}`
+                            : "N/A" // Default case
+                    }
+                  />
+
+                  {/* Dynamic Fields Based on Role */}
+                  {editablePatient.type === "student" && (
+                    <>
+                      <InfoField label="Program" value={program?.program_description || "N/A"} />
+                      <InfoField label="College" value={college?.college_description || "N/A"} />
+                    </>
+                  )}
+
+                  {editablePatient.type === "employee" && (
+                    <>
+                      <InfoField label="Department" value={`${department.name} (${department.acronym})` || "N/A"} />
+                      {college && <InfoField label="College" value={college.college_description} />}
+                    </>
+                  )}
                 </div>
               </div>
             </div>
