@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "@inertiajs/react";
 import toast from "react-hot-toast";
 import {
-    Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription
+    Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
@@ -55,28 +55,82 @@ export default function AddStudentDialog({ open, onClose, colleges }) {
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent className="max-w-4xl">
-                <DialogHeader>
-                    <DialogTitle>Step {step}: {["Basic Info", "Personal Details", "Address Info", "Review & Submit"][step - 1]}</DialogTitle>
-                    <DialogDescription>Fill out the necessary information to proceed.</DialogDescription>
-                </DialogHeader>
-                <form onSubmit={handleSubmit}>
-                    {step === 1 && <Step1 data={data} setData={setData} colleges={colleges} />}
-                    {step === 2 && <Step2 data={data} setData={setData} />}
-                    {step === 3 && <Step3 data={data} setData={setData} />}
-                    {step === 4 && <Step4 data={data} />}
+            <DialogContent className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-5xl w-full bg-white border border-green-400 shadow-2xl rounded-2xl flex flex-col p-6 md:p-8 max-h-[95vh]">
+                    
+                {/* ✅ Smaller Step Progress Indicator */}
+                <div className="sticky top-0 bg-white z-10 pb-2">
+                    <div className="flex justify-between items-center mb-3">
+                        {["Basic Info", "Personal Details", "Address Info", "Review & Submit"].map((title, index) => (
+                            <div key={index} className="flex flex-col items-center">
+                                <div className={`w-9 h-9 flex items-center justify-center font-bold rounded-full transition-all duration-300 text-sm ${
+                                    step === index + 1 
+                                        ? "bg-green-600 text-white ring-2 ring-green-300 shadow-md"
+                                        : "bg-gray-300 text-gray-600"
+                                }`}>
+                                    {index + 1}
+                                </div>
+                                <p className={`text-xs md:text-sm mt-1 font-medium transition-all ${
+                                    step === index + 1 ? "text-green-700" : "text-gray-500"
+                                }`}>
+                                    {title}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
 
-                    <DialogFooter className="flex gap-4 mt-2">
-                        {step > 1 && <Button type="button" onClick={prevStep}>Back</Button>}
+                {/* ✅ More Compact Form Header */}
+                <DialogHeader className="mb-2">
+                    <DialogTitle className="text-lg md:text-xl font-bold text-green-700">
+                        Step {step}: {["Basic Info", "Personal Details", "Address Info", "Review & Submit"][step - 1]}
+                    </DialogTitle>
+                    <DialogDescription className="text-gray-600 text-xs md:text-sm">
+                        Fill out the necessary information to proceed.
+                    </DialogDescription>
+                </DialogHeader>
+
+                {/* ✅ Increased Form Content Area */}
+                <div className="flex-1 overflow-y-auto pr-4 max-h-[80vh] pb-3">
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        {step === 1 && <Step1 data={data} setData={setData} colleges={colleges} />}
+                        {step === 2 && <Step2 data={data} setData={setData} />}
+                        {step === 3 && <Step3 data={data} setData={setData} />}
+                        {step === 4 && <Step4 data={data} />}
+                    </form>
+                </div>
+
+                {/* ✅ More Compact Footer */}
+                <div className="w-full bg-white py-2 mt-3 flex justify-between items-center shadow-md border-t border-gray-300 px-6">
+                    {step > 1 && (
+                        <Button 
+                            type="button" 
+                            onClick={prevStep} 
+                            className="bg-gray-300 text-gray-700 hover:bg-gray-400 transition px-5 py-2 rounded-lg text-sm"
+                        >
+                            Back
+                        </Button>
+                    )}
+                    <div>
                         {step < 4 ? (
-                            <Button type="button" onClick={nextStep}>Next</Button>
+                            <Button 
+                                type="button" 
+                                onClick={nextStep} 
+                                className="bg-green-600 text-white hover:bg-green-700 transition px-5 py-2 rounded-lg text-sm shadow-md"
+                            >
+                                Next
+                            </Button>
                         ) : (
-                            <Button type="submit" disabled={processing}>
+                            <Button 
+                                type="submit" 
+                                disabled={processing} 
+                                className="bg-green-700 text-white hover:bg-green-800 transition px-5 py-2 rounded-lg text-sm shadow-md"
+                            >
                                 {processing ? "Submitting..." : "Submit"}
                             </Button>
                         )}
-                    </DialogFooter>
-                </form>
+                    </div>
+                </div>
+
             </DialogContent>
         </Dialog>
     );
