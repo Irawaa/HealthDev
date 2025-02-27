@@ -1,86 +1,102 @@
-// components/PatientForm/FormStep6.jsx
 const FormStep6 = ({ formData, setFormData, isEditing }) => {
-    const handleInputChange = (e) => {
-      const { name, value } = e.target;
-      setFormData({ ...formData, [name]: value });
-    };
-  
-    return (
-      <div className="p-4">
-        <h3 className="text-xl font-semibold text-green-700 mb-4">Vaccination Status</h3>
-  
-        <div className="flex flex-col mb-6">
-          <label className="font-medium text-green-700">Vaccination Details:</label>
-          <input
-            type="text"
-            name="vaccinationDetails"
-            value={formData.vaccinationDetails || ""}
-            onChange={handleInputChange}
-            disabled={!isEditing}
-            className="border border-gray-300 rounded p-2 w-full focus:ring-green-500 focus:border-green-500"
-            placeholder="Enter vaccination details"
-          />
-        </div>
-  
-        <h3 className="text-xl font-semibold text-green-700 mb-4">Final Evaluation</h3>
-  
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-          <label className="flex items-center space-x-2">
-            <input
-              type="radio"
-              name="finalEvaluation"
-              value="Class A"
-              checked={formData.finalEvaluation === "Class A"}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-              className="w-5 h-5 text-green-600 border-gray-300 focus:ring-green-500"
-            />
-            <span>Class A (Physically Fit)</span>
-          </label>
-  
-          <label className="flex items-center space-x-2">
-            <input
-              type="radio"
-              name="finalEvaluation"
-              value="Class B"
-              checked={formData.finalEvaluation === "Class B"}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-              className="w-5 h-5 text-green-600 border-gray-300 focus:ring-green-500"
-            />
-            <span>Class B (Fit with Minor Illness)</span>
-          </label>
-  
-          <label className="flex items-center space-x-2">
-            <input
-              type="radio"
-              name="finalEvaluation"
-              value="Pending"
-              checked={formData.finalEvaluation === "Pending"}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-              className="w-5 h-5 text-green-600 border-gray-300 focus:ring-green-500"
-            />
-            <span>Pending (Needs Clearance)</span>
-          </label>
-        </div>
-  
-        <h3 className="text-xl font-semibold text-green-700 mb-4">Plan/Recommendation</h3>
-  
-        <div className="flex flex-col">
-          <label className="font-medium text-green-700">Plan/Recommendation:</label>
-          <textarea
-            name="planRecommendation"
-            value={formData.planRecommendation || ""}
-            onChange={handleInputChange}
-            disabled={!isEditing}
-            className="border border-gray-300 rounded p-2 w-full h-32 focus:ring-green-500 focus:border-green-500"
-            placeholder="Enter plan or recommendation"
-          ></textarea>
-        </div>
-      </div>
-    );
+  const labTests = [
+    "Blood Chemistry",
+    "FBS",
+    "Uric Acid",
+    "Triglycerides",
+    "T.Cholesterol",
+    "Creatinine",
+  ];
+
+  // 🔥 Handle Input Changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
-  
-  export default FormStep6;
-  
+
+  // 🔥 Handle File Upload (Chest X-Ray)
+  const handleFileChange = (e) => {
+    setFormData({ ...formData, chestXRay: e.target.files[0] });
+  };
+
+  return (
+    <div className="p-4 space-y-6">
+      {/* 📸 Chest X-Ray Upload */}
+      <h3 className="text-xl font-semibold text-green-700">Chest X-Ray</h3>
+      <input
+        type="file"
+        name="chestXRay"
+        accept="image/*,application/pdf"
+        onChange={handleFileChange}
+        disabled={!isEditing}
+        className="border border-gray-300 rounded p-2 w-full focus:ring-green-500 focus:border-green-500 file:bg-green-100 file:border file:border-gray-300 file:rounded-lg file:px-3 file:py-2 file:cursor-pointer"
+      />
+
+      {/* 🩺 Laboratory Tests */}
+      <h3 className="text-xl font-semibold text-green-700">Laboratory Tests</h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {labTests.map((test) => (
+          <div key={test} className="flex flex-col">
+            <label className="font-medium text-gray-700">{test}:</label>
+            <input
+              type="text"
+              name={test.toLowerCase().replace(/\s/g, "")}
+              value={formData[`${test.toLowerCase().replace(/\s/g, "")}`] || ""}
+              onChange={handleInputChange}
+              disabled={!isEditing}
+              className="border border-gray-300 rounded p-2 w-full focus:ring-green-500 focus:border-green-500"
+              placeholder="Enter result"
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* 🔹 Separator */}
+      <div className="border-t-2 border-gray-300 my-6"></div>
+
+      {/* 🛡️ Vaccination Status */}
+      <h3 className="text-xl font-semibold text-green-700">Vaccination Status</h3>
+      <input
+        type="text"
+        name="vaccinationDetails"
+        value={formData.vaccinationDetails || ""}
+        onChange={handleInputChange}
+        disabled={!isEditing}
+        className="border border-gray-300 rounded p-2 w-full focus:ring-green-500 focus:border-green-500"
+        placeholder="Enter vaccination details"
+      />
+
+      {/* 📋 Final Evaluation */}
+      <h3 className="text-xl font-semibold text-green-700">Final Evaluation</h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+        {["Class A", "Class B", "Pending"].map((option) => (
+          <label key={option} className="flex items-center space-x-2">
+            <input
+              type="radio"
+              name="finalEvaluation"
+              value={option}
+              checked={formData.finalEvaluation === option}
+              onChange={handleInputChange}
+              disabled={!isEditing}
+              className="w-5 h-5 text-green-600 border-gray-300 focus:ring-green-500"
+            />
+            <span>{option} {option === "Class A" ? "(Physically Fit)" : option === "Class B" ? "(Fit with Minor Illness)" : "(Needs Clearance)"}</span>
+          </label>
+        ))}
+      </div>
+
+      {/* 📝 Plan/Recommendation */}
+      <h3 className="text-xl font-semibold text-green-700">Plan/Recommendation</h3>
+      <textarea
+        name="planRecommendation"
+        value={formData.planRecommendation || ""}
+        onChange={handleInputChange}
+        disabled={!isEditing}
+        className="border border-gray-300 rounded p-2 w-full h-32 focus:ring-green-500 focus:border-green-500"
+        placeholder="Enter plan or recommendation"
+      ></textarea>
+    </div>
+  );
+};
+
+export default FormStep6;
