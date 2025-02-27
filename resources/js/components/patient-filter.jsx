@@ -50,18 +50,24 @@ const FilterDropdown = ({ filters, setFilters }) => {
 
     return (
         <div className="relative">
-            <Button onClick={() => setIsOpen(!isOpen)}>Filters</Button>
+            <Button 
+                onClick={() => setIsOpen(!isOpen)} 
+                className="bg-green-600 text-white hover:bg-green-700 transition"
+            >
+                Filters
+            </Button>
+
             {isOpen && (
-                <div className="absolute left-0 mt-2 w-64 border rounded-lg p-4 bg-white shadow-md z-10">
-                    <h2 className="text-lg font-semibold mb-2">Filters</h2>
+                <div className="absolute left-0 mt-2 w-64 border border-green-400 rounded-lg p-4 bg-white shadow-lg z-10">
+                    <h2 className="text-lg font-semibold text-green-700 mb-2">Filters</h2>
 
                     {/* Selected Filters */}
                     <div className="mb-3 flex flex-wrap gap-2">
                         {Object.keys(filters).map(category => 
                             filters[category].map(value => (
-                                <div key={`${category}-${value}`} className="bg-gray-200 px-2 py-1 rounded flex items-center">
+                                <div key={`${category}-${value}`} className="bg-green-100 text-green-900 px-2 py-1 rounded flex items-center">
                                     <span className="text-sm mr-1">{value}</span>
-                                    <X size={12} className="cursor-pointer" onClick={() => clearFilter(category, value)} />
+                                    <X size={12} className="cursor-pointer hover:text-red-600" onClick={() => clearFilter(category, value)} />
                                 </div>
                             ))
                         )}
@@ -71,10 +77,10 @@ const FilterDropdown = ({ filters, setFilters }) => {
                     {["type", "department", "program"].map((category) => (
                         <div key={category} className="relative mb-2">
                             <div 
-                                className="flex justify-between items-center cursor-pointer bg-gray-100 p-2 rounded-lg"
+                                className="flex justify-between items-center cursor-pointer bg-green-100 p-2 rounded-lg border border-green-400 hover:bg-green-200 transition"
                                 onClick={() => toggleDropdown(category)}
                             >
-                                <span className="font-medium capitalize">
+                                <span className="font-medium capitalize text-green-800">
                                     {category.replace(/([A-Z])/g, " $1")}
                                 </span>
                                 {openDropdown === category ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
@@ -82,15 +88,18 @@ const FilterDropdown = ({ filters, setFilters }) => {
 
                             {/* Dropdown Menu */}
                             {openDropdown === category && (
-                                <div className="absolute left-0 mt-1 w-full bg-white shadow-lg rounded-lg border z-10">
-                                    {[
-                                        category === "type" && ["Student", "Staff", "Non-Personnel"],
-                                        category === "department" && (selectedType === "Non-Personnel" ? [] : Object.keys(departments)),
-                                        category === "program" && programs
-                                    ].filter(Boolean).flat().map(option => (
+                                <div className="absolute left-0 mt-1 w-full bg-white shadow-lg rounded-lg border border-green-300 z-10">
+                                    {[category === "type" && ["Student", "Staff", "Non-Personnel"],
+                                      category === "department" && (selectedType === "Non-Personnel" ? [] : Object.keys(departments)),
+                                      category === "program" && programs]
+                                      .filter(Boolean)
+                                      .flat()
+                                      .map(option => (
                                         <div
                                             key={option}
-                                            className={`p-2 cursor-pointer hover:bg-gray-200 ${filters[category].includes(option) ? "bg-gray-300" : ""}`}
+                                            className={`p-2 cursor-pointer hover:bg-green-200 transition ${
+                                                filters[category].includes(option) ? "bg-green-300 text-green-900" : ""
+                                            }`}
                                             onClick={() => handleFilterChange(category, option)}
                                         >
                                             {option}
@@ -102,7 +111,12 @@ const FilterDropdown = ({ filters, setFilters }) => {
                     ))}
 
                     {/* Apply Filters Button */}
-                    <Button className="mt-4 w-full" onClick={() => setIsOpen(false)}>Apply Filters</Button>
+                    <Button 
+                        className="mt-4 w-full bg-green-600 text-white hover:bg-green-700 transition" 
+                        onClick={() => setIsOpen(false)}
+                    >
+                        Apply Filters
+                    </Button>
                 </div>
             )}
         </div>
