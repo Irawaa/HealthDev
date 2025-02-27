@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import MedicalTabs from "./MedicalTabs";
 import { Button } from "@/components/ui/button";
 
-const MedicalModal = ({ onClose, record, onSave, onDelete }) => {
+const MedicalModal = ({ onClose, record, onSave, onDelete, patient }) => {
   const isNewRecord = !record; // Determine if it's a new record
   const [formData, setFormData] = useState(
     record || { 
@@ -54,7 +54,7 @@ const MedicalModal = ({ onClose, record, onSave, onDelete }) => {
 
         {/* Content Area - Scrollable Form */}
         <div className="px-6 py-4 overflow-auto flex-1">
-          <MedicalTabs formData={formData} setFormData={setFormData} isEditing={isEditing} />
+          <MedicalTabs formData={formData} setFormData={setFormData} isEditing={isEditing} patient={patient}/>
         </div>
 
         {/* Footer Buttons */}

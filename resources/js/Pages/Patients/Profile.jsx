@@ -143,7 +143,7 @@ const PatientProfile = ({ patient, onClose, onSave }) => {
               <TabsTrigger value="bp">Blood Pressure</TabsTrigger>
               <TabsTrigger value="incident">Incident Reports</TabsTrigger>
             </TabsList>
-            <div className="mt-3">{activeTab === "medical" && <Medical activeTab={activeTab} />}</div>
+            <div className="mt-3">{activeTab === "medical" && <Medical activeTab={activeTab} patient={patient} />}</div>
           </Tabs>
         </div>
       </DialogContent>

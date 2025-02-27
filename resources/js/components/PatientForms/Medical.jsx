@@ -7,7 +7,7 @@ const mockRecords = [
   { id: 1, createdBy: "Dr. John Doe", date: "2024-02-26", status: "saved", data: {} },
 ];
 
-const Medical = () => {
+const Medical = ({patient}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [records, setRecords] = useState([]);
   const [selectedRecord, setSelectedRecord] = useState(null);
@@ -98,6 +98,7 @@ const Medical = () => {
           record={selectedRecord} 
           onSave={handleSave} 
           onDelete={handleDelete} 
+          patient={patient}
         />
       )}
     </div>
