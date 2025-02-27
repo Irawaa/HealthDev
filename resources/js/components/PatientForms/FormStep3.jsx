@@ -89,7 +89,7 @@ const FormStep3 = ({ formData, setFormData, isEditing }) => {
           type="checkbox"
           name="obGyneHistory"
           checked={formData.obGyneHistory || false}
-          onChange={handleCheckboxChange}
+          onChange={(e) => setFormData({ ...formData, obGyneHistory: e.target.checked })}
           disabled={!isEditing}
           className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500"
         />
@@ -99,6 +99,7 @@ const FormStep3 = ({ formData, setFormData, isEditing }) => {
       {/* Conditional OB/Gyne Fields */}
       {formData.obGyneHistory && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
           {/* Menstruation */}
           <div>
             <label className="font-medium text-green-700">Menstruation:</label>
@@ -109,9 +110,11 @@ const FormStep3 = ({ formData, setFormData, isEditing }) => {
                     type="checkbox"
                     name={name}
                     checked={formData[name] || false}
-                    onChange={(e) => {
-                      setFormData({ ...formData, menstruationRegular: false, menstruationIrregular: false, [name]: e.target.checked });
-                    }}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      menstruationRegular: name === "menstruationRegular" ? e.target.checked : false,
+                      menstruationIrregular: name === "menstruationIrregular" ? e.target.checked : false,
+                    })}
                     disabled={!isEditing}
                   />
                   <span>{name === "menstruationRegular" ? "Regular" : "Irregular"}</span>
@@ -124,15 +127,18 @@ const FormStep3 = ({ formData, setFormData, isEditing }) => {
           <div>
             <label className="font-medium text-green-700">Duration:</label>
             <div className="flex space-x-4">
-              {["duration1to3", "duration4to6", "duration7to9"].map((name, index) => (
-                <label key={index} className="flex items-center space-x-2">
+              {["duration1to3", "duration4to6", "duration7to9"].map((name) => (
+                <label key={name} className="flex items-center space-x-2">
                   <input
                     type="checkbox"
                     name={name}
                     checked={formData[name] || false}
-                    onChange={(e) => {
-                      setFormData({ duration1to3: false, duration4to6: false, duration7to9: false, [name]: e.target.checked });
-                    }}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      duration1to3: name === "duration1to3" ? e.target.checked : false,
+                      duration4to6: name === "duration4to6" ? e.target.checked : false,
+                      duration7to9: name === "duration7to9" ? e.target.checked : false,
+                    })}
                     disabled={!isEditing}
                   />
                   <span>{name.replace("duration", "").replace("to", "-")} Days</span>
@@ -151,9 +157,11 @@ const FormStep3 = ({ formData, setFormData, isEditing }) => {
                     type="checkbox"
                     name={name}
                     checked={formData[name] || false}
-                    onChange={(e) => {
-                      setFormData({ dysmenorrheaYes: false, dysmenorrheaNo: false, [name]: e.target.checked });
-                    }}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      dysmenorrheaYes: name === "dysmenorrheaYes" ? e.target.checked : false,
+                      dysmenorrheaNo: name === "dysmenorrheaNo" ? e.target.checked : false,
+                    })}
                     disabled={!isEditing}
                   />
                   <span>{name === "dysmenorrheaYes" ? "Yes" : "No"}</span>
@@ -166,34 +174,23 @@ const FormStep3 = ({ formData, setFormData, isEditing }) => {
           <div>
             <label className="font-medium text-green-700">Have you been pregnant?</label>
             <div className="flex space-x-4">
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  name="pregnantYes"
-                  checked={formData.pregnantYes || false}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setFormData({ ...formData, pregnantYes: true, pregnantNo: false });
-                    }
-                  }}
-                  disabled={!isEditing}
-                />
-                <span>Yes</span>
-              </label>
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  name="pregnantNo"
-                  checked={formData.pregnantNo || false}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setFormData({ ...formData, pregnantYes: false, pregnantNo: true, numberOfPregnancies: "" });
-                    }
-                  }}
-                  disabled={!isEditing}
-                />
-                <span>No</span>
-              </label>
+              {["pregnantYes", "pregnantNo"].map((name) => (
+                <label key={name} className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    name={name}
+                    checked={formData[name] || false}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      pregnantYes: name === "pregnantYes" ? e.target.checked : false,
+                      pregnantNo: name === "pregnantNo" ? e.target.checked : false,
+                      numberOfPregnancies: name === "pregnantNo" ? "" : formData.numberOfPregnancies,
+                    })}
+                    disabled={!isEditing}
+                  />
+                  <span>{name === "pregnantYes" ? "Yes" : "No"}</span>
+                </label>
+              ))}
             </div>
 
             {/* Show Number of Pregnancies Input Only If "Yes" is Selected */}
@@ -228,6 +225,7 @@ const FormStep3 = ({ formData, setFormData, isEditing }) => {
           </div>
         </div>
       )}
+
     </div>
   );
 };
