@@ -81,11 +81,17 @@ const data = {
   ],
 }
 
-export function AppSidebar({
-  ...props
-}) {
+export function AppSidebar({ ...props }) {
 
   const { auth } = usePage().props;
+  const isAdmin = auth?.user?.role === "admin";
+
+  const filteredNavMain = data.navMain.map((section) => ({
+    ...section,
+    items: section.items.filter(
+      (item) => isAdmin || item.title !== "Clinic Staff"
+    ),
+  }));
 
   return (
     (<Sidebar collapsible="icon" {...props}>
@@ -108,7 +114,7 @@ export function AppSidebar({
 
       <SidebarContent>
         <ScrollArea>
-          <NavMain items={data.navMain} />
+          <NavMain items={filteredNavMain} />
           <NavProjects projects={data.projects} />
         </ScrollArea>
       </SidebarContent>
