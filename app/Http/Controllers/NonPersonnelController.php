@@ -3,14 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Patient;
-use App\Models\Employee;
+use App\Models\NonPersonnel;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 
-class EmployeeController extends Controller
+class NonPersonnelController extends Controller
 {
     public function store(Request $request)
     {
@@ -28,10 +28,8 @@ class EmployeeController extends Controller
             'mobile' => 'required|string|max:50',
             'telephone' => 'nullable|string|max:50',
 
-            // Employees Table
-            'employee_no' => 'required|string|max:255|unique:employees,employee_no',
-            'date_hired' => 'required|date',
-            'is_active' => ['required', Rule::in(['1', '0'])], // 1 = Active, 0 = Inactive
+            // Non-Personnel Table
+            'affiliation' => 'required|string|max:100',
             'height' => 'nullable|numeric',
             'weight' => 'nullable|numeric',
             'blood_type' => 'nullable|string|max:5',
@@ -46,8 +44,6 @@ class EmployeeController extends Controller
             'res_prov' => 'nullable|string|max:45',
             'res_region' => 'nullable|integer',
             'res_zipcode' => 'nullable|string|max:10',
-            'dept_id' => 'nullable|exists:departments,dept_id',
-            'college_id' => 'nullable|exists:colleges,college_id',
         ]);
 
         // Start Transaction
@@ -56,7 +52,7 @@ class EmployeeController extends Controller
         try {
             // Create Patient
             $patient = Patient::create([
-                'type' => 'employee',
+                'type' => 'non_personnel',
                 'lname' => $validated['lname'],
                 'fname' => $validated['fname'],
                 'mname' => $validated['mname'] ?? null,
@@ -80,12 +76,10 @@ class EmployeeController extends Controller
 
             Log::info('Patient created with ID: ' . $patient->patient_id);
 
-            // Create Employee
-            $employee = Employee::create([
+            // Create Non-Personnel
+            $nonPersonnel = NonPersonnel::create([
                 'patient_id' => $patient->patient_id,
-                'employee_no' => $validated['employee_no'],
-                'date_hired' => $validated['date_hired'],
-                'is_active' => (bool)$validated['is_active'],
+                'affiliation' => $validated['affiliation'],
                 'height' => $validated['height'] ?? null,
                 'weight' => $validated['weight'] ?? null,
                 'blood_type' => $validated['blood_type'] ?? null,
@@ -100,26 +94,24 @@ class EmployeeController extends Controller
                 'res_prov' => $validated['res_prov'] ?? null,
                 'res_region' => $validated['res_region'] ?? null,
                 'res_zipcode' => $validated['res_zipcode'] ?? null,
-                'dept_id' => $validated['dept_id'] ?? null,
-                'college_id' => $validated['college_id'] ?? null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
 
-            if (!$employee || !$employee->employee_id) {
+            if (!$nonPersonnel || !$nonPersonnel->non_personnel_id) {
                 DB::rollBack();
-                Log::error('Failed to create Employee for Patient ID: ' . $patient->patient_id);
-                return redirect()->back()->with('error', 'Failed to create employee. Please try again.');
+                Log::error('Failed to create NonPersonnel for Patient ID: ' . $patient->patient_id);
+                return redirect()->back()->with('error', 'Failed to create non-personnel record. Please try again.');
             }
 
-            Log::info('Employee created with ID: ' . $employee->employee_id);
+            Log::info('NonPersonnel created with ID: ' . $nonPersonnel->non_personnel_id);
 
             DB::commit();
 
-            return redirect()->back()->with('success', 'Employee added successfully');
+            return redirect()->back()->with('success', 'Non-personnel added successfully');
         } catch (\Throwable $e) {
             DB::rollBack();
-            Log::error('Error storing employee: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            Log::error('Error storing non-personnel: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return redirect()->back()->with('error', 'An unexpected error occurred. Please contact support.');
         }
     }

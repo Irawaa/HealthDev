@@ -24,8 +24,8 @@ class StudentController extends Controller
             'ext' => 'nullable|string|max:10',
             'birthdate' => 'required|date',
             'gender' => ['required', Rule::in(['1', '0'])], // 1 = Male, 0 = Female
-            'civil_status' => ['required', Rule::in(['1', '0'])], // 1 = Married, 0 = Single
-            'email' => 'nullable|email|max:200|unique:patients,email',
+            'civil_status' => ['required', 'integer', Rule::in([0, 1, 2, 3])], // 0 = Single, 1 = Married, 2 = Widowed, 3 = Divorced
+            'emailaddress' => 'nullable|email|max:200|unique:patients,emailaddress',
             'mobile' => 'required|string|max:50',
             'telephone' => 'nullable|string|max:50',
 
@@ -68,8 +68,8 @@ class StudentController extends Controller
                 'ext' => $validated['ext'] ?? null,
                 'birthdate' => $validated['birthdate'],
                 'gender' => (bool) $validated['gender'], // Convert to boolean
-                'civil_status' => (bool) $validated['civil_status'], // Convert to boolean
-                'email' => $validated['email'] ?? null,
+                'civil_status' => (int)$validated['civil_status'],
+                'emailaddress' => $validated['emailaddress'] ?? null,
                 'mobile' => $validated['mobile'],
                 'telephone' => $validated['telephone'] ?? null,
                 'updated_by' => Auth::id() ?? null,

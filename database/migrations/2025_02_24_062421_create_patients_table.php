@@ -20,8 +20,8 @@ return new class extends Migration
             $table->string('ext', 10)->nullable();
             $table->date('birthdate')->nullable();
             $table->boolean('gender'); // 1: Male, 0: Female
-            $table->boolean('civil_status')->nullable();
-            $table->string('email', 200)->nullable();
+            $table->tinyInteger('civil_status')->nullable();
+            $table->string('emailaddress', 200)->nullable();
             $table->string('mobile', 50)->nullable();
             $table->string('telephone', 50)->nullable();
             $table->timestamps();

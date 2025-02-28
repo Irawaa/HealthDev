@@ -19,22 +19,10 @@ export default function Step2({ data, setData, departments = [], colleges = [] }
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Employee Number */}
+            {/* Affiliation */}
             <div>
-                    <Label className="text-green-700">Employee Number</Label>
-                    <Input type="text" value={data.employee_no} onChange={(e) => setData("employee_no", e.target.value)} className="border-green-500 focus:ring-green-500 w-full" />
-            </div>
-
-            {/* Date Hired */}
-            <div>
-                    <Label className="text-green-700">Date Hired</Label>
-                    <Input type="date" value={data.date_hired} onChange={(e) => setData("date_hired", e.target.value)} className="border-green-500 focus:ring-green-500 w-full" />
-            </div>
-
-            {/* Employment Status */}
-            <div>
-                    <Label className="text-green-700">Active Status</Label>
-                    <Input type="text" value={data.is_active} onChange={(e) => setData("is_active", e.target.value)} className="border-green-500 focus:ring-green-500 w-full" />
+                    <Label className="text-green-700">Affiliation</Label>
+                    <Input type="text" value={data.affiliation} onChange={(e) => setData("employee_no", e.target.value)} className="border-green-500 focus:ring-green-500 w-full" />
             </div>
 
             {/* Physical Attributes */}
