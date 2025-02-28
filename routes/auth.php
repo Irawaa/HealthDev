@@ -17,6 +17,7 @@ use App\Http\Controllers\PatientController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\NonPersonnelController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -64,7 +65,7 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/employees', [EmployeeController::class, 'store'])->name('employees.store');
 
     // Patient - Non-Personnel //
-    Route::post('/nonpersonnel', [EmployeeController::class, 'store'])->name('nonpersonnel.store');
+    Route::post('/nonpersonnel', [NonPersonnelController::class, 'store'])->name('nonpersonnel.store');
 
     // --- Logout ---
     Route::post('/logout', [AuthenticateController::class, 'destroy'])->name('logout');
