@@ -49,18 +49,16 @@ export default function Step1({ data, setData }) {
                 />
             </div>
 
+            {/* Date Hired Input */}
             <div>
-                <Label className="text-green-700">Date Hired</Label>
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <Button variant="outline" className="w-full justify-start border-green-500 text-green-700 hover:bg-green-100">
-                            {data.date_hired ? format(new Date(data.date_hired), "yyyy-MM-dd") : "Select Date"}
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 bg-green-50 border-green-400">
-                        <Calendar mode="single" selected={data.date_hired ? new Date(data.date_hired) : null} onSelect={(date) => setData("date_hired", date ? date.toISOString().split("T")[0] : "")} />
-                    </PopoverContent>
-                </Popover>
+                <Label htmlFor="date_hired" className="text-green-700">Date Hired</Label>
+                <Input
+                    type="date"
+                    id="date_hired"
+                    className="border border-green-500 text-green-700 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-400 bg-white"
+                    value={data.date_hired || ""}
+                    onChange={(e) => setData("date_hired", e.target.value)}
+                />
             </div>
 
             <div>
