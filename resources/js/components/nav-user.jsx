@@ -1,5 +1,3 @@
-"use client";
-
 import { Link } from "@inertiajs/react";
 import {
   BadgeCheck,
@@ -44,7 +42,9 @@ export function NavUser({ user, isNavbar, btnClassName }) {
     }
   };
 
-  // console.log("User data:", user);
+  const handleLogout = () => {
+    localStorage.removeItem("hasLoggedIn"); // ✅ Reset flag on logout
+  };
 
   return (
     <SidebarMenu>
@@ -100,9 +100,12 @@ export function NavUser({ user, isNavbar, btnClassName }) {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator className="bg-white/20" />
-            <DropdownMenuItem className="text-white hover:bg-green-700 active:bg-green-600">
+            <DropdownMenuItem
+              className="text-white hover:bg-green-700 active:bg-green-600"
+              onClick={handleLogout} // ✅ Reset storage before logging out
+            >
               <LogOut />
-              <Link href={route('logout')} method="post" as="button" className="text-white hover:text-gray-300">
+              <Link href={route("logout")} method="post" as="button" className="text-white hover:text-gray-300">
                 Log out
               </Link>
             </DropdownMenuItem>
