@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import Medical from "@/components/PatientForms/Medical";
+import FDARModal from "@/components/FDAR/FDARModal";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 const InfoField = ({ label, value, name, type = "text", options = [], isEditing, handleChange }) => (
@@ -230,8 +231,12 @@ const PatientProfile = ({ patient, onClose, onSave, colleges, departments }) => 
               <TabsTrigger value="fdar">FDAR</TabsTrigger>
               <TabsTrigger value="bp">Blood Pressure</TabsTrigger>
               <TabsTrigger value="incident">Incident Reports</TabsTrigger>
+              <TabsTrigger value="perscription">Perscription</TabsTrigger>
             </TabsList>
-            <div className="mt-3">{activeTab === "medical" && <Medical activeTab={activeTab} patient={patient} />}</div>
+            <div className="mt-3">
+            {activeTab === "medical" && <Medical activeTab={activeTab} patient={patient} />}
+            {activeTab === "fdar" && <FDARModal activeTab={activeTab} patient={patient} />}
+            </div>
           </Tabs>
         </div >
       </DialogContent >
