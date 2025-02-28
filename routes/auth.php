@@ -63,6 +63,9 @@ Route::middleware(['web', 'auth'])->group(function () {
     // Patient - Personnel //
     Route::post('/employees', [EmployeeController::class, 'store'])->name('employees.store');
 
+    // Patient - Non-Personnel //
+    Route::post('/nonpersonnel', [EmployeeController::class, 'store'])->name('nonpersonnel.store');
+
     // --- Logout ---
     Route::post('/logout', [AuthenticateController::class, 'destroy'])->name('logout');
 });
