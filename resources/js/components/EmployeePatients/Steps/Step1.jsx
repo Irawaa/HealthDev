@@ -6,6 +6,9 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { format } from "date-fns";
 
+
+
+
 export default function Step1({ data, setData }) {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-green-50 rounded-lg shadow-md">
@@ -36,33 +39,16 @@ export default function Step1({ data, setData }) {
 
             {/* Birthdate Input */}
             <div>
-                <label className="text-green-700">Birthdate</label>
-                <div className="relative">
-                    <input
-                        type="date"
-                        className="w-full border border-green-500 text-green-700 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-400 bg-white"
-                        value={data.birthdate ? new Date(data.birthdate).toISOString().split("T")[0] : ""}
-                        onChange={(e) => setData("birthdate", e.target.value)}
-                    />
-                    <Popover>
-                        <PopoverTrigger asChild>
-                            <button
-                                className="absolute right-2 top-1/2 -translate-y-1/2 bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 transition"
-                            >
-                                📅
-                            </button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0 bg-green-50 border-green-400 rounded-lg shadow-lg">
-                            <Calendar
-                                mode="single"
-                                selected={data.birthdate ? new Date(data.birthdate) : undefined}
-                                onSelect={(date) => setData("birthdate", date?.toISOString().split("T")[0] || "")}
-                            />
-                        </PopoverContent>
-                    </Popover>
-                </div>
+                <Label htmlFor="birthdate" className="text-green-700">Birthdate</Label>
+                <Input
+                    type="date"
+                    id="birthdate"
+                    className="border border-green-500 text-green-700 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-400 bg-white"
+                    value={data.birthdate || ""}
+                    onChange={(e) => setData("birthdate", e.target.value)}
+                />
             </div>
-            
+
             <div>
                 <Label className="text-green-700">Date Hired</Label>
                 <Popover>
