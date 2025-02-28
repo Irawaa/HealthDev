@@ -20,7 +20,7 @@ export default function AddEmployeeDialog({ open, onClose, colleges }) {
         type: "employee",
         lname: "", fname: "", mname: "", ext: "",
         birthdate: "", gender: "1", civil_status: "",
-        email: "", mobile: "", telephone: "",
+        emailaddress: "", mobile: "", telephone: "",
         updated_by: null, // Foreign key for users
 
         employee_no: "", date_hired: "",

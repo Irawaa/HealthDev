@@ -7,7 +7,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { format } from "date-fns";
 
-export default function Step1({ data, setData, colleges = [] }) { 
+
+export default function Step1({ data, setData, colleges = [] }) {
     const [filteredPrograms, setFilteredPrograms] = useState([]);
 
     const handleCollegeChange = (collegeId) => {
@@ -70,23 +71,35 @@ export default function Step1({ data, setData, colleges = [] }) {
                 />
             </div>
 
-            <div className="w-full">
-                <Label className="text-green-700">Birthdate</Label>
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <Button variant="outline" className="w-full justify-start border-green-500 text-green-700 hover:bg-green-100">
-                            {data.birthdate ? format(new Date(data.birthdate), "yyyy-MM-dd") : "Select Date"}
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 bg-green-50 border-green-400">
-                        <Calendar
-                            mode="single"
-                            selected={data.birthdate ? new Date(data.birthdate) : null}
-                            onSelect={(date) => setData("birthdate", date ? date.toISOString().split("T")[0] : "")}
-                        />
-                    </PopoverContent>
-                </Popover>
+            {/* Birthdate Input */}
+            <div>
+                <label className="text-green-700">Birthdate</label>
+                <div className="relative">
+                    <input
+                        type="date"
+                        className="w-full border border-green-500 text-green-700 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-400 bg-white"
+                        value={data.birthdate ? new Date(data.birthdate).toISOString().split("T")[0] : ""}
+                        onChange={(e) => setData("birthdate", e.target.value)}
+                    />
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <button
+                                className="absolute right-2 top-1/2 -translate-y-1/2 bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 transition"
+                            >
+                                📅
+                            </button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0 bg-green-50 border-green-400 rounded-lg shadow-lg">
+                            <Calendar
+                                mode="single"
+                                selected={data.birthdate ? new Date(data.birthdate) : undefined}
+                                onSelect={(date) => setData("birthdate", date?.toISOString().split("T")[0] || "")}
+                            />
+                        </PopoverContent>
+                    </Popover>
+                </div>
             </div>
+
 
             <div className="w-full">
                 <Label className="text-green-700">Gender</Label>
@@ -114,6 +127,17 @@ export default function Step1({ data, setData, colleges = [] }) {
                         <SelectItem value="1">Married</SelectItem>
                     </SelectContent>
                 </Select>
+            </div>
+
+            <div className="w-full">
+                <Label className="text-green-700">Email</Label>
+                <Input
+                    type="email"
+                    value={data.email}
+                    onChange={(e) => setData("emailaddress", e.target.value)}
+                    className="border-green-500 focus:ring-green-500 w-full"
+                    placeholder="Enter Email"
+                />
             </div>
 
             {/* Academic Information */}
