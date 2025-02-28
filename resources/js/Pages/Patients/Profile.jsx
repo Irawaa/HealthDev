@@ -203,7 +203,7 @@ const PatientProfile = ({ patient, onClose, onSave, colleges, departments }) => 
                     </>
                   )}
 
-                  <InfoField label="Email" value={patient.email || "-"} name="email" isEditing={isEditing} handleChange={handleChange} />
+                  <InfoField label="Email" value={patient.emailaddress || "-"} name="email" isEditing={isEditing} handleChange={handleChange} />
 
                   <InfoField
                     label="Civil Status"

@@ -19,7 +19,7 @@ export default function AddStudentDialog({ open, onClose, colleges }) {
         type: "student",
         lname: "", fname: "", mname: "", ext: "",
         birthdate: "", gender: "1", civil_status: "",
-        email: "", mobile: "", telephone: "",
+        emailaddress: "", mobile: "", telephone: "",
         stud_id: "", is_vaccinated: "1", college_id: "",
         program_id: "", father_name: "", father_birthdate: "",
         father_occupation: "", mother_name: "", mother_birthdate: "",
