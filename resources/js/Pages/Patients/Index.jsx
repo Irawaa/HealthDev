@@ -10,12 +10,14 @@ import AddStudentDialog from "@/components/StudentPatients/add-student-dialog";
 import FilterDropdown from "@/components/patient-filter";
 import PatientRoleDialog from "@/components/patient-role-dialog";
 import AddEmployeeDialog from "@/components/EmployeePatients/add-employee-dialog";
+import AddNonPersonnelDialog from "@/components/NonPersonnelPatients/add-non-personnel-dialog";
 
 const Index = () => {
     const { patients, colleges, departments } = usePage().props;
     const [selectedPatient, setSelectedPatient] = useState(null);
     const [openStudent, setOpenStudent] = useState(false);
     const [openEmployee, setOpenEmployee] = useState(false);
+    const [openNonPersonnel, setOpenNonPersonnel] = useState(false);
     const [openRoleDialog, setOpenRoleDialog] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [filters, setFilters] = useState({
@@ -26,11 +28,11 @@ const Index = () => {
     });
 
     const patientTypeColors = {
-        student: "bg-green-100 border-green-400",
-        employee: "bg-blue-100 border-blue-400",
-        non_personnel: "bg-yellow-100 border-yellow-400",
-        clinic_staff: "bg-red-100 border-red-400",
-        default: "bg-gray-100 border-gray-300",
+        // student: "bg-green-100 border-green-400",
+        // employee: "bg-blue-100 border-blue-400",
+        // non_personnel: "bg-yellow-100 border-yellow-400",
+        // clinic_staff: "bg-red-100 border-red-400",
+        // default: "bg-gray-100 border-gray-300",
     };
 
     const formatType = (type) => {
@@ -53,6 +55,7 @@ const Index = () => {
     const handleCloseDialog = () => {
         setOpenStudent(false);
         setOpenEmployee(false);
+        setOpenNonPersonnel(false);
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
@@ -62,6 +65,8 @@ const Index = () => {
             setOpenStudent(true);
         } else if (role === "employee") {
             setOpenEmployee(true);
+        } else if (role === "non_personnel") {
+            setOpenNonPersonnel(true);
         }
     };
 
@@ -128,7 +133,7 @@ const Index = () => {
                                                         <strong>Type:</strong> {formatType(patient.type)}
                                                     </p>
                                                     <p>
-                                                        <strong>Email:</strong> {patient.email || "-"}
+                                                        <strong>Email:</strong> {patient.emailaddress || "-"}
                                                     </p>
                                                     <p>
                                                         <strong>Contact:</strong>{" "}
@@ -170,6 +175,8 @@ const Index = () => {
                 {/* Add Employee Dialog */}
                 <AddEmployeeDialog key={`add-employee-${openEmployee}`} open={openEmployee} onClose={handleCloseDialog} colleges={colleges} />
 
+                {/* Add Non-Personnel Dialog */}
+                <AddNonPersonnelDialog open={openNonPersonnel} onClose={handleCloseDialog} />
                 {/* Patient Role Dialog */}
                 {openRoleDialog && (
                     <PatientRoleDialog open={openRoleDialog} onClose={() => setOpenRoleDialog(false)} onSelect={handleRoleSelect} colleges={colleges} />

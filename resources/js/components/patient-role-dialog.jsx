@@ -21,7 +21,7 @@ export default function PatientRoleDialog({ open, onClose, colleges, onSelect })
     const isOpen = open ?? internalOpen;
 
     const handleSelect = async (role) => {
-        console.log(`${role} Selected`);
+        // console.log(`${role} Selected`);
         setIsTransitioning(true); // Start transition effect
 
         onSelect?.(role);

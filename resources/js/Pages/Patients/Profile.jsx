@@ -43,7 +43,7 @@ const InfoField = ({ label, value, name, type = "text", options = [], isEditing,
 const PatientProfile = ({ patient, onClose, onSave, colleges, departments }) => {
   if (!patient) return null;
 
-  console.log(patient);
+  // console.log(patient);
   const [isEditing, setIsEditing] = useState(false);
   const [editablePatient, setEditablePatient] = useState({ ...patient });
   const [activeTab, setActiveTab] = useState("medical");
@@ -78,20 +78,20 @@ const PatientProfile = ({ patient, onClose, onSave, colleges, departments }) => 
       const calculatedAge = calculateAge(patient.birthdate);
       setAge(calculatedAge);
 
-      console.log("Patient Birthdate:", patient.birthdate);
-      console.log("Calculated Age:", calculatedAge);
+      // console.log("Patient Birthdate:", patient.birthdate);
+      // console.log("Calculated Age:", calculatedAge);
     }
   }, [patient]); // Ensure it runs when `patient` changes
 
   const calculateAge = (birthdate) => {
     if (!birthdate) {
-      console.log("Birthdate is missing or invalid.");
+      // console.log("Birthdate is missing or invalid.");
       return "N/A";
     }
 
     const birthDate = new Date(birthdate);
     if (isNaN(birthDate.getTime())) {
-      console.log("Invalid birthdate format:", birthdate);
+      // console.log("Invalid birthdate format:", birthdate);
       return "Invalid Date";
     }
 
@@ -107,7 +107,7 @@ const PatientProfile = ({ patient, onClose, onSave, colleges, departments }) => 
       age--;
     }
 
-    console.log(`Birthdate: ${birthDate.toISOString()} | Age: ${age}`);
+    // console.log(`Birthdate: ${birthDate.toISOString()} | Age: ${age}`);
     return age;
   };
 
@@ -146,79 +146,79 @@ const PatientProfile = ({ patient, onClose, onSave, colleges, departments }) => 
             </div>
 
             {/* ✅ Patient Info Dropdown - Scrollable & Lower Position */}
-              <button
-                onClick={() => setShowInfo(!showInfo)}
-                className="w-full flex justify-between items-center text-left py-4 text-lg font-semibold text-gray-800 bg-gray-100 rounded-lg shadow-md px-6 hover:bg-gray-200 transition"
-              >
-                Patient Information
-                {showInfo ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-              </button>
+            <button
+              onClick={() => setShowInfo(!showInfo)}
+              className="w-full flex justify-between items-center text-left py-4 text-lg font-semibold text-gray-800 bg-gray-100 rounded-lg shadow-md px-6 hover:bg-gray-200 transition"
+            >
+              Patient Information
+              {showInfo ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+            </button>
 
-              <div
-                className={`w-full bg-white shadow-md rounded-lg border border-gray-300 transition-all duration-300 overflow-hidden ${showInfo ? "max-h-[500px] p-6 mt-4 overflow-y-auto" : "max-h-0"
-                  }`}
-              >
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm sm:text-md">
-                  <InfoField label="Birthdate" value={patient.birthdate} name="birthdate" type="date" isEditing={isEditing} handleChange={handleChange} />
-                  <InfoField label="Age" value={age} />
+            <div
+              className={`w-full bg-white shadow-md rounded-lg border border-gray-300 transition-all duration-300 overflow-hidden ${showInfo ? "max-h-[500px] p-6 mt-4 overflow-y-auto" : "max-h-0"
+                }`}
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm sm:text-md">
+                <InfoField label="Birthdate" value={patient.birthdate} name="birthdate" type="date" isEditing={isEditing} handleChange={handleChange} />
+                <InfoField label="Age" value={age} />
 
-                  <InfoField
-                    label="Gender"
-                    value={editablePatient.gender === "0" ? "Female" : editablePatient.gender === "1" ? "Male" : "Unspecified"}
-                    name="gender"
-                    type="select"
-                    options={[
-                      { value: "1", text: "Male" },
-                      { value: "0", text: "Female" },
-                    ]}
-                    isEditing={isEditing}
-                    handleChange={handleChange}
-                  />
+                <InfoField
+                  label="Gender"
+                  value={patient.gender == "0" ? "Female" : patient.gender == "1" ? "Male" : "Unspecified"}
+                  name="gender"
+                  type="select"
+                  options={[
+                    { value: "1", text: "Male" },
+                    { value: "0", text: "Female" },
+                  ]}
+                  isEditing={isEditing}
+                  handleChange={handleChange}
+                />
 
-                  <InfoField
-                    label="Address"
-                    value={
-                      patient.type === "student"
-                        ? `${patient.student?.address_house || ''}, ${patient.student?.address_brgy || ''}, ${patient.student?.address_citytown || ''}, ${patient.student?.address_province || ''} ${patient.student?.address_zipcode || ''}`
-                        : patient.type === "employee"
-                          ? `${patient.personnel?.res_brgy || ''}, ${patient.personnel?.res_city || ''}, ${patient.personnel?.res_prov || ''}, ${patient.personnel?.res_region || ''} ${patient.personnel?.res_zipcode || ''}`
-                          : patient.type === "non_personnel"
-                            ? `${patient.visitor?.address || "N/A"}`
-                            : "N/A"
-                    }
-                  />
+                <InfoField
+                  label="Address"
+                  value={
+                    patient.type === "student"
+                      ? `${patient.student?.address_house || ''}, ${patient.student?.address_brgy || ''}, ${patient.student?.address_citytown || ''}, ${patient.student?.address_province || ''} ${patient.student?.address_zipcode || ''}`
+                      : patient.type === "employee"
+                        ? `${patient.personnel?.res_brgy || ''}, ${patient.personnel?.res_city || ''}, ${patient.personnel?.res_prov || ''}, ${patient.personnel?.res_region || ''} ${patient.personnel?.res_zipcode || ''}`
+                        : patient.type === "non_personnel"
+                          ? `${patient.nonpersonnel?.res_brgy || ''}, ${patient.nonpersonnel?.res_city || ''}, ${patient.nonpersonnel?.res_prov || ''}, ${patient.nonpersonnel?.res_region || ''} ${patient.nonpersonnel?.res_zipcode || ''}`
+                          : "N/A"
+                  }
+                />
 
-                  {/* Dynamic Fields Based on Role */}
-                  {editablePatient.type === "student" && (
-                    <>
-                      <InfoField label="Program" value={program?.program_description || "N/A"} />
-                      <InfoField label="College" value={college?.college_description || "N/A"} />
-                    </>
-                  )}
+                {/* Dynamic Fields Based on Role */}
+                {editablePatient.type === "student" && (
+                  <>
+                    <InfoField label="Program" value={program?.program_description || "N/A"} />
+                    <InfoField label="College" value={college?.college_description || "N/A"} />
+                  </>
+                )}
 
-                  {editablePatient.type === "employee" && (
-                    <>
-                      <InfoField label="Department" value={department ? `${department.name} (${department.acronym})` : "N/A"} />
-                      {college && <InfoField label="College" value={college.college_description} />}
-                    </>
-                  )}
+                {editablePatient.type === "employee" && (
+                  <>
+                    <InfoField label="Department" value={department ? `${department.name} (${department.acronym})` : "N/A"} />
+                    {college && <InfoField label="College" value={college.college_description} />}
+                  </>
+                )}
 
-                  <InfoField label="Email" value={patient.email || "-"} name="email" isEditing={isEditing} handleChange={handleChange} />
+                <InfoField label="Email" value={patient.emailaddress || "-"} name="email" isEditing={isEditing} handleChange={handleChange} />
 
-                  <InfoField
-                    label="Civil Status"
-                    value={editablePatient.civil_status === "1" ? "Married" : "Single"}
-                    name="civil_status"
-                    type="select"
-                    options={[
-                      { value: "0", text: "Single" },
-                      { value: "1", text: "Married" },
-                    ]}
-                    isEditing={isEditing}
-                    handleChange={handleChange}
-                  />
-                </div>
+                <InfoField
+                  label="Civil Status"
+                  value={editablePatient.civil_status === "1" ? "Married" : "Single"}
+                  name="civil_status"
+                  type="select"
+                  options={[
+                    { value: "0", text: "Single" },
+                    { value: "1", text: "Married" },
+                  ]}
+                  isEditing={isEditing}
+                  handleChange={handleChange}
+                />
               </div>
+            </div>
 
           </Card>
 

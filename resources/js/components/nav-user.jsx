@@ -44,7 +44,7 @@ export function NavUser({ user, isNavbar, btnClassName }) {
     }
   };
 
-  console.log("User data:", user);
+  // console.log("User data:", user);
 
   return (
     <SidebarMenu>

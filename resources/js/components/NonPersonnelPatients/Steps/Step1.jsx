@@ -35,31 +35,18 @@ export default function Step1({ data, setData }) {
             </div>
 
             <div>
-                <Label className="text-green-700">Birthdate</Label>
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <Button variant="outline" className="w-full justify-start border-green-500 text-green-700 hover:bg-green-100">
-                            {data.birthdate ? format(new Date(data.birthdate), "yyyy-MM-dd") : "Select Date"}
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 bg-green-50 border-green-400">
-                        <Calendar mode="single" selected={data.birthdate ? new Date(data.birthdate) : null} onSelect={(date) => setData("birthdate", date ? date.toISOString().split("T")[0] : "")} />
-                    </PopoverContent>
-                </Popover>
+                <Label className="text-green-700">Affiliation</Label>
+                <Input type="text" value={data.affiliation} onChange={(e) => setData("affiliation", e.target.value)} className="border-green-500 focus:ring-green-500 w-full" />
             </div>
 
-            <div>
-                <Label className="text-green-700">Date Hired</Label>
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <Button variant="outline" className="w-full justify-start border-green-500 text-green-700 hover:bg-green-100">
-                            {data.date_hired ? format(new Date(data.date_hired), "yyyy-MM-dd") : "Select Date"}
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 bg-green-50 border-green-400">
-                        <Calendar mode="single" selected={data.date_hired ? new Date(data.date_hired) : null} onSelect={(date) => setData("date_hired", date ? date.toISOString().split("T")[0] : "")} />
-                    </PopoverContent>
-                </Popover>
+            <div className="max-w-xs">
+                <Label className="text-green-700">Birthdate</Label>
+                <Input
+                    type="date"
+                    value={data.birthdate || ""}
+                    onChange={(e) => setData("birthdate", e.target.value)}
+                    className="border-green-500 focus:ring-green-500 w-full"
+                />
             </div>
 
             <div>

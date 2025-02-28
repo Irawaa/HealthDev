@@ -1,11 +1,11 @@
 // components/PatientForm/MedicalTabs.jsx
 import { useState } from "react";
-import FormStep1 from "./FormStep1";
-import FormStep2 from "./FormStep2";
-import FormStep3 from "./FormStep3";
-import FormStep4 from "./FormStep4";
-import FormStep5 from "./FormStep5";
-import FormStep6 from "./FormStep6";
+import FormStep1 from "./MedicalSteps/FormStep1";
+import FormStep2 from "./MedicalSteps/FormStep2";
+import FormStep3 from "./MedicalSteps/FormStep3";
+import FormStep4 from "./MedicalSteps/FormStep4";
+import FormStep5 from "./MedicalSteps/FormStep5";
+import FormStep6 from "./MedicalSteps/FormStep6";
 
 const MedicalTabs = ({ formData, setFormData, isEditing, patient}) => {
   const [step, setStep] = useState(1);

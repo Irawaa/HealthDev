@@ -1690,6 +1690,7 @@ namespace App\Models {
      * @property-read \App\Models\User $updater
      * @property-read \App\Models\Student $student
      * @property-read \App\Models\Employee $personnel
+     * @property-read \App\Models\NonPersonnel $nonpersonnel
      * @method static \Illuminate\Database\Eloquent\Builder|Patient wherePatientId($value)
      * @method static \Illuminate\Database\Eloquent\Builder|Patient whereType($value)
      * @method static \Illuminate\Database\Eloquent\Builder|Patient whereLname($value)

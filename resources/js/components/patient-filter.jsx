@@ -89,7 +89,7 @@ const FilterDropdown = ({ filters, setFilters }) => {
                             {/* Dropdown Menu */}
                             {openDropdown === category && (
                                 <div className="absolute left-0 mt-1 w-full bg-white shadow-lg rounded-lg border border-green-300 z-10">
-                                    {[category === "type" && ["Student", "Staff", "Non-Personnel"],
+                                    {[category === "type" && ["student", "employee", "non_personnel"],
                                       category === "department" && (selectedType === "Non-Personnel" ? [] : Object.keys(departments)),
                                       category === "program" && programs]
                                       .filter(Boolean)

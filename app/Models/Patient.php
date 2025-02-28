@@ -39,4 +39,9 @@ class Patient extends Model
     {
         return $this->hasOne(Employee::class, 'patient_id', 'patient_id');
     }
+
+    public function nonpersonnel()
+    {
+        return $this->hasOne(NonPersonnel::class, 'patient_id', 'patient_id');
+    }
 }

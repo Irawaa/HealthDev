@@ -4,48 +4,65 @@ import { Label } from "@/components/ui/label";
 export default function Step3({ data, setData }) {
     return (
         <div className="max-w-screen-lg mx-auto p-6 bg-green-50 rounded-lg shadow-md">
-            {/* Family Information Section */}
+            {/* Address Information Section */}
             <div className="border-b border-green-400 pb-2 mb-4">
-                <h2 className="text-lg font-semibold text-green-700">Family Information</h2>
+                <h2 className="text-lg font-semibold text-green-700">Address Information</h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Father's Details */}
-                <div>
-                    <Label className="text-green-700">Father's Name</Label>
-                    <Input type="text" value={data.father_name} onChange={(e) => setData("father_name", e.target.value)} className="border-green-500 focus:ring-green-500 w-full" />
-                </div>
-                
-                {/* Mother's Details */}
-                <div>
-                    <Label className="text-green-700">Mother's Name</Label>
-                    <Input type="text" value={data.mother_name} onChange={(e) => setData("mother_name", e.target.value)} className="border-green-500 focus:ring-green-500 w-full" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* Barangay */}
+                <div className="col-span-1 md:col-span-2 lg:col-span-3">
+                    <Label className="text-green-700">Barangay</Label>
+                    <Input 
+                        type="text" 
+                        value={data.res_brgy} 
+                        onChange={(e) => setData("res_brgy", e.target.value)} 
+                        className="border-green-500 focus:ring-green-500 w-full"
+                    />
                 </div>
 
-                {/* Spouse Details */}
+                {/* City/Town */}
                 <div>
-                    <Label className="text-green-700">Spouse's Name</Label>
-                    <Input type="text" value={data.spouse_name} onChange={(e) => setData("spouse_name", e.target.value)} className="border-green-500 focus:ring-green-500 w-full" />
+                    <Label className="text-green-700">City/Town</Label>
+                    <Input 
+                        type="text" 
+                        value={data.res_city} 
+                        onChange={(e) => setData("res_city", e.target.value)} 
+                        className="border-green-500 focus:ring-green-500 w-full"
+                    />
                 </div>
-                <div>
-                    <Label className="text-green-700">Spouse's Occupation</Label>
-                    <Input type="text" value={data.spouse_occupation} onChange={(e) => setData("spouse_occupation", e.target.value)} className="border-green-500 focus:ring-green-500 w-full" />
-                </div>
-            </div>
 
-            {/* Emergency Contact Section */}
-            <div className="border-b border-green-400 pb-2 mt-6 mb-4">
-                <h2 className="text-lg font-semibold text-green-700">Emergency Contact</h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Province */}
                 <div>
-                    <Label className="text-green-700">Emergency Contact Person</Label>
-                    <Input type="text" value={data.emergency_contact_person} onChange={(e) => setData("emergency_contact_person", e.target.value)} className="border-green-500 focus:ring-green-500 w-full" />
+                    <Label className="text-green-700">Province</Label>
+                    <Input 
+                        type="text" 
+                        value={data.res_prov} 
+                        onChange={(e) => setData("res_prov", e.target.value)} 
+                        className="border-green-500 focus:ring-green-500 w-full"
+                    />
                 </div>
+
+                {/* Region */}
                 <div>
-                    <Label className="text-green-700">Emergency Contact Number</Label>
-                    <Input type="text" value={data.emergency_contact_number} onChange={(e) => setData("emergency_contact_number", e.target.value)} className="border-green-500 focus:ring-green-500 w-full" />
+                    <Label className="text-green-700">Region</Label>
+                    <Input 
+                        type="text" 
+                        value={data.res_region} 
+                        onChange={(e) => setData("res_region", e.target.value)} 
+                        className="border-green-500 focus:ring-green-500 w-full"
+                    />
+                </div>
+
+                {/* Zip Code */}
+                <div className="col-span-1 md:col-span-2 lg:col-span-1">
+                    <Label className="text-green-700">Zip Code</Label>
+                    <Input 
+                        type="text" 
+                        value={data.res_zipcode} 
+                        onChange={(e) => setData("res_zipcode", e.target.value)} 
+                        className="border-green-500 focus:ring-green-500 w-full"
+                    />
                 </div>
             </div>
         </div>

@@ -39,6 +39,18 @@ class PatientController extends Controller
                     'dept_id',
                     'college_id',
                 );
+            },
+
+            'nonpersonnel' => function ($query) {
+                $query->select(
+                    'patient_id',
+                    'affiliation',
+                    'res_brgy', 
+                    'res_city', 
+                    'res_prov',
+                    'res_region', 
+                    'res_zipcode',
+                );
             }
         ])->latest()->get();
 
