@@ -146,7 +146,6 @@ const PatientProfile = ({ patient, onClose, onSave, colleges, departments }) => 
             </div>
 
             {/* ✅ Patient Info Dropdown - Scrollable & Lower Position */}
-            <div className="w-full">
               <button
                 onClick={() => setShowInfo(!showInfo)}
                 className="w-full flex justify-between items-center text-left py-4 text-lg font-semibold text-gray-800 bg-gray-100 rounded-lg shadow-md px-6 hover:bg-gray-200 transition"
@@ -156,7 +155,7 @@ const PatientProfile = ({ patient, onClose, onSave, colleges, departments }) => 
               </button>
 
               <div
-                className={`w-full bg-white shadow-md rounded-lg border border-gray-300 transition-all duration-300 ${showInfo ? "max-h-[400px] p-6 mt-4 overflow-y-auto" : "max-h-0 overflow-hidden"
+                className={`w-full bg-white shadow-md rounded-lg border border-gray-300 transition-all duration-300 overflow-hidden ${showInfo ? "max-h-[500px] p-6 mt-4 overflow-y-auto" : "max-h-0"
                   }`}
               >
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm sm:text-md">
@@ -165,7 +164,7 @@ const PatientProfile = ({ patient, onClose, onSave, colleges, departments }) => 
 
                   <InfoField
                     label="Gender"
-                    value={editablePatient.gender === "0" ? "Female" : "Male"}
+                    value={editablePatient.gender === "0" ? "Female" : editablePatient.gender === "1" ? "Male" : "Unspecified"}
                     name="gender"
                     type="select"
                     options={[
@@ -175,24 +174,17 @@ const PatientProfile = ({ patient, onClose, onSave, colleges, departments }) => 
                     isEditing={isEditing}
                     handleChange={handleChange}
                   />
+
                   <InfoField
                     label="Address"
                     value={
                       patient.type === "student"
-                        ? `${patient.student?.address_house || ''}, 
-                          ${patient.student?.address_brgy || ''}, 
-                          ${patient.student?.address_citytown || ''}, 
-                          ${patient.student?.address_province || ''} 
-                          ${patient.student?.address_zipcode || ''}`
+                        ? `${patient.student?.address_house || ''}, ${patient.student?.address_brgy || ''}, ${patient.student?.address_citytown || ''}, ${patient.student?.address_province || ''} ${patient.student?.address_zipcode || ''}`
                         : patient.type === "employee"
-                          ? `${patient.personnel?.res_brgy || ''}, 
-                            ${patient.personnel?.res_city || ''}, 
-                            ${patient.personnel?.res_prov || ''}, 
-                            ${patient.personnel?.res_region || ''} 
-                            ${patient.personnel?.res_zipcode || ''}`
-                          : patient.type === "non_personnel" // 🆕 New Patient Type
+                          ? `${patient.personnel?.res_brgy || ''}, ${patient.personnel?.res_city || ''}, ${patient.personnel?.res_prov || ''}, ${patient.personnel?.res_region || ''} ${patient.personnel?.res_zipcode || ''}`
+                          : patient.type === "non_personnel"
                             ? `${patient.visitor?.address || "N/A"}`
-                            : "N/A" // Default case
+                            : "N/A"
                     }
                   />
 
@@ -206,13 +198,28 @@ const PatientProfile = ({ patient, onClose, onSave, colleges, departments }) => 
 
                   {editablePatient.type === "employee" && (
                     <>
-                      <InfoField label="Department" value={`${department.name} (${department.acronym})` || "N/A"} />
+                      <InfoField label="Department" value={department ? `${department.name} (${department.acronym})` : "N/A"} />
                       {college && <InfoField label="College" value={college.college_description} />}
                     </>
                   )}
+
+                  <InfoField label="Email" value={patient.email || "-"} name="email" isEditing={isEditing} handleChange={handleChange} />
+
+                  <InfoField
+                    label="Civil Status"
+                    value={editablePatient.civil_status === "1" ? "Married" : "Single"}
+                    name="civil_status"
+                    type="select"
+                    options={[
+                      { value: "0", text: "Single" },
+                      { value: "1", text: "Married" },
+                    ]}
+                    isEditing={isEditing}
+                    handleChange={handleChange}
+                  />
                 </div>
               </div>
-            </div>
+
           </Card>
 
           {/* ✅ Tabs - Fixed (No More Scroll) */}
@@ -226,9 +233,9 @@ const PatientProfile = ({ patient, onClose, onSave, colleges, departments }) => 
             </TabsList>
             <div className="mt-3">{activeTab === "medical" && <Medical activeTab={activeTab} patient={patient} />}</div>
           </Tabs>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </div >
+      </DialogContent >
+    </Dialog >
   );
 };
 
