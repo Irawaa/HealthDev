@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import Medical from "@/components/PatientForms/Medical";
+import MedicalRecordDialog from "@/components/MedicalRecordForm/medical-records-dialog";
 import FDARModal from "@/components/FDAR/FDARModal";
 import BPModal from "@/components/BP/BPModal";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
@@ -236,7 +236,7 @@ const PatientProfile = ({ patient, onClose, onSave, colleges, departments }) => 
               <TabsTrigger value="perscription">Perscription</TabsTrigger>
             </TabsList>
             <div className="mt-3">
-              {activeTab === "medical" && <Medical activeTab={activeTab} patient={patient} />}
+              {activeTab === "medical" && <MedicalRecordDialog activeTab={activeTab} patient={patient} />}
               {activeTab === "fdar" && <FDARModal activeTab={activeTab} patient={patient} />}
               {activeTab === "bp" && <BPModal activeTab={activeTab} patient={patient} />} 
             </div>
