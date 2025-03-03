@@ -7,6 +7,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\NonPersonnelController;
+use App\Http\Controllers\MedicalRecordController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -39,11 +40,15 @@ Route::middleware(['web', 'auth'])->group(function () {
         return Inertia::render('Dashboard');
     })->name('dashboard');
 
+    Route::get('/medical', function () {
+        return Inertia::render('MedicalRecords/Index');
+    })->name('medical');
+
+    Route::get('/medical', [MedicalRecordController::class, 'index'])->name('medical');
 
     // --- Patients --- //
     Route::get('/patients', [PatientController::class, 'index'])->name('patients.index');
     Route::post('/patients', [PatientController::class, 'store'])->name('patients.store');
-    Route::get('/patients/{patient}', [PatientController::class, 'show'])->name('patients.show');
     Route::put('/patients/{patient}', [PatientController::class, 'update'])->name('patients.update');
     Route::delete('/patients/{patient}', [PatientController::class, 'destroy'])->name('patients.destroy');
 
@@ -55,6 +60,9 @@ Route::middleware(['web', 'auth'])->group(function () {
 
     // Patient - Non-Personnel //
     Route::post('/nonpersonnel', [NonPersonnelController::class, 'store'])->name('nonpersonnel.store');
+
+    // Medical Records //
+    Route::post('/medical-records', [MedicalRecordController::class, 'store'])->name('medical-records.store');
 
     // --- Logout ---
     Route::post('/logout', [AuthenticateController::class, 'destroy'])->name('logout');

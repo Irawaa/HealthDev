@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Patient;
 use App\Models\College;
 use App\Models\Department;
+use App\Models\ReviewOfSystem;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -70,7 +71,7 @@ class PatientController extends Controller
         return Inertia::render('Patients/Index', [
             'patients' => $patients,
             'colleges' => $colleges,
-            'departments' => $departments
+            'departments' => $departments,
         ]);
     }
 

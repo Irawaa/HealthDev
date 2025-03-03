@@ -13,7 +13,8 @@ import AddEmployeeDialog from "@/components/EmployeePatients/add-employee-dialog
 import AddNonPersonnelDialog from "@/components/NonPersonnelPatients/add-non-personnel-dialog";
 
 const Index = () => {
-    const { patients, colleges, departments } = usePage().props;
+    const { patients, colleges, departments, reviewOfSystems } = usePage().props;
+    console.log(reviewOfSystems);
     const [selectedPatient, setSelectedPatient] = useState(null);
     const [openStudent, setOpenStudent] = useState(false);
     const [openEmployee, setOpenEmployee] = useState(false);

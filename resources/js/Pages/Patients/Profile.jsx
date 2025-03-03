@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import Medical from "@/components/PatientForms/Medical";
+import MedicalRecordDialog from "@/components/MedicalRecordForm/medical-records-dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 const InfoField = ({ label, value, name, type = "text", options = [], isEditing, handleChange }) => (
@@ -50,13 +50,14 @@ const PatientProfile = ({ patient, onClose, onSave, colleges, departments }) => 
   const [showInfo, setShowInfo] = useState(false);
   const [age, setAge] = useState("0"); // State for age
 
-  const college = colleges.find(col =>
+  const college = colleges?.find(col =>
     col.college_id === patient.student?.college_id ||
-    col.college_id === patient.personnel?.college_id // ✅ Include personnel
-  );
-  const program = college?.programs.find(prog => prog.program_id === patient.student?.program_id);
-
-  const department = departments.find(dept => dept.dept_id === patient.personnel?.dept_id);
+    col.college_id === patient.personnel?.college_id
+  ) || null;
+  
+  const program = college?.programs?.find(prog => prog.program_id === patient.student?.program_id) || null;
+  
+  const department = departments?.find(dept => dept.dept_id === patient.personnel?.dept_id) || null;  
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -231,7 +232,7 @@ const PatientProfile = ({ patient, onClose, onSave, colleges, departments }) => 
               <TabsTrigger value="bp">Blood Pressure</TabsTrigger>
               <TabsTrigger value="incident">Incident Reports</TabsTrigger>
             </TabsList>
-            <div className="mt-3">{activeTab === "medical" && <Medical activeTab={activeTab} patient={patient} />}</div>
+            <div className="mt-3">{activeTab === "medical" && <MedicalRecordDialog activeTab={activeTab} patient={patient} />}</div>
           </Tabs>
         </div >
       </DialogContent >
