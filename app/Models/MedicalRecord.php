@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MedicalRecord extends Model
 {
@@ -22,7 +25,7 @@ class MedicalRecord extends Model
     /**
      * Relationship with Patient
      */
-    public function patient()
+    public function patient(): BelongsTo
     {
         return $this->belongsTo(Patient::class, 'patient_id', 'patient_id');
     }
@@ -30,7 +33,7 @@ class MedicalRecord extends Model
     /**
      * Relationship with Clinic Staff (Nurse)
      */
-    public function nurse()
+    public function nurse(): BelongsTo
     {
         return $this->belongsTo(ClinicStaff::class, 'school_nurse_id', 'staff_id');
     }
@@ -38,7 +41,7 @@ class MedicalRecord extends Model
     /**
      * Relationship with Clinic Staff (Physician)
      */
-    public function physician()
+    public function physician(): BelongsTo
     {
         return $this->belongsTo(ClinicStaff::class, 'school_physician_id', 'staff_id');
     }
@@ -46,15 +49,45 @@ class MedicalRecord extends Model
     /**
      * Relationship with Clinic Staff (Recorder)
      */
-    public function recordedBy()
+    public function recordedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'recorded_by', 'user_id');
     }
 
-    public function reviewOfSystems()
+    /**
+     * Relationship with Review of Systems
+     */
+    public function reviewOfSystems(): BelongsToMany
     {
         return $this->belongsToMany(ReviewOfSystem::class, 'medical_record_review_of_system')
             ->withPivot('custom_symptom')
+            ->withTimestamps();
+    }
+
+    /**
+     * Relationship with Deformities
+     */
+    public function deformities(): BelongsToMany
+    {
+        return $this->belongsToMany(Deformity::class, 'medical_record_deformities', 'medical_record_id', 'deformity_id')
+            ->withTimestamps();
+    }
+
+    /**
+     * Relationship with MedicalRecordVitalSign (One-to-One)
+     */
+    public function vitalSigns(): HasOne
+    {
+        return $this->hasOne(MedicalRecordVitalSign::class, 'medical_record_id');
+    }
+
+    /**
+     * ✅ Relationship with Past Medical Histories (Many-to-Many)
+     */
+    public function pastMedicalHistories(): BelongsToMany
+    {
+        return $this->belongsToMany(PastMedicalHistory::class, 'medical_record_past_medical_history')
+            ->withPivot('custom_condition') // For "Others" input
             ->withTimestamps();
     }
 }

@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import MedicalRecordDialog from "@/components/MedicalRecordForm/medical-records-dialog";
-import FDARModal from "@/components/FDAR/FDARModal";
+import FDARModal from "@/components/FDAR/fdar-records-dialog";
 import BPModal from "@/components/BP/BPModal";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 

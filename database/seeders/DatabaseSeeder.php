@@ -16,6 +16,8 @@ class DatabaseSeeder extends Seeder
             DepartmentSeeder::class,
             PatientsSeeder::class,
             ReviewOfSystemsSeeder::class,
+            DeformitiesSeeder::class,
+            PastMedicalHistoriesSeeder::class,
         ]);
     }
 }

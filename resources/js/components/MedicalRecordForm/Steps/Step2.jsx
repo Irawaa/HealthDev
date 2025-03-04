@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/solid";
 
 const deformityOptions = [
-  { name: "cleftLip", label: "Cleft Lip" },
-  { name: "exotropia", label: "Exotropia" },
-  { name: "poliomyelitis", label: "Poliomyelitis" },
-  { name: "scoliosis", label: "Scoliosis" },
-  { name: "strabismus", label: "Strabismus" },
+  { name: "Cleft Lip (Bingot)", label: "Cleft Lip" },
+  { name: "Exotropia (walleyed / banlag)", label: "Exotropia" },
+  { name: "Poliomyelitis", label: "Poliomyelitis" },
+  { name: "Scoliosis", label: "Scoliosis" },
+  { name: "Strabismus (cross-eyed / duling)", label: "Strabismus" },
+  { name: "None", label: "None" }, // Added "None" as per your table content
 ];
 
 const vitalSigns = [
@@ -23,12 +24,21 @@ const Step2 = ({ formData, setFormData }) => {
   const [isBpFocused, setIsBpFocused] = useState(false);
 
   const handleCheckboxChange = ({ target: { name, checked } }) => {
-    setFormData({
-      ...formData,
-      [name]: checked,
-      ...(name === "deformity" && !checked && deformityOptions.reduce((acc, { name }) => ({ ...acc, [name]: false }), {})),
-    });
-  };
+    if (name === "deformity") {
+      setFormData((prev) => ({
+        ...prev,
+        deformity: checked,
+        deformities: checked ? prev.deformities : [], // Reset if unchecked
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        deformities: checked
+          ? [...prev.deformities, name] // Add deformity
+          : prev.deformities.filter((d) => d !== name), // Remove if unchecked
+      }));
+    }
+  };  
 
   const handleInputChange = ({ target: { name, value } }) => {
     setFormData({ ...formData, [name]: value });
@@ -75,7 +85,7 @@ const Step2 = ({ formData, setFormData }) => {
             <input
               type="checkbox"
               name={name}
-              checked={formData[name] || false}
+              checked={formData.deformities.includes(name)}
               onChange={handleCheckboxChange}
               disabled={!formData.deformity}
               className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500"

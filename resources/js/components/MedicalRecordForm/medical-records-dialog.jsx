@@ -19,9 +19,17 @@ const MedicalRecordDialog = ({ patient }) => {
     patient_id: patient?.patient_id || null,
     school_nurse_id: 1,
     school_physician_id: 2,
-    recorded_by: 1,
     review_of_systems: [],
     others: "",
+    deformities: [],
+    bp: "",
+    rr: "",
+    hr: "",
+    temperature: "",
+    weight: "",
+    height: "",
+    past_medical_histories: [],
+    other_condition: "",
   });
 
   const nextStep = () => setStep((prev) => Math.min(prev + 1, 6));
