@@ -23,6 +23,23 @@ const Step2 = ({ formData, setFormData }) => {
   const [bpSeverity, setBpSeverity] = useState("");
   const [isBpFocused, setIsBpFocused] = useState(false);
 
+  // Automatically Calculate BMI on Height or Weight Change
+  useEffect(() => {
+    const { height, weight } = formData;
+
+    if (height && weight) {
+      const h = parseFloat(height);
+      const w = parseFloat(weight);
+
+      if (h > 0 && w > 0) {
+        const bmi = (w / (h * h)).toFixed(2);
+        setFormData((prev) => ({ ...prev, bmi }));
+      }
+    } else {
+      setFormData((prev) => ({ ...prev, bmi: "" }));
+    }
+  }, [formData.height, formData.weight, setFormData]);
+
   const handleCheckboxChange = ({ target: { name, checked } }) => {
     if (name === "deformity") {
       setFormData((prev) => ({
@@ -38,7 +55,7 @@ const Step2 = ({ formData, setFormData }) => {
           : prev.deformities.filter((d) => d !== name), // Remove if unchecked
       }));
     }
-  };  
+  };
 
   const handleInputChange = ({ target: { name, value } }) => {
     setFormData({ ...formData, [name]: value });
@@ -148,7 +165,6 @@ const Step2 = ({ formData, setFormData }) => {
             value={formData.bmi || ""}
             disabled
             className="border border-gray-300 bg-gray-100 rounded p-2 w-full cursor-not-allowed"
-            placeholder="Auto-calculated"
           />
         </div>
       </div>

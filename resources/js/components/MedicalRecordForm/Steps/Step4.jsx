@@ -2,21 +2,42 @@
 const Step4 = ({ formData, setFormData }) => {
   const handleCheckboxChange = (e) => {
     const { name, checked } = e.target;
-    setFormData({ ...formData, [name]: checked });
 
-    // Ensure only one selection for Pregnancy, Hospitalization, and Surgeries
-    if (name === "hospitalizedYes" && checked) {
-      setFormData({ ...formData, hospitalizedYes: true, hospitalizedNo: false });
-    }
-    if (name === "hospitalizedNo" && checked) {
-      setFormData({ ...formData, hospitalizedYes: false, hospitalizedNo: true, hospitalizationReason: "" });
-    }
-    if (name === "surgeryYes" && checked) {
-      setFormData({ ...formData, surgeryYes: true, surgeryNo: false });
-    }
-    if (name === "surgeryNo" && checked) {
-      setFormData({ ...formData, surgeryYes: false, surgeryNo: true, surgeryReason: "" });
-    }
+    setFormData((prev) => {
+      let updatedData = { ...prev, [name]: checked };
+
+      // ✅ Hospitalized Logic
+      if (name === "hospitalized" && checked) {
+        updatedData.hospitalized = true;
+      }
+      if (name === "hospitalizedNo" && checked) {
+        updatedData.hospitalized = false;
+        updatedData.hospitalized_reason = ""; // Clear reason
+      }
+
+      // ✅ Surgery Logic
+      if (name === "previous_surgeries" && checked) {
+        updatedData.previous_surgeries = true;
+      }
+      if (name === "surgeryNo" && checked) {
+        updatedData.previous_surgeries = false;
+        updatedData.surgery_reason = ""; // Clear reason
+      }
+
+      // ✅ Smoker
+      if (name === "smoker" && !checked) {
+        updatedData.sticks_per_day = "";
+        updatedData.years_smoking = "";
+      }
+
+      // ✅ Eye Disorder
+      if (name === "eye_disorder_no" && checked) {
+        updatedData.eye_glasses = false;
+        updatedData.contact_lens = false;
+      }
+
+      return updatedData;
+    });
   };
 
   const handleInputChange = (e) => {
@@ -35,8 +56,8 @@ const Step4 = ({ formData, setFormData }) => {
           <label className="font-medium text-green-700">Chief Complaint:</label>
           <input
             type="text"
-            name="chiefComplaint"
-            value={formData.chiefComplaint || ""}
+            name="chief_complaint"
+            value={formData.chief_complaint || ""}
             onChange={handleInputChange}
             className="border border-gray-300 rounded p-2 w-full"
             placeholder="Enter chief complaint"
@@ -48,8 +69,8 @@ const Step4 = ({ formData, setFormData }) => {
           <label className="font-medium text-green-700">Present Illness:</label>
           <input
             type="text"
-            name="presentIllness"
-            value={formData.presentIllness || ""}
+            name="present_illness"
+            value={formData.present_illness || ""}
             onChange={handleInputChange}
             className="border border-gray-300 rounded p-2 w-full"
             placeholder="Describe present illness"
@@ -70,8 +91,8 @@ const Step4 = ({ formData, setFormData }) => {
         </div>
       </div>
 
-        {/* Line Separator */}
-        <hr className="border-t border-gray-300 my-6" />
+      {/* Line Separator */}
+      <hr className="border-t border-gray-300 my-6" />
 
       {/* Hospitalization & Surgery History */}
       <h3 className="text-xl font-semibold text-green-700 mt-6 mb-4">Hospitalization & Surgery History</h3>
@@ -81,30 +102,39 @@ const Step4 = ({ formData, setFormData }) => {
         <div>
           <label className="font-medium text-green-700">Have you ever been hospitalized?</label>
           <div className="flex space-x-4">
-            {["hospitalizedYes", "hospitalizedNo"].map((name) => (
-              <label key={name} className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  name={name}
-                  checked={formData[name] || false}
-                  onChange={handleCheckboxChange}
-                />
-                <span>{name === "hospitalizedYes" ? "Yes" : "No"}</span>
-              </label>
-            ))}
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                name="hospitalized"
+                checked={formData.hospitalized || false}
+                onChange={handleCheckboxChange}
+                className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500" // 💚 Checkbox Green
+              />
+              <span>Yes</span>
+            </label>
+
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                name="hospitalizedNo"
+                checked={!formData.hospitalized}
+                onChange={handleCheckboxChange}
+                className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500" // 💚 Checkbox Green
+              />
+              <span>No</span>
+            </label>
           </div>
 
-          {/* Reason for Hospitalization */}
-          {formData.hospitalizedYes && (
+          {formData.hospitalized && (
             <div className="mt-2">
-              <label className="font-medium text-green-700">If yes, reason for hospitalization:</label>
+              <label className="font-medium text-green-700">Reason:</label>
               <input
                 type="text"
-                name="hospitalizationReason"
-                value={formData.hospitalizationReason || ""}
+                name="hospitalized_reason"
+                value={formData.hospitalized_reason || ""}
                 onChange={handleInputChange}
-                className="border border-gray-300 rounded p-2 w-full"
-                placeholder="Enter reason for hospitalization"
+                className="border border-gray-300 rounded p-2 w-full focus:ring-green-500 focus:border-green-500"
+                placeholder="Enter reason"
               />
             </div>
           )}
@@ -114,30 +144,39 @@ const Step4 = ({ formData, setFormData }) => {
         <div>
           <label className="font-medium text-green-700">Previous Surgeries?</label>
           <div className="flex space-x-4">
-            {["surgeryYes", "surgeryNo"].map((name) => (
-              <label key={name} className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  name={name}
-                  checked={formData[name] || false}
-                  onChange={handleCheckboxChange}
-                />
-                <span>{name === "surgeryYes" ? "Yes" : "No"}</span>
-              </label>
-            ))}
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                name="previous_surgeries"
+                checked={formData.previous_surgeries || false}
+                onChange={handleCheckboxChange}
+                className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500" // 💚 Checkbox Green
+              />
+              <span>Yes</span>
+            </label>
+
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                name="surgeryNo"
+                checked={!formData.previous_surgeries}
+                onChange={handleCheckboxChange}
+                className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500" // 💚 Checkbox Green
+              />
+              <span>No</span>
+            </label>
           </div>
 
-          {/* Reason for Surgery */}
-          {formData.surgeryYes && (
+          {formData.previous_surgeries && (
             <div className="mt-2">
-              <label className="font-medium text-green-700">If yes, reason for surgery:</label>
+              <label className="font-medium text-green-700">Reason:</label>
               <input
                 type="text"
-                name="surgeryReason"
-                value={formData.surgeryReason || ""}
+                name="surgery_reason"
+                value={formData.surgery_reason || ""}
                 onChange={handleInputChange}
-                className="border border-gray-300 rounded p-2 w-full"
-                placeholder="Enter reason for surgery"
+                className="border border-gray-300 rounded p-2 w-full focus:ring-green-500 focus:border-green-500"
+                placeholder="Enter reason"
               />
             </div>
           )}
@@ -155,55 +194,67 @@ const Step4 = ({ formData, setFormData }) => {
         <div>
           <label className="font-medium text-green-700">Smoker:</label>
           <div className="flex space-x-4">
+            {/* ✅ Smoker Yes */}
             <label className="flex items-center space-x-2">
               <input
-                type="checkbox"
-                name="smokerYes"
-                checked={formData.smokerYes || false}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setFormData({ ...formData, smokerYes: true, smokerNo: false });
-                  }
-                }}
+                type="radio" // 🔥 Changed to Radio
+                name="smoker"
+                value="1"
+                checked={formData.smoker === true}
+                onChange={() =>
+                  setFormData({
+                    ...formData,
+                    smoker: true,
+                    sticks_per_day: "",
+                    years_smoking: "",
+                  })
+                }
+                className="w-5 h-5 text-green-600 focus:ring-green-500"
               />
               <span>Yes</span>
             </label>
+
+            {/* ❌ Smoker No */}
             <label className="flex items-center space-x-2">
               <input
-                type="checkbox"
-                name="smokerNo"
-                checked={formData.smokerNo || false}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setFormData({ ...formData, smokerYes: false, smokerNo: true, sticksPerDay: "", yearsSmoking: "" });
-                  }
-                }}
+                type="radio" // 🔥 Changed to Radio
+                name="smoker"
+                value="0"
+                checked={formData.smoker === false}
+                onChange={() =>
+                  setFormData({
+                    ...formData,
+                    smoker: false,
+                    sticks_per_day: "",
+                    years_smoking: "",
+                  })
+                }
+                className="w-5 h-5 text-green-600 focus:ring-green-500"
               />
               <span>No</span>
             </label>
           </div>
 
-          {/* Sticks per day & Years of Smoking Inputs */}
-          {formData.smokerYes && (
+          {/* ✅ Sticks per Day & Years Smoking (Only for YES) */}
+          {formData.smoker && (
             <div className="mt-2">
-              <label className="font-medium text-green-700">Sticks per day:</label>
+              <label className="font-medium text-green-700">Sticks per Day:</label>
               <input
-                type="text"
-                name="sticksPerDay"
-                value={formData.sticksPerDay || ""}
+                type="number"
+                name="sticks_per_day"
+                value={formData.sticks_per_day || ""}
                 onChange={handleInputChange}
-                className="border border-gray-300 rounded p-2 w-full"
+                className="border border-gray-300 rounded p-2 w-full focus:ring-green-500"
                 placeholder="Enter sticks per day"
               />
-
               <label className="font-medium text-green-700 mt-2">Years of Smoking:</label>
               <input
-                type="text"
-                name="yearsSmoking"
-                value={formData.yearsSmoking || ""}
+                type="number"
+                name="years_smoking"
+                value={formData.years_smoking || ""}
                 onChange={handleInputChange}
-                className="border border-gray-300 rounded p-2 w-full"
-                placeholder="Enter years of smoking"
+                className="border border-gray-300 rounded p-2 w-full focus:ring-green-500"
+                placeholder="Enter years smoking"
               />
             </div>
           )}
@@ -213,22 +264,17 @@ const Step4 = ({ formData, setFormData }) => {
         <div>
           <label className="font-medium text-green-700">Alcohol Drinker:</label>
           <div className="flex space-x-4">
-            {["alcoholRegular", "alcoholOccasional", "alcoholNo"].map((name, index) => (
+            {["Regular", "Occasional", "No"].map((option, index) => (
               <label key={index} className="flex items-center space-x-2">
                 <input
-                  type="checkbox"
-                  name={name}
-                  checked={formData[name] || false}
-                  onChange={(e) => {
-                    setFormData({
-                      alcoholRegular: false,
-                      alcoholOccasional: false,
-                      alcoholNo: false,
-                      [name]: e.target.checked,
-                    });
-                  }}
+                  type="radio" // ✅ Change checkbox to radio for single selection
+                  name="alcoholic_drinker"
+                  value={option}
+                  checked={formData.alcoholic_drinker === option}
+                  onChange={handleInputChange}
+                  className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500"
                 />
-                <span>{name.replace("alcohol", "")}</span>
+                <span>{option}</span> {/* ✅ This will now display the correct text */}
               </label>
             ))}
           </div>
@@ -240,27 +286,24 @@ const Step4 = ({ formData, setFormData }) => {
           <div className="flex space-x-4">
             <label className="flex items-center space-x-2">
               <input
-                type="checkbox"
-                name="illicitDrugsYes"
-                checked={formData.illicitDrugsYes || false}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setFormData({ ...formData, illicitDrugsYes: true, illicitDrugsNo: false });
-                  }
-                }}
+                type="radio"
+                name="illicit_drugs"
+                value="1"
+                checked={formData.illicit_drugs === true}
+                onChange={() => setFormData({ ...formData, illicit_drugs: true })}
+                className="w-5 h-5 text-green-600 focus:ring-green-500"
               />
               <span>Yes</span>
             </label>
+
             <label className="flex items-center space-x-2">
               <input
-                type="checkbox"
-                name="illicitDrugsNo"
-                checked={formData.illicitDrugsNo || false}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setFormData({ ...formData, illicitDrugsYes: false, illicitDrugsNo: true });
-                  }
-                }}
+                type="radio"
+                name="illicit_drugs"
+                value="0"
+                checked={formData.illicit_drugs === false}
+                onChange={() => setFormData({ ...formData, illicit_drugs: false })}
+                className="w-5 h-5 text-green-600 focus:ring-green-500"
               />
               <span>No</span>
             </label>
@@ -274,60 +317,38 @@ const Step4 = ({ formData, setFormData }) => {
             <label className="flex items-center space-x-2">
               <input
                 type="checkbox"
-                name="eyeDisorderYes"
-                checked={formData.eyeDisorderYes || false}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setFormData({ ...formData, eyeDisorderYes: true, eyeDisorderNo: false });
-                  }
-                }}
+                name="eye_glasses"
+                checked={formData.eye_glasses || false}
+                onChange={handleCheckboxChange}
+                disabled={formData.eye_disorder_no}
+                className="w-5 h-5 text-green-600 focus:ring-green-500"
               />
-              <span>Yes</span>
+              <span>Eye Glasses</span>
             </label>
+
             <label className="flex items-center space-x-2">
               <input
                 type="checkbox"
-                name="eyeDisorderNo"
-                checked={formData.eyeDisorderNo || false}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setFormData({
-                      ...formData,
-                      eyeDisorderYes: false,
-                      eyeDisorderNo: true,
-                      eyeGlasses: false,
-                      contactLens: false,
-                    });
-                  }
-                }}
+                name="contact_lens"
+                checked={formData.contact_lens || false}
+                onChange={handleCheckboxChange}
+                disabled={formData.eye_disorder_no}
+                className="w-5 h-5 text-green-600 focus:ring-green-500"
+              />
+              <span>Contact Lens</span>
+            </label>
+
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                name="eye_disorder_no"
+                checked={formData.eye_disorder_no || false}
+                onChange={handleCheckboxChange}
+                className="w-5 h-5 text-green-600 focus:ring-green-500"
               />
               <span>No</span>
             </label>
           </div>
-
-          {/* Eye Glasses & Contact Lens Checkboxes */}
-          {formData.eyeDisorderYes && (
-            <div className="mt-2 flex space-x-4">
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  name="eyeGlasses"
-                  checked={formData.eyeGlasses || false}
-                  onChange={handleCheckboxChange}
-                />
-                <span>Eye Glasses</span>
-              </label>
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  name="contactLens"
-                  checked={formData.contactLens || false}
-                  onChange={handleCheckboxChange}
-                />
-                <span>Contact Lens</span>
-              </label>
-            </div>
-          )}
         </div>
       </div>
     </div>

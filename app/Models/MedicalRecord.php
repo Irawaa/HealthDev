@@ -19,7 +19,9 @@ class MedicalRecord extends Model
         'school_nurse_id',
         'school_physician_id',
         'recorded_by',
-        'updated_by'
+        'updated_by',
+        'final_evaluation',
+        'plan_recommendation',
     ];
 
     /**
@@ -88,6 +90,35 @@ class MedicalRecord extends Model
     {
         return $this->belongsToMany(PastMedicalHistory::class, 'medical_record_past_medical_history')
             ->withPivot('custom_condition') // For "Others" input
+            ->withTimestamps();
+    }
+
+    public function obGyne(): HasOne
+    {
+        return $this->hasOne(ObGyneHistory::class, 'medical_record_id');
+    }
+
+    public function details(): HasOne
+    {
+        return $this->hasOne(MedicalRecordDetail::class, 'medical_record_id');
+    }
+
+    public function personalSocialHistory(): HasOne
+    {
+        return $this->hasOne(PersonalSocialHistory::class, 'medical_record_id');
+    }
+
+    public function physicalExaminations()
+    {
+        return $this->belongsToMany(PhysicalExamination::class, 'medical_record_physical_examination')
+            ->withPivot('result', 'remarks')
+            ->withTimestamps();
+    }
+
+    public function familyHistories(): BelongsToMany
+    {
+        return $this->belongsToMany(FamilyHistory::class, 'medical_record_family_history')
+            ->withPivot('family_member', 'remarks') // Additional fields for family member and remarks
             ->withTimestamps();
     }
 }

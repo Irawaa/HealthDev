@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             ReviewOfSystemsSeeder::class,
             DeformitiesSeeder::class,
             PastMedicalHistoriesSeeder::class,
+            PhysicalExaminationSeeder::class,
         ]);
     }
 }

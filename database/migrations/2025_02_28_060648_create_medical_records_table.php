@@ -23,6 +23,14 @@ return new class extends Migration {
             $table->unsignedSmallInteger('school_physician_id');
             $table->unsignedSmallInteger('recorded_by');
 
+            // Final Evaluation
+            $table->enum('final_evaluation', ['Class A', 'Class B', 'Pending'])
+                ->nullable();
+
+            // Plan/Recommendation
+            $table->text('plan_recommendation')
+                ->nullable();
+
             // Tracking Information
             $table->timestamps(); // Includes `created_at` and `updated_at`
             $table->unsignedInteger('updated_by')->nullable();

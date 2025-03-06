@@ -19,17 +19,92 @@ const MedicalRecordDialog = ({ patient }) => {
     patient_id: patient?.patient_id || null,
     school_nurse_id: 1,
     school_physician_id: 2,
+
+    // ✅ Review of Systems
     review_of_systems: [],
     others: "",
+
+    // ✅ Deformities
     deformities: [],
+
+    // ✅ Vital Signs
     bp: "",
     rr: "",
     hr: "",
     temperature: "",
     weight: "",
     height: "",
+
+    // ✅ Past Medical Histories
     past_medical_histories: [],
     other_condition: "",
+
+    // ✅ OB/Gyne History
+    menstruation: "",
+    duration: "",
+    dysmenorrhea: false,
+    pregnant_before: false,
+    num_of_pregnancies: "",
+    last_menstrual_period: "",
+
+    // ✅ Personal & Social History
+    alcoholic_drinker: "",
+    smoker: false,
+    sticks_per_day: "",
+    years_smoking: "",
+    illicit_drugs: false,
+    eye_glasses: false,
+    contact_lens: false,
+    eye_disorder_no: false,
+
+    physical_examinations: [
+      { name: "General Survey", result: "Normal", remarks: "" },
+      { name: "Eyes/Ear/Nose/Throat", result: "Normal", remarks: "" },
+      { name: "Hearing", result: "Normal", remarks: "" },
+      { name: "Vision", result: "Normal", remarks: "" },
+      { name: "Lymph Nodes", result: "Normal", remarks: "" },
+      { name: "Heart", result: "Normal", remarks: "" },
+      { name: "Lungs", result: "Normal", remarks: "" },
+      { name: "Abdomen", result: "Normal", remarks: "" },
+      { name: "Skin", result: "Normal", remarks: "" },
+      { name: "Extremities", result: "Normal", remarks: "" },
+    ],
+
+    // ✅ Medical Record Details 🔥
+
+    // ✅ Chief Complaint
+    chief_complaint: "",
+
+    // ✅ Present Illness
+    present_illness: "",
+
+    // ✅ Medication
+    medication: "",
+
+    // ✅ Hospitalized?
+    hospitalized: false,
+    hospitalized_reason: "",
+
+    // ✅ Previous Surgery?
+    previous_surgeries: false,
+    surgery_reason: "",
+
+    // ✅ X-Ray Image
+    chest_xray: null, // Image File (Binary)
+
+    // ✅ Vaccination Status
+    vaccination_status: "",
+
+    // ✅ Laboratory Fields
+    blood_chemistry: "",
+    fbs: "",
+    uric_acid: "",
+    triglycerides: "",
+    t_cholesterol: "",
+    creatinine: "",
+
+    final_evaluation: "",
+    plan_recommendation: "",
   });
 
   const nextStep = () => setStep((prev) => Math.min(prev + 1, 6));
@@ -49,6 +124,12 @@ const MedicalRecordDialog = ({ patient }) => {
   };
 
   const handleSave = () => {
+    data.physical_examinations = data.physical_examinations.map((exam) => ({
+      name: exam.name,
+      result: exam.result,
+      remarks: exam.remarks, // Keep remarks for both Normal and Abnormal
+    }));
+
     post(route("medical-records.store"), {
       onSuccess: () => {
         toast.success("Medical record saved successfully!");

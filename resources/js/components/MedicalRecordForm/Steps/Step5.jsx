@@ -7,7 +7,7 @@ const illnesses = [
 ];
 
 const bodyParts = [
-  "Eyes/Ears/Nose/Throat", "Hearing", "Vision", "Lymph Nodes",
+  "General Survey", "Eyes/Ear/Nose/Throat", "Hearing", "Vision", "Lymph Nodes",
   "Heart", "Lungs", "Abdomen", "Skin", "Extremities",
 ];
 
@@ -21,6 +21,11 @@ const Step5 = ({ formData, setFormData }) => {
         ...prev,
         familyHistory: { Father: {}, Mother: {} },
         physicalExam: prev?.physicalExam || {},
+        physical_examinations: prev?.physical_examinations || bodyParts.map((part) => ({
+          name: part,
+          result: "Normal",
+          remarks: "",
+        })),
       }));
     }
   }, [formData, setFormData]);
@@ -57,15 +62,17 @@ const Step5 = ({ formData, setFormData }) => {
     }));
   };
 
-  // Handle physical exam input changes
-  const handleExamChange = (e, part, status) => {
+  const handleExamChange = (e, part, field) => {
     const { value } = e.target;
+
     setFormData((prev) => ({
       ...prev,
-      physicalExam: {
-        ...prev.physicalExam,
-        [part]: { ...prev.physicalExam[part], [status]: value },
-      },
+      physical_examinations: prev.physical_examinations.map((exam) => {
+        if (exam.name === part) {
+          return { ...exam, [field]: value };
+        }
+        return exam;
+      }),
     }));
   };
 
@@ -153,30 +160,57 @@ const Step5 = ({ formData, setFormData }) => {
               <thead>
                 <tr className="bg-green-200 text-green-900">
                   <th className="border border-green-300 px-4 py-2 text-left">Body Part</th>
-                  <th className="border border-green-300 px-4 py-2 text-left">Normal</th>
-                  <th className="border border-green-300 px-4 py-2 text-left">Abnormal</th>
+                  <th className="border border-green-300 px-4 py-2 text-left">Normal / Abnormal</th>
+                  <th className="border border-green-300 px-4 py-2 text-left">Remarks</th>
                 </tr>
               </thead>
               <tbody>
-                {bodyParts.map((part) => (
-                  <tr key={part} className="border-t border-green-300">
-                    <td className="border border-green-300 px-4 py-2 font-semibold text-green-800">{part}</td>
-                    <td className="border border-green-300 px-4 py-2">
-                      <TextInput
-                        value={formData?.physicalExam?.[part]?.normal || ""}
-                        onChange={(e) => handleExamChange(e, part, "normal")}
-                        placeholder="Normal Condition"
-                      />
-                    </td>
-                    <td className="border border-green-300 px-4 py-2">
-                      <TextInput
-                        value={formData?.physicalExam?.[part]?.abnormal || ""}
-                        onChange={(e) => handleExamChange(e, part, "abnormal")}
-                        placeholder="Abnormal Condition"
-                      />
-                    </td>
-                  </tr>
-                ))}
+                {bodyParts.map((part) => {
+                  const exam = formData.physical_examinations.find((exam) => exam.name === part);
+
+                  return (
+                    <tr key={part} className="border-t border-green-300">
+                      <td className="border border-green-300 px-4 py-2 font-semibold text-green-800">{part}</td>
+
+                      {/* Radio buttons for Normal/Abnormal */}
+                      <td className="border border-green-300 px-4 py-2">
+                        <div className="flex items-center space-x-4">
+                          <label className="flex items-center space-x-2">
+                            <input
+                              type="radio"
+                              name={`${part}-result`}
+                              value="Normal"
+                              checked={exam?.result === "Normal"}
+                              onChange={(e) => handleExamChange(e, part, "result")}
+                              className="form-radio text-green-600"
+                            />
+                            <span className="text-green-800">Normal</span>
+                          </label>
+                          <label className="flex items-center space-x-2">
+                            <input
+                              type="radio"
+                              name={`${part}-result`}
+                              value="Abnormal"
+                              checked={exam?.result === "Abnormal"}
+                              onChange={(e) => handleExamChange(e, part, "result")}
+                              className="form-radio text-red-600"
+                            />
+                            <span className="text-red-800">Abnormal</span>
+                          </label>
+                        </div>
+                      </td>
+
+                      {/* Remarks field always visible */}
+                      <td className="border border-green-300 px-4 py-2">
+                        <TextInput
+                          value={exam?.remarks || ""}
+                          onChange={(e) => handleExamChange(e, part, "remarks")}
+                          placeholder={exam?.result === "Abnormal" ? "Abnormal Condition Remarks" : "Remarks"}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

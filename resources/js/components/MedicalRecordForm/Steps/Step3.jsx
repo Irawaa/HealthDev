@@ -17,73 +17,59 @@ const Step3 = ({ formData, setFormData, patient }) => {
 
   const obGyneOptions = {
     menstruation: [
-      { name: "menstruationRegular", label: "Regular" },
-      { name: "menstruationIrregular", label: "Irregular" },
+      { name: "Regular", label: "Regular" },
+      { name: "Irregular", label: "Irregular" },
     ],
     duration: [
-      { name: "duration1to3", label: "1-3 Days" },
-      { name: "duration4to6", label: "4-6 Days" },
-      { name: "duration7to9", label: "7-9 Days" },
-    ],
-    dysmenorrhea: [
-      { name: "dysmenorrheaYes", label: "Yes" },
-      { name: "dysmenorrheaNo", label: "No" },
-    ],
-    pregnancy: [
-      { name: "pregnantYes", label: "Yes" },
-      { name: "pregnantNo", label: "No" },
+      { name: "1-3 days", label: "1-3 Days" },
+      { name: "4-6 days", label: "4-6 Days" },
+      { name: "7-9 days", label: "7-9 Days" },
     ],
   };
 
   const handleCheckboxChange = (e) => {
     const { name, checked } = e.target;
-  
+
     setFormData((prev) => {
       let updatedData = { ...prev };
-  
+
       // Handle past medical history checkboxes
       if (name !== "obGyneHistory" && name !== "pregnantYes" && name !== "pregnantNo") {
         updatedData.past_medical_histories = checked
           ? [...(prev.past_medical_histories || []), name] // Add to history
           : prev.past_medical_histories?.filter((item) => item !== name) || []; // Remove if unchecked
-  
+
         if (name === "Others" && !checked) {
           updatedData.other_condition = ""; // Clear input when unchecked
         }
       }
-  
-      // Handle OB/Gyne History Checkbox
+
       if (name === "obGyneHistory") {
         updatedData.obGyneHistory = checked;
         if (!checked) {
           updatedData = {
             ...updatedData,
-            menstruationRegular: false,
-            menstruationIrregular: false,
-            duration1to3: false,
-            duration4to6: false,
-            duration7to9: false,
-            dysmenorrheaYes: false,
-            dysmenorrheaNo: false,
-            pregnantYes: false,
-            pregnantNo: false,
-            numberOfPregnancies: "",
-            lastMenstrualPeriod: "",
+            menstruation: "",
+            duration: "",
+            dysmenorrhea: false,
+            pregnant_before: false,
+            num_of_pregnancies: "",
+            last_menstrual_period: "",
           };
         }
       }
-  
+
       // Handle Pregnancy Logic
       if (name === "pregnantNo" && checked) {
-        updatedData.pregnantYes = false;
-        updatedData.numberOfPregnancies = "";
+        updatedData.pregnant_before = false;
+        updatedData.num_of_pregnancies = "";
       } else if (name === "pregnantYes" && checked) {
-        updatedData.pregnantNo = false;
+        updatedData.pregnant_before = true;
       }
-  
+
       return updatedData;
     });
-  };  
+  };
 
   const handleTextChange = (e) => {
     const { name, value } = e.target;
@@ -129,8 +115,11 @@ const Step3 = ({ formData, setFormData, patient }) => {
       {!isMale && (
         <>
           <hr className="border-t border-gray-300 my-6" />
+          <h3 className="text-xl font-semibold text-green-700 mb-4">
+            OB/Gyne History (Female Only)
+          </h3>
 
-          <h3 className="text-xl font-semibold text-green-700 mt-6 mb-4 flex items-center space-x-2">
+          <label className="flex items-center space-x-2 mb-4">
             <input
               type="checkbox"
               name="obGyneHistory"
@@ -138,28 +127,26 @@ const Step3 = ({ formData, setFormData, patient }) => {
               onChange={handleCheckboxChange}
               className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500"
             />
-            <span>OB/Gyne History <span className="text-sm text-gray-500">(Female Only)</span></span>
-          </h3>
+            <span>Check if applicable</span>
+          </label>
 
           {formData.obGyneHistory && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-4">
               {Object.entries(obGyneOptions).map(([key, options]) => (
                 <div key={key}>
-                  <label className="font-medium text-green-700">{key.charAt(0).toUpperCase() + key.slice(1)}:</label>
+                  <label className="font-medium text-green-700">
+                    {key.charAt(0).toUpperCase() + key.slice(1)}:
+                  </label>
                   <div className="flex space-x-4">
                     {options.map(({ name, label }) => (
                       <label key={name} className="flex items-center space-x-2">
                         <input
-                          type="checkbox"
-                          name={name}
-                          checked={formData[name] || false}
-                          onChange={(e) => {
-                            setFormData((prev) => ({
-                              ...prev,
-                              [options[0].name]: name === options[0].name ? e.target.checked : false,
-                              [options[1].name]: name === options[1].name ? e.target.checked : false,
-                            }));
-                          }}
+                          type="radio"
+                          name={key}
+                          value={name}
+                          checked={formData[key] === name}
+                          onChange={handleTextChange}
+                          className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500"
                         />
                         <span>{label}</span>
                       </label>
@@ -168,27 +155,99 @@ const Step3 = ({ formData, setFormData, patient }) => {
                 </div>
               ))}
 
-              {formData.pregnantYes && (
-                <div className="mt-2">
-                  <label className="font-medium text-green-700">If yes, number of pregnancies:</label>
+              <div>
+                <label className="font-medium text-green-700">Dysmenorrhea:</label>
+                <div className="flex space-x-4">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      name="dysmenorrhea"
+                      checked={formData.dysmenorrhea}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          dysmenorrhea: e.target.checked,
+                        }))
+                      }
+                      className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                    />
+                    <span>Yes</span>
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      name="dysmenorrheaNo"
+                      checked={!formData.dysmenorrhea}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          dysmenorrhea: !e.target.checked,
+                        }))
+                      }
+                      className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                    />
+                    <span>No</span>
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <label className="font-medium text-green-700">Pregnant Before:</label>
+                <div className="flex space-x-4">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      name="pregnant_before"
+                      checked={formData.pregnant_before}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          pregnant_before: e.target.checked,
+                        }))
+                      }
+                      className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                    />
+                    <span>Yes</span>
+                  </label>
+
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      name="pregnant_before_no"
+                      checked={!formData.pregnant_before}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          pregnant_before: !e.target.checked,
+                        }))
+                      }
+                      className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                    />
+                    <span>No</span>
+                  </label>
+                </div>
+              </div>
+
+              {formData.pregnant_before && (
+                <div>
+                  <label className="font-medium text-green-700">Number of Pregnancies:</label>
                   <input
                     type="number"
-                    name="numberOfPregnancies"
-                    value={formData.numberOfPregnancies || ""}
+                    name="num_of_pregnancies"
+                    value={formData.num_of_pregnancies || ""}
                     onChange={handleTextChange}
                     className="border border-gray-300 rounded p-2 w-full"
-                    placeholder="Enter number of pregnancies"
                     min="1"
                   />
                 </div>
               )}
 
-              <div className="flex flex-col">
+              <div>
                 <label className="font-medium text-green-700">Last Menstrual Period:</label>
                 <input
                   type="date"
-                  name="lastMenstrualPeriod"
-                  value={formData.lastMenstrualPeriod || ""}
+                  name="last_menstrual_period"
+                  value={formData.last_menstrual_period || ""}
                   onChange={handleTextChange}
                   className="border border-gray-300 rounded p-2 w-full"
                 />
