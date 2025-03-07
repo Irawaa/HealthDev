@@ -97,7 +97,11 @@ const Step3 = ({ formData, setFormData, patient }) => {
     <div className="p-4">
       <h3 className="text-xl font-semibold text-green-700 mb-4">Past Medical History</h3>
 
-      <CheckboxGroup options={medicalHistoryOptions} formData={formData} handleChange={handleCheckboxChange} />
+      <CheckboxGroup
+        options={medicalHistoryOptions}
+        formData={formData}
+        handleChange={handleCheckboxChange}
+      />
 
       <div className="flex flex-col mb-6">
         <label className="font-medium text-green-700">Others:</label>
@@ -108,7 +112,6 @@ const Step3 = ({ formData, setFormData, patient }) => {
           onChange={handleTextChange}
           className="border border-gray-300 rounded p-2 w-full focus:ring-green-500 focus:border-green-500"
           placeholder="Specify other medical history"
-          disabled={!formData.past_medical_histories?.includes("Others")}
         />
       </div>
 

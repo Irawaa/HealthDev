@@ -8,7 +8,9 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import MedicalRecordDialog from "@/components/MedicalRecordForm/medical-records-dialog";
 import FDARModal from "@/components/FDAR/fdar-records-dialog";
 import BPModal from "@/components/BP/BPModal";
+import IncidentModal from "@/components/Incidents/IncidentModal";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import PerscriptionModal from "@/components/Perscription/PerscriptionModal";
 
 const InfoField = ({ label, value, name, type = "text", options = [], isEditing, handleChange }) => (
   <div className="flex flex-col w-full space-y-1">
@@ -239,6 +241,8 @@ const PatientProfile = ({ patient, onClose, onSave, colleges, departments }) => 
               {activeTab === "medical" && <MedicalRecordDialog activeTab={activeTab} patient={patient} />}
               {activeTab === "fdar" && <FDARModal activeTab={activeTab} patient={patient} />}
               {activeTab === "bp" && <BPModal activeTab={activeTab} patient={patient} />} 
+              {activeTab === "incident" && <IncidentModal activeTab={activeTab} patient={patient} />}
+              {activeTab === "perscription" && <PerscriptionModal activeTab={activeTab} patient={patient} />}
             </div>
           </Tabs>
         </div >

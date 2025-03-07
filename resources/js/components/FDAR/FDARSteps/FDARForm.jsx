@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline"; // ✅ Warning icon
+import FDARTags from "@/components/fdar-tags";
 
 const FDARForm = ({ formData, handleChange }) => {
   const [bpWarning, setBpWarning] = useState("");
   const [bpSeverity, setBpSeverity] = useState("");
   const [isBpFocused, setIsBpFocused] = useState(false);
+  const [focusTags, setFocusTags] = useState([]); // ✅ Fixed: Defined state for FDARTags
 
   const checkBpWarning = (value) => {
     if (!value) {
@@ -52,11 +54,15 @@ const FDARForm = ({ formData, handleChange }) => {
     <div className="p-4 space-y-4">
       <h3 className="text-lg font-semibold text-green-800">FDAR & Patient Vitals</h3>
 
-      {/* ✅ FDAR Inputs (Full Width) */}
+      <FDARTags selectedTags={focusTags} setSelectedTags={setFocusTags} /> {/* ✅ Fixed: State is now properly defined */}
+
+      {/* ✅ FDAR Inputs */}
       <div className="grid grid-cols-1 gap-4">
-        {["focus", "data", "action", "response"].map((key) => (
+        {["data", "action", "response"].map((key) => (
           <div key={key} className="flex flex-col">
-            <label className="text-xs font-medium text-gray-700">{key.charAt(0).toUpperCase() + key.slice(1)}</label>
+            <label className="text-xs font-medium text-gray-700">
+              {key.charAt(0).toUpperCase() + key.slice(1)}
+            </label>
             <textarea
               name={key}
               value={formData[key] || ""}
