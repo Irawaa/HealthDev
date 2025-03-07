@@ -91,11 +91,17 @@ class MedicalRecordController extends Controller
                 'contact_lens' => 'nullable|boolean',
                 'eye_disorder_no' => 'nullable|boolean',
 
-                // ✅ Family History
+                // ✅ Family History Validation
                 'family_histories' => 'array',
-                'family_histories.*' => 'string|exists:family_histories,condition',
-                'relationships' => 'array',
-                'relationships.*' => 'nullable|string|in:Father,Mother,Sister,Brother',
+                'family_histories.*.condition' => 'required|string|exists:family_histories,condition',
+                'family_histories.*.Father' => 'nullable|string',
+                'family_histories.*.Mother' => 'nullable|string',
+                'family_histories.*.Sister' => 'nullable|array',
+                'family_histories.*.Sister.*' => 'nullable|string', // Loop for each Sister
+                'family_histories.*.Brother' => 'nullable|array',
+                'family_histories.*.Brother.*' => 'nullable|string', // Loop for each Brother
+                'family_histories.*.remarks' => 'nullable|string',
+
 
                 // ✅ Physical Examination Validation
                 'physical_examinations' => 'array',
@@ -124,6 +130,19 @@ class MedicalRecordController extends Controller
             $recordedBy = Auth::id();
             if (!$recordedBy) {
                 return redirect()->back()->withErrors('Unauthorized action.');
+            }
+
+            // Check if Patient Already Has a Medical Record
+            $existingRecord = MedicalRecord::where('patient_id', $validated['patient_id'])->first();
+
+            if ($existingRecord) {
+                Log::info('Patient already has an existing medical record', [
+                    'patient_id' => $validated['patient_id'],
+                    'existing_record_id' => $existingRecord->id,
+                    'recorded_by' => Auth::id()
+                ]);
+
+                return redirect()->back()->withErrors('Patient already has an existing medical record.');
             }
 
             // ✅ Create Medical Record
@@ -233,19 +252,42 @@ class MedicalRecordController extends Controller
             $personalSocialHistory = PersonalSocialHistory::create($personalSocialHistoryData);
             Log::info('Personal & Social History stored', ['personal_social_history' => $personalSocialHistory]);
 
-            // Handling Family History
-            if (!empty($validated['family_histories'])) {
-                $familyHistories = FamilyHistory::whereIn('condition', $validated['family_histories'])->get();
-                $familyHistorySyncData = [];
+            // ✅ Handling Family History
+            if ($request->filled('family_histories')) {
+                $syncData = [];
 
-                foreach ($familyHistories as $key => $history) {
-                    $familyHistorySyncData[$history->id] = [
-                        'relationship' => $validated['relationships'][$key] ?? null, // Add the relationship from the 'relationships' array
-                    ];
+                foreach ($validated['family_histories'] as $history) {
+                    $familyHistory = FamilyHistory::where('condition', $history['condition'])->first();
+
+                    if ($familyHistory) {
+                        foreach (['Father', 'Mother'] as $member) {
+                            if (!empty($history[$member])) {
+                                $syncData[] = [
+                                    'family_history_id' => $familyHistory->id,
+                                    'family_member' => $member,
+                                    'family_history_remarks' => $history[$member],
+                                    'overall_remarks' => $history['remarks'] ?? null,
+                                ];
+                            }
+                        }
+
+                        foreach (['Sister', 'Brother'] as $sibling) {
+                            if (!empty($history[$sibling])) {
+                                foreach ($history[$sibling] as $key => $note) {
+                                    $syncData[] = [
+                                        'family_history_id' => $familyHistory->id,
+                                        'family_member' => $sibling . ' ' . ($key + 1), // 🔥 Sister 1, Sister 2
+                                        'family_history_remarks' => $note,
+                                        'overall_remarks' => $history['remarks'] ?? null,
+                                    ];
+                                }
+                            }
+                        }
+                    }
                 }
 
-                Log::info('Syncing family histories', ['familyHistorySyncData' => $familyHistorySyncData]);
-                $medicalRecord->familyHistories()->sync($familyHistorySyncData);
+                Log::info('Syncing Family Histories', ['sync_data' => $syncData]);
+                $medicalRecord->familyHistories()->sync($syncData);
             }
 
             // ✅ Sync Physical Examinations

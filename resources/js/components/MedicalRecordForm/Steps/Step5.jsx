@@ -16,10 +16,17 @@ const Step5 = ({ formData, setFormData }) => {
   const [siblingToDelete, setSiblingToDelete] = useState(null);
 
   useEffect(() => {
-    if (!formData?.familyHistory) {
+    if (!formData?.family_histories) {
       setFormData((prev) => ({
         ...prev,
-        familyHistory: { Father: {}, Mother: {} },
+        family_histories: illnesses.map((illness) => ({
+          condition: illness,
+          Father: "",
+          Mother: "",
+          Sister: [""],
+          Brother: [""],
+          remarks: "",
+        })),
         physicalExam: prev?.physicalExam || {},
         physical_examinations: prev?.physical_examinations || bodyParts.map((part) => ({
           name: part,
@@ -28,38 +35,28 @@ const Step5 = ({ formData, setFormData }) => {
         })),
       }));
     }
-  }, [formData, setFormData]);
+  }, []); // ✅ Add empty dependency array here  
 
   // Toggle Section Expansion
-  const toggleSection = (section) => {
-    setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
-  };
-
-  // Handle changes for family history sickness input
-  const handleSicknessChange = (e, member, sickness) => {
-    const { value } = e.target;
-    setFormData((prev) => ({
+  const toggleSection = (condition) => {
+    setExpandedSections((prev) => ({
       ...prev,
-      familyHistory: {
-        ...prev.familyHistory,
-        [member]: {
-          ...prev.familyHistory[member],
-          sicknesses: { ...prev.familyHistory[member]?.sicknesses, [sickness]: value },
-        },
-      },
+      [condition]: !prev[condition],
     }));
   };
 
-  // Handle remarks input
-  const handleRemarksChange = (e, member) => {
+  // Handle Remarks Change
+  const handleInputChange = (e, index, member, subIndex = null) => {
     const { value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      familyHistory: {
-        ...prev.familyHistory,
-        [member]: { ...prev.familyHistory[member], remarks: value },
-      },
-    }));
+    setFormData((prev) => {
+      const updatedHistories = [...prev.family_histories];
+      if (subIndex !== null) {
+        updatedHistories[index][member][subIndex] = value;
+      } else {
+        updatedHistories[index][member] = value;
+      }
+      return { ...prev, family_histories: updatedHistories };
+    });
   };
 
   const handleExamChange = (e, part, field) => {
@@ -77,21 +74,13 @@ const Step5 = ({ formData, setFormData }) => {
   };
 
   // Add sibling
-  const addSibling = (gender) => {
-    const siblingCount = Object.keys(formData.familyHistory || {})
-      .filter((key) => key.startsWith(gender)).length + 1;
-
-    setFormData((prev) => ({
-      ...prev,
-      familyHistory: {
-        ...prev.familyHistory,
-        [`${gender} ${siblingCount}`]: { sicknesses: {}, remarks: "" },
-      },
-    }));
+  const addSibling = (index, member) => {
+    setFormData((prev) => {
+      const updatedHistories = [...prev.family_histories];
+      updatedHistories[index][member].push("");
+      return { ...prev, family_histories: updatedHistories };
+    });
   };
-
-  // Confirm sibling deletion
-  const confirmDeleteSibling = (sibling) => setSiblingToDelete(sibling);
 
   // Delete sibling
   const deleteSibling = () => {
@@ -105,45 +94,81 @@ const Step5 = ({ formData, setFormData }) => {
     }
   };
 
+  const removeSibling = (index, member, subIndex) => {
+    setFormData((prev) => {
+      const updatedHistories = [...prev.family_histories];
+      updatedHistories[index][member] = updatedHistories[index][member].filter((_, i) => i !== subIndex);
+      return { ...prev, family_histories: updatedHistories };
+    });
+  };  
+
   return (
     <div className="p-4">
       {/* Family History Section */}
       <h3 className="text-xl font-semibold text-green-700 mb-4">Family History</h3>
       <div className="space-y-4">
-        {["Father", "Mother", ...Object.keys(formData.familyHistory || {}).filter((key) =>
-          key.startsWith("Brother") || key.startsWith("Sister")
-        )].map((member) => (
-          <CollapsibleSection key={member} title={member} toggle={toggleSection} expanded={expandedSections[member]}>
+        {formData.family_histories?.map((history, index) => (
+          <CollapsibleSection
+            key={history.condition}
+            title={history.condition}
+            toggle={() => toggleSection(history.condition)}
+            expanded={expandedSections[history.condition]}
+          >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {illnesses.map((sickness) => (
+              {/* Father & Mother Inputs */}
+              {["Father", "Mother"].map((member) => (
                 <TextInput
-                  key={sickness}
-                  label={sickness}
-                  value={formData.familyHistory?.[member]?.sicknesses?.[sickness] || ""}
-                  onChange={(e) => handleSicknessChange(e, member, sickness)}
+                  key={`${history.condition}-${member}`}
+                  label={member}
+                  value={history[member]}
+                  onChange={(e) => handleInputChange(e, index, member)}
                 />
               ))}
+
+              {/* Brother & Sister Inputs with Dynamic Add/Remove */}
+              {["Brother", "Sister"].map((member) => (
+                <div key={`${history.condition}-${member}`}>
+                  {history[member].map((sibling, subIndex) => (
+                    <div key={subIndex} className="flex items-center gap-2">
+                      <TextInput
+                        label={`${member} ${subIndex + 1}`}
+                        value={sibling}
+                        onChange={(e) =>
+                          handleInputChange(e, index, member, subIndex)
+                        }
+                      />
+                      <DeleteButton
+                        text="❌"
+                        onClick={() => removeSibling(index, member, subIndex)}
+                      />
+                    </div>
+                  ))}
+                  <AddButton
+                    text={`+ Add ${member}`}
+                    onClick={() => addSibling(index, member)}
+                  />
+                </div>
+              ))}
+
+              {/* Overall Remarks Input */}
+              <TextInput
+                label="Overall Remarks"
+                value={history.remarks}
+                onChange={(e) => handleInputChange(e, index, "remarks")}
+              />
             </div>
-            <TextInput
-              label="Remarks"
-              value={formData.familyHistory?.[member]?.remarks || ""}
-              onChange={(e) => handleRemarksChange(e, member)}
-            />
-            {(member.startsWith("Brother") || member.startsWith("Sister")) && (
-              <DeleteButton text={`Delete ${member}`} onClick={() => confirmDeleteSibling(member)} />
-            )}
           </CollapsibleSection>
         ))}
       </div>
 
-      {/* Add Sibling Buttons */}
-      <div className="flex space-x-4 mt-4">
-        <AddButton text="+ Add Brother" onClick={() => addSibling("Brother")} />
-        <AddButton text="+ Add Sister" onClick={() => addSibling("Sister")} />
-      </div>
-
-      {/* Sibling Delete Confirmation */}
-      {siblingToDelete && <DeleteConfirmation sibling={siblingToDelete} onDelete={deleteSibling} onCancel={() => setSiblingToDelete(null)} />}
+      {/* Delete Sibling Confirmation */}
+      {siblingToDelete && (
+        <DeleteConfirmation
+          sibling={siblingToDelete}
+          onDelete={deleteSibling}
+          onCancel={() => setSiblingToDelete(null)}
+        />
+      )}
 
       {/* Separator */}
       <hr className="border-t-2 border-green-400 my-6" />

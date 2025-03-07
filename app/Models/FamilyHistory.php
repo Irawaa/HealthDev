@@ -9,6 +9,8 @@ class FamilyHistory extends Model
 {
     use HasFactory;
 
+    protected $table = 'family_histories';
+
     protected $fillable = [
         'condition',  // The name of the condition, e.g., "Cancer"
     ];

@@ -12,10 +12,11 @@ return new class extends Migration {
     {
         Schema::create('medical_record_family_history', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('medical_record_id'); // FK to Medical Records
+            $table->unsignedBigInteger('medical_record_id'); // FK to Medical Record
             $table->unsignedBigInteger('family_history_id'); // FK to Family History
-            $table->enum('family_member', ['Father', 'Mother', 'Sister', 'Brother']); // Family member type
-            $table->text('remarks')->nullable(); // Remarks (optional)
+            $table->string('family_member'); // Immediate Family Only
+            $table->text('family_history_remarks')->nullable(); // Remarks for Family Member
+            $table->text('overall_remarks')->nullable(); // General Remarks for the Condition
             $table->timestamps();
 
             // 🔑 Foreign Keys

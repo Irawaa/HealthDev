@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\ClinicStaff;
+use App\Models\FamilyHistory;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -19,6 +20,7 @@ class DatabaseSeeder extends Seeder
             DeformitiesSeeder::class,
             PastMedicalHistoriesSeeder::class,
             PhysicalExaminationSeeder::class,
+            FamilyHistorySeeder::class,
         ]);
     }
 }
