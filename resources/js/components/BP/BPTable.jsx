@@ -94,91 +94,92 @@ const BPTable = ({ open, setOpen, selectedRecord, setBpRecords }) => {
           </DialogTitle>
         </DialogHeader>
 
-        {/* BP Records List - Dropdown Accordion */}
-        <div className="space-y-2">
-          {formData.map((record, index) => (
-            <div key={record.id} className="border border-green-300 rounded-lg bg-green-100">
-              {/* Record Header (Click to Expand/Collapse) */}
-              <div
-                className="flex justify-between items-center p-3 bg-green-200 cursor-pointer rounded-t-lg hover:bg-green-300 transition"
-                onClick={() => setExpandedIndex(expandedIndex === index ? null : index)}
-              >
-                <h3 className="text-sm font-semibold text-green-900">
-                  BP Record {index + 1} - {record.date || "No Date"} at {record.time || "No Time"}
-                </h3>
-                <span className="text-green-700">{expandedIndex === index ? "▲" : "▼"}</span>
-              </div>
+     {/* BP Records List - Scrollable Container */}
+<div className="space-y-2 max-h-80 overflow-y-auto">
+  {formData.map((record, index) => (
+    <div key={record.id} className="border border-green-300 rounded-lg bg-green-100">
+      {/* Record Header (Click to Expand/Collapse) */}
+      <div
+        className="flex justify-between items-center p-3 bg-green-200 cursor-pointer rounded-t-lg hover:bg-green-300 transition"
+        onClick={() => setExpandedIndex(expandedIndex === index ? null : index)}
+      >
+        <h3 className="text-sm font-semibold text-green-900">
+          BP Record {index + 1} - {record.date || "No Date"} at {record.time || "No Time"}
+        </h3>
+        <span className="text-green-700">{expandedIndex === index ? "▲" : "▼"}</span>
+      </div>
 
-              {/* Expanded Content (Inputs) */}
-              {expandedIndex === index && (
-                <div className="p-3 transition-all">
-                  <div className="grid grid-cols-2 gap-4">
-                    {/* Date Input */}
-                    <div>
-                      <label className="text-sm font-medium text-green-800">Date</label>
-                      <input
-                        type="date"
-                        value={record.date}
-                        onChange={(e) => handleChange(index, "date", e.target.value)}
-                        className="w-full border border-green-400 rounded-md px-2 py-1 focus:ring-0 focus:border-green-600"
-                      />
-                    </div>
+      {/* Expanded Content (Inputs) */}
+      {expandedIndex === index && (
+        <div className="p-3 transition-all">
+          <div className="grid grid-cols-2 gap-4">
+            {/* Date Input */}
+            <div>
+              <label className="text-sm font-medium text-green-800">Date</label>
+              <input
+                type="date"
+                value={record.date}
+                onChange={(e) => handleChange(index, "date", e.target.value)}
+                className="w-full border border-green-400 rounded-md px-2 py-1 focus:ring-0 focus:border-green-600"
+              />
+            </div>
 
-                    {/* Time Input */}
-                    <div>
-                      <label className="text-sm font-medium text-green-800">Time</label>
-                      <input
-                        type="time"
-                        value={record.time}
-                        onChange={(e) => handleChange(index, "time", e.target.value)}
-                        className="w-full border border-green-400 rounded-md px-2 py-1 focus:ring-0 focus:border-green-600"
-                      />
-                    </div>
+            {/* Time Input */}
+            <div>
+              <label className="text-sm font-medium text-green-800">Time</label>
+              <input
+                type="time"
+                value={record.time}
+                onChange={(e) => handleChange(index, "time", e.target.value)}
+                className="w-full border border-green-400 rounded-md px-2 py-1 focus:ring-0 focus:border-green-600"
+              />
+            </div>
 
-                    {/* BP Input with Warning */}
-                    <div className="col-span-2 relative">
-                      <label className="text-sm font-medium text-green-800">Blood Pressure</label>
-                      <input
-                        type="text"
-                        value={record.bp}
-                        onChange={(e) => handleBpChange(index, e.target.value)}
-                        className={`w-full border border-green-400 rounded-md px-2 py-1 focus:ring-0 focus:border-green-600 ${record.severity}`}
-                        placeholder="e.g. 120/80"
-                        pattern="\d{2,3}/\d{2,3}"
-                      />
-                      
-                      {/* Warning Icon */}
-                      {record.warning && (
-                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                          <ExclamationTriangleIcon className={`w-5 h-5 ${record.severity}`} />
-                        </div>
-                      )}
+            {/* BP Input with Warning */}
+            <div className="col-span-2 relative">
+              <label className="text-sm font-medium text-green-800">Blood Pressure</label>
+              <input
+                type="text"
+                value={record.bp}
+                onChange={(e) => handleBpChange(index, e.target.value)}
+                className={`w-full border border-green-400 rounded-md px-2 py-1 focus:ring-0 focus:border-green-600 ${record.severity}`}
+                placeholder="e.g. 120/80"
+                pattern="\d{2,3}/\d{2,3}"
+              />
+              
+              {/* Warning Icon */}
+              {record.warning && (
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <ExclamationTriangleIcon className={`w-5 h-5 ${record.severity}`} />
+                </div>
+              )}
 
-                      {/* Warning Message */}
-                      {record.warning && (
-                        <div className={`mt-1 text-xs p-2 rounded shadow-lg ${record.severity}`}>
-                          {record.warning}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Remove Button (Only if more than 1 record) */}
-                  {formData.length > 1 && (
-                    <div className="mt-3 flex justify-end">
-                      <button
-                        onClick={() => removeRecord(index)}
-                        className="text-sm text-red-600 bg-red-100 px-3 py-1 rounded-md hover:bg-red-200 transition"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  )}
+              {/* Warning Message */}
+              {record.warning && (
+                <div className={`mt-1 text-xs p-2 rounded shadow-lg ${record.severity}`}>
+                  {record.warning}
                 </div>
               )}
             </div>
-          ))}
+          </div>
+
+          {/* Remove Button (Only if more than 1 record) */}
+          {formData.length > 1 && (
+            <div className="mt-3 flex justify-end">
+              <button
+                onClick={() => removeRecord(index)}
+                className="text-sm text-red-600 bg-red-100 px-3 py-1 rounded-md hover:bg-red-200 transition"
+              >
+                Remove
+              </button>
+            </div>
+          )}
         </div>
+      )}
+    </div>
+  ))}
+</div>
+
 
         {/* Add Record Button */}
         <div className="mt-4 flex justify-center">
