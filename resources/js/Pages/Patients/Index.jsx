@@ -120,9 +120,6 @@ const Index = () => {
                                                     </CardTitle>
                                                 </CardHeader>
                                                 <CardContent className="p-4 space-y-2 text-green-900">
-                                                    <p>
-                                                        <strong>Birthdate:</strong> {patient.birthdate || "-"}
-                                                    </p>
                                                     <div className="flex items-center gap-2">
                                                         <strong>Gender:</strong>
                                                         <Badge variant="outline" className={patient.gender ? "bg-blue-200" : "bg-pink-200"}>
@@ -131,9 +128,6 @@ const Index = () => {
                                                     </div>
                                                     <p>
                                                         <strong>Type:</strong> {formatType(patient.type)}
-                                                    </p>
-                                                    <p>
-                                                        <strong>Email:</strong> {patient.emailaddress || "-"}
                                                     </p>
                                                     <p>
                                                         <strong>Contact:</strong>{" "}
@@ -146,6 +140,21 @@ const Index = () => {
                                                             "-"
                                                         )}
                                                     </p>
+
+                                                    <p>
+                                                        <strong>Emergency Contact:</strong>{" "}
+                                                        {patient.emergency_contacts && patient.emergency_contacts.length ? (
+                                                            patient.emergency_contacts.map((contact, index) => (
+                                                                <span key={index}>
+                                                                    {contact.name}: {contact.contact_number}
+                                                                    {index !== patient.emergency_contacts.length - 1 && <span> / </span>}
+                                                                </span>
+                                                            ))
+                                                        ) : (
+                                                            <span>None</span>
+                                                        )}
+                                                    </p>
+
 
                                                     {/* Fix: Use divs instead of <p> inside the condition */}
                                                     {patient.type === "student" && (
