@@ -31,14 +31,14 @@ const IncidentForm = ({ open, setOpen, selectedIncident, handleSave }) => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="bg-white shadow-xl rounded-lg p-6 max-w-md w-full mx-auto">
+      <DialogContent className="bg-white shadow-xl rounded-lg p-6 w-full max-w-full sm:max-w-lg md:max-w-xl lg:max-w-2xl mx-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-green-700">
+          <DialogTitle className="text-2xl font-bold text-green-700 text-center">
             {selectedIncident ? "Edit" : "New"} Incident Report
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-4 max-h-[70vh] overflow-y-auto px-2">
           {/* History */}
           <div>
             <label className="block text-sm font-medium text-gray-700">History:</label>
@@ -141,11 +141,18 @@ const IncidentForm = ({ open, setOpen, selectedIncident, handleSave }) => {
           </div>
         </div>
 
-        <DialogFooter className="mt-4 flex justify-between">
-          <Button onClick={() => setOpen(false)} className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600">
+        {/* Footer Buttons */}
+        <DialogFooter className="mt-4 flex flex-col sm:flex-row sm:justify-between gap-3">
+          <Button
+            onClick={() => setOpen(false)}
+            className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 w-full sm:w-auto"
+          >
             Cancel
           </Button>
-          <Button onClick={handleSubmit} className="bg-green-700 text-white px-6 py-2 rounded-lg hover:bg-green-800">
+          <Button
+            onClick={handleSubmit}
+            className="bg-green-700 text-white px-6 py-2 rounded-lg hover:bg-green-800 w-full sm:w-auto"
+          >
             Save
           </Button>
         </DialogFooter>
