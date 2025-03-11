@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import BPTable from "@/components/BP/BPTable";
+import BPTable from "@/components/BP/bp-table";
 
 const BPModal = ({ patient }) => {
   const [open, setOpen] = useState(false);

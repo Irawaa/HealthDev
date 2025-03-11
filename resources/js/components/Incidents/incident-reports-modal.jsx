@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import IncidentForm from "./IncidentForm";
+import IncidentForm from "./incident-reports-form";
 
 const IncidentModal = ({ activeTab, patient }) => {
   const [open, setOpen] = useState(false);

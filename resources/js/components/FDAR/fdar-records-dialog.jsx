@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { useForm } from "@inertiajs/react";
 import { toast } from "react-hot-toast"; // ✅ Import toast
-import FDARForm from "./FDARSteps/FDARForm";
+import FDARForm from "./FDARSteps/fdar-forms";
 
 const FDARModal = ({ patient }) => {
   const [open, setOpen] = useState(false);

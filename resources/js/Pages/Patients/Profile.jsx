@@ -7,8 +7,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import MedicalRecordDialog from "@/components/MedicalRecordForm/medical-records-dialog";
 import FDARModal from "@/components/FDAR/fdar-records-dialog";
-import BPModal from "@/components/BP/BPModal";
-import IncidentModal from "@/components/Incidents/IncidentModal";
+import BPModal from "@/components/BP/bp-modal";
+import IncidentModal from "@/components/Incidents/incident-reports-modal";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import PerscriptionModal from "@/components/Perscription/PerscriptionModal";
 
