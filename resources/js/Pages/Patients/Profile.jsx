@@ -11,6 +11,7 @@ import BPModal from "@/components/BP/bp-modal";
 import IncidentModal from "@/components/Incidents/incident-reports-modal";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import PerscriptionModal from "@/components/Perscription/PerscriptionModal";
+import CertificatesModal from "@/components/Certificate/certificate-dialog";
 
 const InfoField = ({ label, value, name, type = "text", options = [], isEditing, handleChange }) => (
   <div className="flex flex-col w-full space-y-1">
@@ -58,10 +59,10 @@ const PatientProfile = ({ patient, onClose, onSave, colleges, departments }) => 
     col.college_id === patient.student?.college_id ||
     col.college_id === patient.personnel?.college_id
   ) || null;
-  
+
   const program = college?.programs?.find(prog => prog.program_id === patient.student?.program_id) || null;
-  
-  const department = departments?.find(dept => dept.dept_id === patient.personnel?.dept_id) || null;  
+
+  const department = departments?.find(dept => dept.dept_id === patient.personnel?.dept_id) || null;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -144,8 +145,8 @@ const PatientProfile = ({ patient, onClose, onSave, colleges, departments }) => 
                 ) : (
                   <h2 className="text-2xl font-bold text-gray-900">{fullName}</h2>
                 )}
-                <Badge className="mt-2 px-4 py-1 text-sm sm:text-md font-semibold bg-gray-200 text-gray-800 rounded-md">
-                  {editablePatient.role}
+                <Badge className="mt-2 px-4 py-1 text-sm sm:text-md font-semibold rounded-md">
+                  {patient.type}
                 </Badge>
               </div>
             </div>
@@ -236,13 +237,18 @@ const PatientProfile = ({ patient, onClose, onSave, colleges, departments }) => 
               <TabsTrigger value="bp">Blood Pressure</TabsTrigger>
               <TabsTrigger value="incident">Incident Reports</TabsTrigger>
               <TabsTrigger value="perscription">Perscription</TabsTrigger>
+              <TabsTrigger value="pre-participatory">Pre-Participatory Medical Evaluation</TabsTrigger>
+              <TabsTrigger value="certificates">Certificates</TabsTrigger>
+              <TabsTrigger value="recommendations">Recommendations</TabsTrigger>
             </TabsList>
+
             <div className="mt-3">
               {activeTab === "medical" && <MedicalRecordDialog activeTab={activeTab} patient={patient} />}
               {activeTab === "fdar" && <FDARModal activeTab={activeTab} patient={patient} />}
-              {activeTab === "bp" && <BPModal activeTab={activeTab} patient={patient} />} 
+              {activeTab === "bp" && <BPModal activeTab={activeTab} patient={patient} />}
               {activeTab === "incident" && <IncidentModal activeTab={activeTab} patient={patient} />}
               {activeTab === "perscription" && <PerscriptionModal activeTab={activeTab} patient={patient} />}
+              {activeTab === "certificates" && <CertificatesModal activeTab={activeTab} patient={patient} />}
             </div>
           </Tabs>
         </div >
