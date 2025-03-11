@@ -12,6 +12,7 @@ import IncidentModal from "@/components/Incidents/incident-reports-modal";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import PerscriptionModal from "@/components/Perscription/PerscriptionModal";
 import CertificatesModal from "@/components/Certificate/certificate-dialog";
+import ReferralModal from "@/components/Referral/referral-dialog";
 
 const InfoField = ({ label, value, name, type = "text", options = [], isEditing, handleChange }) => (
   <div className="flex flex-col w-full space-y-1">
@@ -249,6 +250,7 @@ const PatientProfile = ({ patient, onClose, onSave, colleges, departments }) => 
               {activeTab === "incident" && <IncidentModal activeTab={activeTab} patient={patient} />}
               {activeTab === "perscription" && <PerscriptionModal activeTab={activeTab} patient={patient} />}
               {activeTab === "certificates" && <CertificatesModal activeTab={activeTab} patient={patient} />}
+              {activeTab === "referrals" && <ReferralModal activeTab={activeTab} patient={patient} />}
             </div>
           </Tabs>
         </div >
