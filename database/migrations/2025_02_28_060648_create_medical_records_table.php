@@ -21,7 +21,7 @@ return new class extends Migration {
             // Clinic Staff Foreign Keys
             $table->unsignedSmallInteger('school_nurse_id');
             $table->unsignedSmallInteger('school_physician_id');
-            $table->unsignedSmallInteger('recorded_by');
+            $table->unsignedInteger('recorded_by');
 
             // Final Evaluation
             $table->enum('final_evaluation', ['Class A', 'Class B', 'Pending'])
@@ -51,8 +51,8 @@ return new class extends Migration {
                 ->onDelete('cascade');
 
             $table->foreign('recorded_by', 'fk_medical_recorded_by')
-                ->references('staff_id')
-                ->on('clinic_staffs')
+                ->references('user_id')
+                ->on('users')
                 ->onDelete('cascade');
 
             $table->foreign('updated_by', 'fk_medical_updated_by')

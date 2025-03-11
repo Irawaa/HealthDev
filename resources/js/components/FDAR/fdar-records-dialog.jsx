@@ -1,62 +1,60 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
-import FDARForm from "./FDARSteps/FDARForm"; // ✅ Import the combined form
+import { useForm } from "@inertiajs/react";
+import { toast } from "react-hot-toast"; // ✅ Import toast
+import FDARForm from "./FDARSteps/FDARForm";
 
 const FDARModal = ({ patient }) => {
   const [open, setOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    focus: "",
+
+  // ✅ Initialize Inertia form
+  const { data, setData, post, processing, reset } = useForm({
+    patient_id: patient?.patient_id || null,
+    school_nurse_id: "", // ✅ To be filled dynamically if needed
     data: "",
     action: "",
     response: "",
     weight: "",
     height: "",
-    bloodPressure: "",
-    cr: "",
-    rr: "",
-    temp: "",
-    o2Sat: "",
-    lmp: "",
-    savedBy: "Dr. John Doe",
-    savedAt: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
+    blood_pressure: "",
+    cardiac_rate: "",
+    respiratory_rate: "",
+    temperature: "",
+    oxygen_saturation: "",
+    last_menstrual_period: "",
+    common_disease_ids: [],
   });
 
-  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  // ✅ Handle input changes
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setData(name, value);
+  };
 
-  const handleSubmit = () => {
-    console.log("Saving Data:", formData);
-    setOpen(false);
+  // ✅ Handle form submission using Inertia.js
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    console.log("Form Data before submission:", data); // ✅ Log form data
+
+    post(route("fdar-forms.store"), {
+      onSuccess: () => {
+        toast.success("FDAR Record Saved Successfully"); // ✅ Show success toast
+        console.log("FDAR Record Saved Successfully");
+        setOpen(false);
+        reset();
+      },
+      onError: (errors) => {
+        toast.error("Failed to save FDAR record"); // ✅ Show error toast
+        console.error("Form submission errors:", errors);
+      },
+    });
   };
 
   // ✅ Open modal for creating a new FDAR record
   const openCreateModal = () => {
-    setFormData({
-      focus: "",
-      data: "",
-      action: "",
-      response: "",
-      weight: "",
-      height: "",
-      bloodPressure: "",
-      cr: "",
-      rr: "",
-      temp: "",
-      o2Sat: "",
-      lmp: "",
-      savedBy: "Dr. John Doe",
-      savedAt: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
-    });
-    setOpen(true);
-  };
-
-  // ✅ Open modal for editing an existing record
-  const openEditModal = (record) => {
-    setFormData({
-      ...record,
-      savedAt: format(new Date(), "yyyy-MM-dd HH:mm:ss"), // Update timestamp
-    });
+    reset(); // Clear form
     setOpen(true);
   };
 
@@ -72,53 +70,21 @@ const FDARModal = ({ patient }) => {
         Create New FDAR Record
       </Button>
 
-      {/* ✅ FDAR Records List */}
-      <div className="mt-4 space-y-3">
-        {[{ id: 1, createdBy: "Dr. John Doe", date: "2024-02-26", focus: "Sample Focus", data: "Sample Data" }].map(
-          (record) => (
-            <div key={record.id} className="bg-white p-4 rounded-lg shadow flex justify-between items-center">
-              <div>
-                <p className="font-medium text-gray-800">
-                  <span className="font-semibold">Created by:</span> {record.createdBy}
-                </p>
-                <p className="text-sm text-gray-500">
-                  <span className="font-semibold">Date:</span> {record.date}
-                </p>
-              </div>
-              <div className="space-x-2">
-                {/* ✅ Edit Button - Opens Modal with Pre-filled Data */}
-                <Button
-                  className="bg-green-600 text-white px-3 py-1 rounded shadow hover:bg-green-700"
-                  onClick={() => openEditModal(record)}
-                >
-                  Edit
-                </Button>
-                <Button className="bg-red-600 text-white px-3 py-1 rounded shadow hover:bg-red-700">Delete</Button>
-              </div>
-            </div>
-          )
-        )}
-      </div>
-
       {/* ✅ FDAR Form Modal */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="bg-white shadow-xl rounded-lg p-8 max-w-4xl w-full mx-auto max-h-[90vh] flex flex-col overflow-hidden">
-          {/* ✅ Fixed Green Header */}
           <div className="bg-green-100 px-6 py-4 flex justify-between items-center border-b shadow-md sticky top-0 z-10">
             <h2 className="text-lg font-semibold text-green-700">New FDAR Record</h2>
-            <p className="text-sm text-gray-600">
-              Created by: {formData.savedBy} on {new Date().toISOString().split("T")[0]}
-            </p>
           </div>
 
           {/* ✅ Scrollable Content */}
           <div className="flex-1 overflow-y-auto">
             <DialogHeader className="mb-4">
-              <DialogTitle className="text-transparent select-none">‎</DialogTitle> {/* Invisible title for spacing */}
+              <DialogTitle className="text-transparent select-none">‎</DialogTitle>
             </DialogHeader>
 
             {/* ✅ Render Single Combined Form */}
-            <FDARForm formData={formData} handleChange={handleChange} />
+            <FDARForm formData={data} handleChange={handleChange} />
           </div>
 
           {/* ✅ Footer Controls */}
@@ -126,8 +92,12 @@ const FDARModal = ({ patient }) => {
             <Button onClick={() => setOpen(false)} className="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600">
               Cancel
             </Button>
-            <Button onClick={handleSubmit} className="bg-green-700 text-white px-6 py-2 rounded-lg hover:bg-green-800">
-              Save
+            <Button
+              onClick={handleSubmit}
+              disabled={processing}
+              className="bg-green-700 text-white px-6 py-2 rounded-lg hover:bg-green-800"
+            >
+              {processing ? "Saving..." : "Save"}
             </Button>
           </DialogFooter>
         </DialogContent>

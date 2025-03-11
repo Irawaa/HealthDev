@@ -1,12 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline"; // ✅ Warning icon
-import FDARTags from "@/components/fdar-tags";
+import FDARTags from "@/components/FDAR/fdar-tags";
 
 const FDARForm = ({ formData, handleChange }) => {
   const [bpWarning, setBpWarning] = useState("");
+  const [selectedTagIds, setSelectedTagIds] = useState(formData.common_disease_ids || []);
   const [bpSeverity, setBpSeverity] = useState("");
   const [isBpFocused, setIsBpFocused] = useState(false);
-  const [focusTags, setFocusTags] = useState([]); // ✅ Fixed: Defined state for FDARTags
 
   const checkBpWarning = (value) => {
     if (!value) {
@@ -34,6 +34,10 @@ const FDARForm = ({ formData, handleChange }) => {
     }
   };
 
+  useEffect(() => {
+    handleChange({ target: { name: "common_disease_ids", value: selectedTagIds } });
+  }, [selectedTagIds]); // Update formData when selectedTagIds changes
+
   const handleBpChange = (e) => {
     handleChange(e);
     checkBpWarning(e.target.value);
@@ -42,19 +46,19 @@ const FDARForm = ({ formData, handleChange }) => {
   const fields = [
     { key: "weight", label: "Weight", type: "input" },
     { key: "height", label: "Height", type: "input" },
-    { key: "bloodPressure", label: "Blood Pressure (BP)", type: "input", bp: true }, // ✅ BP field included
-    { key: "cr", label: "CR", type: "input" },
-    { key: "rr", label: "RR", type: "input" },
-    { key: "temp", label: "Temperature (T)", type: "input" },
-    { key: "o2Sat", label: "O₂ Saturation", type: "input" },
-    { key: "lmp", label: "LMP", type: "input" },
+    { key: "blood_pressure", label: "Blood Pressure (BP)", type: "input", bp: true }, // ✅ BP field included
+    { key: "cardiac_rate", label: "CR", type: "input" },
+    { key: "respiratory_rate", label: "RR", type: "input" },
+    { key: "temperature", label: "Temperature (T)", type: "input" },
+    { key: "oxygen_saturation", label: "O₂ Saturation", type: "input" },
+    { key: "last_menstrual_period", label: "LMP", type: "date" },
   ];
 
   return (
     <div className="p-4 space-y-4">
       <h3 className="text-lg font-semibold text-green-800">FDAR & Patient Vitals</h3>
 
-      <FDARTags selectedTags={focusTags} setSelectedTags={setFocusTags} /> {/* ✅ Fixed: State is now properly defined */}
+      <FDARTags selectedTagIds={selectedTagIds} setSelectedTagIds={setSelectedTagIds} />
 
       {/* ✅ FDAR Inputs */}
       <div className="grid grid-cols-1 gap-4">
@@ -81,7 +85,7 @@ const FDARForm = ({ formData, handleChange }) => {
           <div key={key} className="relative flex flex-col">
             <label className="text-xs font-medium text-gray-700">{label}</label>
             <input
-              type="text"
+              type={key === "last_menstrual_period" ? "date" : "text"}
               name={key}
               value={formData[key] || ""}
               onChange={bp ? handleBpChange : handleChange} // ✅ BP-specific handler

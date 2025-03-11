@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             PastMedicalHistoriesSeeder::class,
             PhysicalExaminationSeeder::class,
             FamilyHistorySeeder::class,
+            CommonDiseasesSeeder::class,
         ]);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Patient;
 use App\Models\College;
 use App\Models\Department;
+use App\Models\CommonDisease;
 use App\Models\ReviewOfSystem;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -32,10 +33,10 @@ class PatientController extends Controller
                 $query->select(
                     'patient_id',
                     'employee_id',
-                    'res_brgy', 
-                    'res_city', 
+                    'res_brgy',
+                    'res_city',
                     'res_prov',
-                    'res_region', 
+                    'res_region',
                     'res_zipcode',
                     'dept_id',
                     'college_id',
@@ -46,10 +47,10 @@ class PatientController extends Controller
                 $query->select(
                     'patient_id',
                     'affiliation',
-                    'res_brgy', 
-                    'res_city', 
+                    'res_brgy',
+                    'res_city',
                     'res_prov',
-                    'res_region', 
+                    'res_region',
                     'res_zipcode',
                 );
             }
@@ -68,10 +69,16 @@ class PatientController extends Controller
 
         $departments = Department::select('dept_id', 'name', 'acronym')->get();
 
+        // Fetch active diseases
+        $commonDiseases = CommonDisease::orderBy('name')
+            ->select('id', 'name') // category: Major/Minor
+            ->get();
+
         return Inertia::render('Patients/Index', [
             'patients' => $patients,
             'colleges' => $colleges,
             'departments' => $departments,
+            'commonDiseases' => $commonDiseases, // Pass diseases to frontend
         ]);
     }
 

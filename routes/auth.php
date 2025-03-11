@@ -8,6 +8,7 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\NonPersonnelController;
 use App\Http\Controllers\MedicalRecordController;
+use App\Http\Controllers\FDARFormController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -40,10 +41,6 @@ Route::middleware(['web', 'auth'])->group(function () {
         return Inertia::render('Dashboard');
     })->name('dashboard');
 
-    Route::get('/medical', function () {
-        return Inertia::render('MedicalRecords/Index');
-    })->name('medical');
-
     Route::get('/medical', [MedicalRecordController::class, 'index'])->name('medical');
 
     // --- Patients --- //
@@ -63,6 +60,9 @@ Route::middleware(['web', 'auth'])->group(function () {
 
     // Medical Records //
     Route::post('/medical-records', [MedicalRecordController::class, 'store'])->name('medical-records.store');
+
+    // FDAR Forms //
+    Route::post('/fdar-forms', [FDARFormController::class, 'store'])->name('fdar-forms.store');
 
     // --- Logout ---
     Route::post('/logout', [AuthenticateController::class, 'destroy'])->name('logout');
