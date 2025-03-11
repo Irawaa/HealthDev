@@ -239,7 +239,7 @@ const PatientProfile = ({ patient, onClose, onSave, colleges, departments }) => 
               <TabsTrigger value="perscription">Perscription</TabsTrigger>
               <TabsTrigger value="pre-participatory">Pre-Participatory Medical Evaluation</TabsTrigger>
               <TabsTrigger value="certificates">Certificates</TabsTrigger>
-              <TabsTrigger value="recommendations">Recommendations</TabsTrigger>
+              <TabsTrigger value="referrals">Referrals</TabsTrigger>
             </TabsList>
 
             <div className="mt-3">

@@ -42,7 +42,7 @@ const DentalForm = ({ onSave, setOpen }) => {
                         <div key={procedure} className="flex items-center space-x-2">
                             <Checkbox
                                 checked={formData.procedures.includes(procedure)}
-                                onCheckedChange={() => handleCheckboxChange(procedure)}
+                                onCheckedChange={(checked) => handleCheckboxChange(procedure)}
                                 className="text-green-600 border-green-500 focus:ring-green-400"
                             />
                             <label className="text-green-800">{procedure}</label>
@@ -86,11 +86,19 @@ const DentalForm = ({ onSave, setOpen }) => {
                 </Select>
             </div>
 
-            <Button
-                onClick={() => window.print()}
-                className="w-full bg-green-700 text-white px-6 py-2 rounded-lg hover:bg-green-800 mt-4 transition-all">
-                Save & Print
-            </Button>
+            {/* Button Group */}
+            <div className="flex gap-4 mt-4">
+                <Button
+                    onClick={handleSubmit}
+                    className="w-1/2 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-all">
+                    Save
+                </Button>
+                <Button
+                    onClick={() => window.print()}
+                    className="w-1/2 bg-green-700 text-white px-6 py-2 rounded-lg hover:bg-green-800 transition-all">
+                    Print
+                </Button>
+            </div>
         </div>
     );
 };
