@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-const PerscriptionForm = ({ open, setOpen, setPerscriptionImage }) => {
+const PrescriptionForm = ({ open, setOpen, setPrescriptionImage }) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [preview, setPreview] = useState(null);
 
@@ -16,7 +16,7 @@ const PerscriptionForm = ({ open, setOpen, setPerscriptionImage }) => {
 
   const handleSubmit = () => {
     if (selectedImage) {
-      setPerscriptionImage(preview);
+      setPrescriptionImage(preview);
       setOpen(false);
     }
   };
@@ -25,7 +25,7 @@ const PerscriptionForm = ({ open, setOpen, setPerscriptionImage }) => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="bg-white shadow-xl rounded-lg p-6 max-w-md w-full mx-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-green-700">Upload Perscription</DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-green-700">Upload Prescription</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -38,7 +38,7 @@ const PerscriptionForm = ({ open, setOpen, setPerscriptionImage }) => {
           {/* Image Preview */}
           {preview && (
             <div className="flex justify-center mt-4">
-              <img src={preview} alt="Perscription Preview" className="max-w-full h-auto rounded-lg shadow-md border border-gray-300" />
+              <img src={preview} alt="Prescription Preview" className="max-w-full h-auto rounded-lg shadow-md border border-gray-300" />
             </div>
           )}
         </div>
@@ -56,4 +56,4 @@ const PerscriptionForm = ({ open, setOpen, setPerscriptionImage }) => {
   );
 };
 
-export default PerscriptionForm;
+export default PrescriptionForm;

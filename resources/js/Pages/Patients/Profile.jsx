@@ -10,7 +10,7 @@ import FDARModal from "@/components/FDAR/fdar-records-dialog";
 import BPModal from "@/components/BP/bp-modal";
 import IncidentModal from "@/components/Incidents/incident-reports-modal";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import PerscriptionModal from "@/components/Perscription/PerscriptionModal";
+import PrescriptionModal from "@/components/Prescription/prescription-modal";
 import CertificatesModal from "@/components/Certificate/certificate-dialog";
 import ReferralModal from "@/components/Referral/referral-dialog";
 
@@ -237,7 +237,7 @@ const PatientProfile = ({ patient, onClose, onSave, colleges, departments }) => 
               <TabsTrigger value="fdar">FDAR</TabsTrigger>
               <TabsTrigger value="bp">Blood Pressure</TabsTrigger>
               <TabsTrigger value="incident">Incident Reports</TabsTrigger>
-              <TabsTrigger value="perscription">Perscription</TabsTrigger>
+              <TabsTrigger value="prescription">Prescription</TabsTrigger>
               <TabsTrigger value="pre-participatory">Pre-Participatory Medical Evaluation</TabsTrigger>
               <TabsTrigger value="certificates">Certificates</TabsTrigger>
               <TabsTrigger value="referrals">Referrals</TabsTrigger>
@@ -248,7 +248,7 @@ const PatientProfile = ({ patient, onClose, onSave, colleges, departments }) => 
               {activeTab === "fdar" && <FDARModal activeTab={activeTab} patient={patient} />}
               {activeTab === "bp" && <BPModal activeTab={activeTab} patient={patient} />}
               {activeTab === "incident" && <IncidentModal activeTab={activeTab} patient={patient} />}
-              {activeTab === "perscription" && <PerscriptionModal activeTab={activeTab} patient={patient} />}
+              {activeTab === "prescription" && <PrescriptionModal activeTab={activeTab} patient={patient} />}
               {activeTab === "certificates" && <CertificatesModal activeTab={activeTab} patient={patient} />}
               {activeTab === "referrals" && <ReferralModal activeTab={activeTab} patient={patient} />}
             </div>
