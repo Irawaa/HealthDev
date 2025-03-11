@@ -6,7 +6,7 @@ use App\Models\Patient;
 use App\Models\College;
 use App\Models\Department;
 use App\Models\CommonDisease;
-use App\Models\ReviewOfSystem;
+use App\Models\ClinicStaff;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -74,11 +74,17 @@ class PatientController extends Controller
             ->select('id', 'name') // category: Major/Minor
             ->get();
 
+        $physicianStaff = ClinicStaff::whereIn('role', ['University Physician', 'Clinic Physician'])
+            ->orderBy('lname') // Sort alphabetically by last name
+            ->select('staff_id', 'lname', 'fname', 'mname', 'ext', 'license_no', 'ptr_no') // ✅ Only required fields
+            ->get();
+
         return Inertia::render('Patients/Index', [
             'patients' => $patients,
             'colleges' => $colleges,
             'departments' => $departments,
             'commonDiseases' => $commonDiseases, // Pass diseases to frontend
+            'physicianStaff' => $physicianStaff
         ]);
     }
 

@@ -23,10 +23,16 @@ class MedicalRecordController extends Controller
     {
         Log::info('Request received', ['request' => $request->all()]);
 
+        // Get clinic staff ID from authenticated user (School Nurse ID)
+        $clinicStaffId = Auth::user()->clinicStaff->staff_id ?? null;
+        if (!$clinicStaffId) {
+            Log::warning('Authenticated user is not linked to clinic staff.');
+            return redirect()->back()->withErrors('You are not authorized to submit an incident report.');
+        }
+
         try {
             $validated = $request->validate([
                 'patient_id' => 'required|exists:patients,patient_id',
-                'school_nurse_id' => 'required|exists:clinic_staffs,staff_id',
                 'school_physician_id' => 'required|exists:clinic_staffs,staff_id',
                 'final_evaluation' => 'nullable|in:Class A,Class B,Pending',
                 'plan_recommendation' => 'nullable|string',
@@ -148,7 +154,7 @@ class MedicalRecordController extends Controller
             // ✅ Create Medical Record
             $medicalRecord = MedicalRecord::create([
                 'patient_id' => $validated['patient_id'],
-                'school_nurse_id' => $validated['school_nurse_id'],
+                'school_nurse_id' => $clinicStaffId,
                 'school_physician_id' => $validated['school_physician_id'],
                 'recorded_by' => $recordedBy,
                 'final_evaluation' => $validated['final_evaluation'] ?? null,

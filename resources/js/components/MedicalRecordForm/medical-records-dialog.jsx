@@ -17,8 +17,7 @@ const MedicalRecordDialog = ({ patient }) => {
 
   const { data, setData, post, processing, reset, errors } = useForm({
     patient_id: patient?.patient_id || null,
-    school_nurse_id: 1,
-    school_physician_id: 2,
+    school_physician_id: 1,
 
     // ✅ Review of Systems
     review_of_systems: [],

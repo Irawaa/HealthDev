@@ -1,4 +1,8 @@
+import { usePhysicianStaff } from "@/Pages/Patients/Index"; // Import context
+
 const Step6 = ({ formData, setFormData }) => {
+  const physicianStaff = usePhysicianStaff();
+
   const labTests = [
     { name: "blood_chemistry", label: "Blood Chemistry" },
     { name: "fbs", label: "FBS" },
@@ -85,8 +89,8 @@ const Step6 = ({ formData, setFormData }) => {
               {option === "Class A"
                 ? "(Physically Fit)"
                 : option === "Class B"
-                ? "(Physically Fit with Minor Illness)"
-                : "(Needs Clearance)"}
+                  ? "(Physically Fit with Minor Illness)"
+                  : "(Needs Clearance)"}
             </span>
           </label>
         ))}
@@ -101,6 +105,27 @@ const Step6 = ({ formData, setFormData }) => {
         className="border border-gray-300 rounded p-2 w-full h-32 focus:ring-green-500"
         placeholder="Enter plan or recommendation"
       ></textarea>
+
+      {/* School Physician Selection */}
+      <h3 className="text-xl font-semibold text-green-700">School Physician</h3>
+      <select
+        name="school_physician_id"
+        value={formData.school_physician_id || ""}
+        onChange={handleInputChange}
+        className="border border-gray-300 rounded p-2 w-full"
+        required
+      >
+        <option value="">Select Physician</option>
+        {physicianStaff && physicianStaff.length > 0 ? (
+          physicianStaff.map((physician) => (
+            <option key={physician.staff_id} value={physician.staff_id}>
+              {physician.lname}, {physician.fname} {physician.mname || ""} (Lic: {physician.license_no})
+            </option>
+          ))
+        ) : (
+          <option disabled>No physicians available</option>
+        )}
+      </select>
     </div>
   );
 };

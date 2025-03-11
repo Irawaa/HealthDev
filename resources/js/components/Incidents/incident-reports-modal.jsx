@@ -56,7 +56,7 @@ const IncidentModal = ({ activeTab, patient }) => {
           )}
         </div>
 
-        {openForm && <IncidentForm open={openForm} setOpen={setOpenForm} handleSave={handleSave} />}
+        {openForm && <IncidentForm open={openForm} setOpen={setOpenForm} handleSave={handleSave} patient={patient} />}
       </div>
     )
   );
