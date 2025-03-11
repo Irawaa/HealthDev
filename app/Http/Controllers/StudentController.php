@@ -81,7 +81,7 @@ class StudentController extends Controller
             if (!$patient || !$patient->patient_id) {
                 DB::rollBack();
                 Log::error('Failed to create patient');
-                return redirect()->back()->with('error', 'Failed to create patient. Please try again.');
+                return back()->with('error', 'Failed to create patient. Please try again.');
             }
 
             Log::info('Patient created with ID: ' . $patient->patient_id);
@@ -117,19 +117,19 @@ class StudentController extends Controller
             if (!$student || !$student->stud_id) {
                 DB::rollBack();
                 Log::error('Failed to create student for patient ID: ' . $patient->patient_id);
-                return redirect()->back()->with('error', 'Failed to create student. Please try again.');
+                return back()->with('error', 'Failed to create student. Please try again.');
             }
 
             Log::info('Student created with ID: ' . $student->stud_id);
 
             // Commit transaction if everything is successful
             DB::commit();
-            return redirect()->back()->with('success', 'Student added successfully');
+            return back()->with('success', 'Student added successfully');
 
         } catch (\Throwable $e) { // Catch any type of error
             DB::rollBack();
             Log::error('Error storing student: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            return redirect()->back()->with('error', 'An unexpected error occurred. Please contact support.');
+            return back()->with('error', 'An unexpected error occurred. Please contact support.');
         }
     }
 }

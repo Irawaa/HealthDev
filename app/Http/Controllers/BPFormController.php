@@ -19,7 +19,7 @@ class BPFormController extends Controller
             $recordedBy = Auth::id();
             if (!$recordedBy) {
                 Log::warning('Unauthorized BP form submission attempt.');
-                return redirect()->back()->withErrors('Unauthorized action.');
+                return back()->withErrors('Unauthorized action.');
             }
 
             // Get clinic staff ID from authenticated user
@@ -67,7 +67,7 @@ class BPFormController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->withErrors('Failed to create BP form. Please try again.');
+            return back()->withErrors('Failed to create BP form. Please try again.');
         }
     }
 }

@@ -369,8 +369,22 @@ const MedicalRecordDialog = ({ patient }) => {
         reset();
         setIsOpen(false);
       },
-      onError: () => {
-        toast.error("❌ Failed to save medical record.");
+      onError: (errors) => {
+        console.error("Validation Errors:", errors);
+
+        // 🔥 Show general error message if available
+        if (typeof errors.error === "string") {
+          toast.error(`❌ ${errors.error}`);
+        }
+
+        // 🔥 Loop through all errors safely
+        Object.entries(errors).forEach(([key, messages]) => {
+          if (Array.isArray(messages)) {
+            messages.forEach((message) => toast.error(`❌ ${message}`));
+          } else if (typeof messages === "string") {
+            toast.error(`❌ ${messages}`);
+          }
+        });
       },
     });
   };

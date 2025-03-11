@@ -71,7 +71,7 @@ class NonPersonnelController extends Controller
             if (!$patient || !$patient->patient_id) {
                 DB::rollBack();
                 Log::error('Failed to create Patient');
-                return redirect()->back()->with('error', 'Failed to create patient. Please try again.');
+                return back()->with('error', 'Failed to create patient. Please try again.');
             }
 
             Log::info('Patient created with ID: ' . $patient->patient_id);
@@ -101,18 +101,18 @@ class NonPersonnelController extends Controller
             if (!$nonPersonnel || !$nonPersonnel->non_personnel_id) {
                 DB::rollBack();
                 Log::error('Failed to create NonPersonnel for Patient ID: ' . $patient->patient_id);
-                return redirect()->back()->with('error', 'Failed to create non-personnel record. Please try again.');
+                return back()->direct()->with('error', 'Failed to create non-personnel record. Please try again.');
             }
 
             Log::info('NonPersonnel created with ID: ' . $nonPersonnel->non_personnel_id);
 
             DB::commit();
 
-            return redirect()->back()->with('success', 'Non-personnel added successfully');
+            return back()->with('success', 'Non-personnel added successfully');
         } catch (\Throwable $e) {
             DB::rollBack();
             Log::error('Error storing non-personnel: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            return redirect()->back()->with('error', 'An unexpected error occurred. Please contact support.');
+            return back()->with('error', 'An unexpected error occurred. Please contact support.');
         }
     }
 }

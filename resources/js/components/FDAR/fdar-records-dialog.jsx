@@ -9,9 +9,9 @@ const FDARModal = ({ patient }) => {
   const [open, setOpen] = useState(false);
 
   // ✅ Initialize Inertia form
-  const { data, setData, post, processing, reset } = useForm({
+  const { data, setData, post, processing, reset, errors } = useForm({
     patient_id: patient?.patient_id || null,
-    school_nurse_id: "", // ✅ To be filled dynamically if needed
+    school_nurse_id: "",
     data: "",
     action: "",
     response: "",
@@ -32,22 +32,71 @@ const FDARModal = ({ patient }) => {
     setData(name, value);
   };
 
+  // ✅ Capitalize First Letter of Error Messages
+  const capitalizeFirstLetter = (str) => {
+    return str.charAt(0).toUpperCase() + str.slice(1).replace(/_/g, " ");
+  };
+
+  // ✅ Frontend Validation
+  const validateForm = () => {
+    let isValid = true;
+
+    // 🔥 Required Fields
+    const requiredFields = ["data", "action", "response", "blood_pressure", "cardiac_rate", "respiratory_rate", "temperature"];
+    requiredFields.forEach((field) => {
+      if (!data[field]?.trim()) {
+        toast.error(`❌ ${capitalizeFirstLetter(field)} is required`);
+        isValid = false;
+      }
+    });
+
+    // 🔥 Numeric Fields Validation
+    const numericFields = ["weight", "height", "temperature", "oxygen_saturation"];
+    numericFields.forEach((field) => {
+      if (data[field] && isNaN(Number(data[field]))) {
+        toast.error(`❌ ${capitalizeFirstLetter(field)} must be a valid number`);
+        isValid = false;
+      }
+    });
+
+    // 🔥 Dropdown / Array Validation
+    if (!data.common_disease_ids.length) {
+      toast.error("❌ Please select at least one Common Disease");
+      isValid = false;
+    }
+
+    return isValid;
+  };
+
   // ✅ Handle form submission using Inertia.js
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    console.log("Form Data before submission:", data); // ✅ Log form data
+    // 🔥 Validate before submission
+    if (!validateForm()) return;
 
     post(route("fdar-forms.store"), {
       onSuccess: () => {
-        toast.success("FDAR Record Saved Successfully"); // ✅ Show success toast
-        console.log("FDAR Record Saved Successfully");
+        toast.success("✅ FDAR Record Saved Successfully!");
         setOpen(false);
         reset();
       },
       onError: (errors) => {
-        toast.error("Failed to save FDAR record"); // ✅ Show error toast
-        console.error("Form submission errors:", errors);
+        console.error("Validation Errors:", errors);
+
+        // 🔥 Show general error message if available
+        if (typeof errors.error === "string") {
+          toast.error(`❌ ${capitalizeFirstLetter(errors.error)}`);
+        }
+
+        // 🔥 Loop through all validation errors safely
+        Object.entries(errors).forEach(([key, messages]) => {
+          if (Array.isArray(messages)) {
+            messages.forEach((message) => toast.error(`❌ ${capitalizeFirstLetter(message)}`));
+          } else if (typeof messages === "string") {
+            toast.error(`❌ ${capitalizeFirstLetter(messages)}`);
+          }
+        });
       },
     });
   };

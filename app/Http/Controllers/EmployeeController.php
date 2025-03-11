@@ -75,7 +75,7 @@ class EmployeeController extends Controller
             if (!$patient || !$patient->patient_id) {
                 DB::rollBack();
                 Log::error('Failed to create Patient');
-                return redirect()->back()->with('error', 'Failed to create patient. Please try again.');
+                return back()->with('error', 'Failed to create patient. Please try again.');
             }
 
             Log::info('Patient created with ID: ' . $patient->patient_id);
@@ -109,18 +109,18 @@ class EmployeeController extends Controller
             if (!$employee || !$employee->employee_id) {
                 DB::rollBack();
                 Log::error('Failed to create Employee for Patient ID: ' . $patient->patient_id);
-                return redirect()->back()->with('error', 'Failed to create employee. Please try again.');
+                return back()->with('error', 'Failed to create employee. Please try again.');
             }
 
             Log::info('Employee created with ID: ' . $employee->employee_id);
 
             DB::commit();
 
-            return redirect()->back()->with('success', 'Employee added successfully');
+            return back()->with('success', 'Employee added successfully');
         } catch (\Throwable $e) {
             DB::rollBack();
             Log::error('Error storing employee: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            return redirect()->back()->with('error', 'An unexpected error occurred. Please contact support.');
+            return back()->with('error', 'An unexpected error occurred. Please contact support.');
         }
     }
 }

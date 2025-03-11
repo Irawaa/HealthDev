@@ -27,7 +27,7 @@ class MedicalRecordController extends Controller
         $clinicStaffId = Auth::user()->clinicStaff->staff_id ?? null;
         if (!$clinicStaffId) {
             Log::warning('Authenticated user is not linked to clinic staff.');
-            return redirect()->back()->withErrors('You are not authorized to submit an incident report.');
+            return back()->withErrors('You are not authorized to submit an incident report.');
         }
 
         try {
@@ -135,7 +135,7 @@ class MedicalRecordController extends Controller
             // Get authenticated user
             $recordedBy = Auth::id();
             if (!$recordedBy) {
-                return redirect()->back()->withErrors('Unauthorized action.');
+                return back()->withErrors('Unauthorized action.');
             }
 
             // Check if Patient Already Has a Medical Record
@@ -148,7 +148,7 @@ class MedicalRecordController extends Controller
                     'recorded_by' => Auth::id()
                 ]);
 
-                return redirect()->back()->withErrors('Patient already has an existing medical record.');
+                return back()->withErrors('Patient already has an existing medical record.');
             }
 
             // ✅ Create Medical Record
@@ -361,7 +361,7 @@ class MedicalRecordController extends Controller
             return redirect()->route('patients.index')->with('success', 'Medical record created successfully');
         } catch (\Exception $e) {
             Log::error('Error storing medical record', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-            return redirect()->back()->withErrors('Failed to create medical record. Please try again.');
+            return back()->withErrors('Failed to create medical record. Please try again.');
         }
     }
 }
