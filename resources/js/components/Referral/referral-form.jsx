@@ -1,11 +1,24 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import LaboratoryForm from "./laboratory-form";
+import LaboratoryForm from "@/components/Referral/laboratory-form";
+import GeneralReferralForm from "@/components/Referral/general-referral-form"; // Import General Referral Form
 
-const ReferralForm = ({ open, setOpen, onSave }) => {
+const ReferralForm = ({ open, setOpen }) => {
   const [activeTab, setActiveTab] = useState("general");
 
-  if (!open) return null;
+  // State to store form data
+  const [formData, setFormData] = useState({
+    to: "",
+    address: "",
+    examinedOn: "",
+    examinedDueTo: "",
+    duration: "",
+    impression: "",
+    schoolNurse: "",
+    schoolPhysician: "",
+  });
+
+  if (!open) return null; // Prevent rendering if modal is closed
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center p-4">
@@ -33,17 +46,15 @@ const ReferralForm = ({ open, setOpen, onSave }) => {
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto px-2">
           {activeTab === "general" ? (
-            <div className="h-40 flex items-center justify-center text-gray-500">
-              General Referral Form (Coming Soon...)
-            </div>
+            <GeneralReferralForm formData={formData} setFormData={setFormData} />
           ) : (
-            <LaboratoryForm onSave={onSave} />
+            <LaboratoryForm formData={formData} setFormData={setFormData} />
           )}
         </div>
 
         {/* Close Button */}
         <div className="flex justify-end mt-4">
-          <Button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded" onClick={() => setOpen(false)}>
+          <Button className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded" onClick={() => setOpen(false)}>
             Close
           </Button>
         </div>
