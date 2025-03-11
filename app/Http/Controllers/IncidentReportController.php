@@ -21,31 +21,31 @@ class IncidentReportController extends Controller
             $recordedBy = Auth::id();
             if (!$recordedBy) {
                 Log::warning('Unauthorized incident report submission attempt.');
-                return redirect()->back()->withErrors('Unauthorized action.');
+                return back()->withErrors('Unauthorized action.');
             }
 
             // Get clinic staff ID from authenticated user (School Nurse ID)
             $clinicStaffId = Auth::user()->clinicStaff->staff_id ?? null;
             if (!$clinicStaffId) {
                 Log::warning('Authenticated user is not linked to clinic staff.');
-                return redirect()->back()->withErrors('You are not authorized to submit an incident report.');
+                return back()->withErrors('You are not authorized to submit an incident report.');
             }
 
             // Validate request data
-            $validated = $request->validate([
-                'patient_id'            => 'required|exists:patients,patient_id',
-                'history'               => 'required|string',
-                'nature_of_incident'    => 'required|string|max:255',
-                'place_of_incident'     => 'required|string|max:255',
-                'date_of_incident'      => 'required|date',
-                'time_of_incident'      => 'required|date_format:H:i',
-                'description_of_injury' => 'nullable|string',
-                'management'            => 'required|in:In PNC,Referred to Hospital',
-                'hospital_specification'=> 'nullable|string|max:255',
+                $validated = $request->validate([
+                    'patient_id'            => 'required|exists:patients,patient_id',
+                    'history'               => 'required|string',
+                    'nature_of_incident'    => 'required|string|max:255',
+                    'place_of_incident'     => 'required|string|max:255',
+                    'date_of_incident'      => 'required|date',
+                    'time_of_incident'      => 'required|date_format:H:i',
+                    'description_of_injury' => 'nullable|string',
+                    'management'            => 'required|in:In PNC,Referred to Hospital',
+                    'hospital_specification'=> 'nullable|string|max:255',
 
-                // Only require school physician ID from request
-                'school_physician_id'   => 'required|exists:clinic_staffs,staff_id',
-            ]);
+                    // Only require school physician ID from request
+                    'school_physician_id'   => 'required|exists:clinic_staffs,staff_id',
+                ]);
 
             Log::info('Incident report validation passed', ['validated_data' => $validated]);
 
@@ -78,7 +78,7 @@ class IncidentReportController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->withErrors('Failed to create incident report. Please try again.');
+            return back()->withErrors('Failed to create incident report. Please try again.');
         }
     }
 }

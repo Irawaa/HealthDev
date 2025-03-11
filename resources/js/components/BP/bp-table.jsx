@@ -9,7 +9,7 @@ const BPTable = ({ open, setOpen, patient }) => {
   const MAX_RECORDS = 7; // Limit for BP records
   const [expandedIndex, setExpandedIndex] = useState(null); // Track expanded record
 
-  const { data, setData, post, processing, reset } = useForm({
+  const { data, setData, post, processing, reset, errors } = useForm({
     patient_id: patient?.patient_id || null,
     readings: [],
   });
@@ -50,6 +50,20 @@ const BPTable = ({ open, setOpen, patient }) => {
         remark: "Normal - BP within a healthy range"
       };
     }
+  };
+
+  // Validation function
+  const validateForm = () => {
+    // Check if there are any missing or invalid fields
+    return data.readings.every((record) => {
+      const { date, time, blood_pressure } = record;
+      // Check if all required fields have values
+      const isValidDate = date && time && blood_pressure;
+      // Check if blood pressure is in valid format (e.g., 120/80)
+      const isValidBp = /^(\d{2,3})\/(\d{2,3})$/.test(blood_pressure);
+
+      return isValidDate && isValidBp;
+    });
   };
 
   // Handle input changes
@@ -114,8 +128,22 @@ const BPTable = ({ open, setOpen, patient }) => {
         reset();
         setOpen(false);
       },
-      onError: () => {
-        toast.error("Failed to save BP records. Please try again.");
+      onError: (errors) => {
+        console.error("Validation Errors:", errors);
+
+        // 🔥 Show general error message if available
+        if (typeof errors.error === "string") {
+          toast.error(`❌ ${errors.error}`);
+        }
+
+        // 🔥 Loop through all errors safely
+        Object.entries(errors).forEach(([key, messages]) => {
+          if (Array.isArray(messages)) {
+            messages.forEach((message) => toast.error(`❌ ${message}`));
+          } else if (typeof messages === "string") {
+            toast.error(`❌ ${messages}`);
+          }
+        });
       },
     });
   };
@@ -233,7 +261,11 @@ const BPTable = ({ open, setOpen, patient }) => {
           <Button onClick={() => setOpen(false)} className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600">
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={processing} className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+          <Button
+            onClick={handleSubmit}
+            disabled={processing || data.readings.length === 0 || !validateForm()}
+            className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
+          >
             {processing ? "Saving..." : "Save"}
           </Button>
         </DialogFooter>

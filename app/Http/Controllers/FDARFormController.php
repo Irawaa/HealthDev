@@ -18,7 +18,7 @@ class FDARFormController extends Controller
             $recordedBy = Auth::id();
             if (!$recordedBy) {
                 Log::warning('Unauthorized FDAR form submission attempt.');
-                return redirect()->back()->withErrors('Unauthorized action.');
+                return back()->withErrors('Unauthorized action.');
             }
 
             // Get clinic staff ID from authenticated user
@@ -57,7 +57,7 @@ class FDARFormController extends Controller
                 'recorded_by' => $recordedBy,
                 'school_nurse_id' => $clinicStaffId,
             ]);
-            
+
             // Attach Common Diseases if provided
             if (!empty($validated['common_disease_ids'])) {
                 $fdarForm->commonDiseases()->attach($validated['common_disease_ids']);
@@ -73,7 +73,7 @@ class FDARFormController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->withErrors('Failed to create FDAR form. Please try again.');
+            return back()->withErrors('Failed to create FDAR form. Please try again.');
         }
     }
 }
