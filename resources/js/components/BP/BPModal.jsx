@@ -107,7 +107,7 @@ const BPModal = ({ patient }) => {
       )}
 
       {/* ✅ BP Form Modal */}
-      {openForm && <BPTable open={openForm} setOpen={setOpenForm} selectedRecord={viewRecord} />}
+      {openForm && <BPTable open={openForm} setOpen={setOpenForm} patient={patient} />}
     </div>
   );
 };

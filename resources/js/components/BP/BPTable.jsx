@@ -1,200 +1,240 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ExclamationTriangleIcon } from "@heroicons/react/24/outline"; // ✅ Warning icon
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { useForm } from "@inertiajs/react";
+import { toast } from "react-hot-toast";
 
-const BPTable = ({ open, setOpen, selectedRecord, setBpRecords }) => {
-  const MAX_RECORDS = 7; // Maximum records allowed
+const BPTable = ({ open, setOpen, patient }) => {
+  const MAX_RECORDS = 7; // Limit for BP records
+  const [expandedIndex, setExpandedIndex] = useState(null); // Track expanded record
 
-  const [formData, setFormData] = useState([]);
-  const [expandedIndex, setExpandedIndex] = useState(null); // Track which record is expanded
+  const { data, setData, post, processing, reset } = useForm({
+    patient_id: patient?.patient_id || null,
+    readings: [],
+  });
 
-  useEffect(() => {
-    if (selectedRecord) {
-      setFormData(selectedRecord.bpRecords || []);
-    } else {
-      setFormData([]); // Reset form for new records
-    }
-  }, [selectedRecord]);
-
-  // Handle input changes
-  const handleChange = (index, field, value) => {
-    setFormData((prevData) =>
-      prevData.map((record, i) =>
-        i === index ? { ...record, [field]: value } : record
-      )
-    );
-  };
-
-  // Check BP Warning
+  // BP Warning Logic
   const checkBpWarning = (bp) => {
-    if (!bp) return { warning: "", severity: "" };
+    if (!bp) return { warning: "", severity: "", remark: "No BP recorded" };
 
     const [systolic, diastolic] = bp.split("/").map(Number);
     if (systolic >= 180 || diastolic >= 120) {
-      return { warning: "🚨 Hypertensive Crisis: Seek emergency care!", severity: "text-red-600 border-red-500 bg-red-100" };
+      return {
+        warning: "🚨 Hypertensive Crisis: Seek emergency care!",
+        severity: "text-red-600 border-red-500 bg-red-100",
+        remark: "Critical - Immediate medical attention required"
+      };
     } else if (systolic >= 140 || diastolic >= 90) {
-      return { warning: "⚠️ Stage 2 Hypertension: Monitor closely.", severity: "text-orange-500 border-orange-500 bg-orange-100" };
+      return {
+        warning: "⚠️ Stage 2 Hypertension: Monitor closely.",
+        severity: "text-orange-500 border-orange-500 bg-orange-100",
+        remark: "High BP - Consider medication or lifestyle changes"
+      };
     } else if (systolic >= 130 || diastolic >= 80) {
-      return { warning: "⚠️ Stage 1 Hypertension: Lifestyle changes recommended.", severity: "text-green-600 border-green-500 bg-green-100" };
+      return {
+        warning: "⚠️ Stage 1 Hypertension: Lifestyle changes recommended.",
+        severity: "text-yellow-600 border-yellow-500 bg-yellow-100",
+        remark: "Elevated BP - Diet and exercise advised"
+      };
     } else if (systolic < 90 || diastolic < 60) {
-      return { warning: "⚠️ Low Blood Pressure: Consider medical advice.", severity: "text-green-600 border-green-500 bg-green-100" };
+      return {
+        warning: "⚠️ Low Blood Pressure: Consider medical advice.",
+        severity: "text-blue-600 border-blue-500 bg-blue-100",
+        remark: "Low BP - Monitor for dizziness or fatigue"
+      };
     } else {
-      return { warning: "", severity: "" };
+      return {
+        warning: "",
+        severity: "",
+        remark: "Normal - BP within a healthy range"
+      };
     }
   };
 
-  // Handle BP Input Change with Warning
+  // Handle input changes
+  const handleChange = (index, field, value) => {
+    setData("readings", data.readings.map((record, i) =>
+      i === index ? { ...record, [field]: value } : record
+    ));
+  };
+
+  // Handle BP changes with warning (Use "blood_pressure" to match Laravel)
   const handleBpChange = (index, value) => {
-    const { warning, severity } = checkBpWarning(value);
-    setFormData((prevData) =>
-      prevData.map((record, i) =>
-        i === index ? { ...record, bp: value, warning, severity } : record
-      )
-    );
+    const { warning, severity, remark } = checkBpWarning(value);
+    setData("readings", data.readings.map((record, i) =>
+      i === index ? { ...record, blood_pressure: value, warning, severity, remarks: remark } : record
+    ));
+    updateOverallStatus();
   };
 
-  // Add new BP record (Limit to 7)
-  const addRecord = () => {
-    if (formData.length < MAX_RECORDS) {
-      const newRecord = { id: Date.now(), date: "", time: "", bp: "", remarks: "", warning: "", severity: "" };
-      setFormData((prevData) => [...prevData, newRecord]);
-      setExpandedIndex(formData.length); // Expand new record
-    }
-  };
+  const updateOverallStatus = () => {
+    let criticalCount = 0, highCount = 0, lowCount = 0, normalCount = 0;
 
-  // Remove a BP record
-  const removeRecord = (index) => {
-    if (formData.length > 1) {
-      setFormData((prevData) => prevData.filter((_, i) => i !== index));
-      setExpandedIndex(null); // Close any expanded records
-    }
-  };
-
-  // Handle form submission
-  const handleSubmit = () => {
-    setBpRecords((prevRecords) => {
-      if (selectedRecord) {
-        return prevRecords.map((rec) =>
-          rec.id === selectedRecord.id ? { ...rec, bpRecords: formData } : rec
-        );
-      } else {
-        return [...prevRecords, { id: Date.now(), bpRecords: formData }];
-      }
+    data.readings.forEach((record) => {
+      if (record.remarks.includes("Critical")) criticalCount++;
+      else if (record.remarks.includes("High BP")) highCount++;
+      else if (record.remarks.includes("Low BP")) lowCount++;
+      else if (record.remarks.includes("Normal")) normalCount++;
     });
-    setOpen(false); // Close modal
+
+    let status = "Stable";
+    if (criticalCount > 0) status = "Critical Condition";
+    else if (highCount >= 3) status = "High Risk";
+    else if (highCount > 0) status = "Elevated BP";
+    else if (lowCount > 0) status = "Low BP Warning";
+    else if (normalCount === data.readings.length) status = "Stable";
+
+    setData("status", status);
+  };
+
+  // Add a new record (limit 7)
+  const addRecord = () => {
+    if (data.readings.length < MAX_RECORDS) {
+      setData("readings", [
+        ...data.readings,
+        { date: "", time: "", blood_pressure: "", has_signature: false, remarks: "No BP recorded", warning: "", severity: "" }
+      ]);
+      updateOverallStatus();
+      setExpandedIndex(data.readings.length);
+    }
+  };
+
+  // Remove a record
+  const removeRecord = (index) => {
+    setData("readings", data.readings.filter((_, i) => i !== index));
+    setExpandedIndex(null);
+  };
+
+  // Submit Form
+  const handleSubmit = () => {
+    post(route("bp-forms.store"), {
+      onSuccess: () => {
+        toast.success("BP records saved successfully!");
+        reset();
+        setOpen(false);
+      },
+      onError: () => {
+        toast.error("Failed to save BP records. Please try again.");
+      },
+    });
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="bg-green-50 shadow-xl rounded-lg p-6 max-w-lg w-full mx-auto">
+      <DialogContent className="bg-white shadow-xl rounded-lg p-6 max-w-lg w-full mx-auto border border-gray-200">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-green-800">
-            {selectedRecord ? "Edit BP Records" : "New BP Records"}
-          </DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-gray-800">New BP Records</DialogTitle>
         </DialogHeader>
 
-     {/* BP Records List - Scrollable Container */}
-<div className="space-y-2 max-h-80 overflow-y-auto">
-  {formData.map((record, index) => (
-    <div key={record.id} className="border border-green-300 rounded-lg bg-green-100">
-      {/* Record Header (Click to Expand/Collapse) */}
-      <div
-        className="flex justify-between items-center p-3 bg-green-200 cursor-pointer rounded-t-lg hover:bg-green-300 transition"
-        onClick={() => setExpandedIndex(expandedIndex === index ? null : index)}
-      >
-        <h3 className="text-sm font-semibold text-green-900">
-          BP Record {index + 1} - {record.date || "No Date"} at {record.time || "No Time"}
-        </h3>
-        <span className="text-green-700">{expandedIndex === index ? "▲" : "▼"}</span>
-      </div>
-
-      {/* Expanded Content (Inputs) */}
-      {expandedIndex === index && (
-        <div className="p-3 transition-all">
-          <div className="grid grid-cols-2 gap-4">
-            {/* Date Input */}
-            <div>
-              <label className="text-sm font-medium text-green-800">Date</label>
-              <input
-                type="date"
-                value={record.date}
-                onChange={(e) => handleChange(index, "date", e.target.value)}
-                className="w-full border border-green-400 rounded-md px-2 py-1 focus:ring-0 focus:border-green-600"
-              />
-            </div>
-
-            {/* Time Input */}
-            <div>
-              <label className="text-sm font-medium text-green-800">Time</label>
-              <input
-                type="time"
-                value={record.time}
-                onChange={(e) => handleChange(index, "time", e.target.value)}
-                className="w-full border border-green-400 rounded-md px-2 py-1 focus:ring-0 focus:border-green-600"
-              />
-            </div>
-
-            {/* BP Input with Warning */}
-            <div className="col-span-2 relative">
-              <label className="text-sm font-medium text-green-800">Blood Pressure</label>
-              <input
-                type="text"
-                value={record.bp}
-                onChange={(e) => handleBpChange(index, e.target.value)}
-                className={`w-full border border-green-400 rounded-md px-2 py-1 focus:ring-0 focus:border-green-600 ${record.severity}`}
-                placeholder="e.g. 120/80"
-                pattern="\d{2,3}/\d{2,3}"
-              />
-              
-              {/* Warning Icon */}
-              {record.warning && (
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                  <ExclamationTriangleIcon className={`w-5 h-5 ${record.severity}`} />
-                </div>
-              )}
-
-              {/* Warning Message */}
-              {record.warning && (
-                <div className={`mt-1 text-xs p-2 rounded shadow-lg ${record.severity}`}>
-                  {record.warning}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Remove Button (Only if more than 1 record) */}
-          {formData.length > 1 && (
-            <div className="mt-3 flex justify-end">
-              <button
-                onClick={() => removeRecord(index)}
-                className="text-sm text-red-600 bg-red-100 px-3 py-1 rounded-md hover:bg-red-200 transition"
-              >
-                Remove
-              </button>
-            </div>
-          )}
+        {/* Overall Status Summary */}
+        <div className="mb-4 p-3 rounded-lg bg-gray-100 border border-gray-300 text-gray-800 font-semibold">
+          Overall Status: <span className="font-bold">{data.status}</span>
         </div>
-      )}
-    </div>
-  ))}
-</div>
 
+
+        {/* BP Records List */}
+        <div className="space-y-2 max-h-80 overflow-y-auto">
+          {data.readings.map((record, index) => (
+            <div key={record.id || index} className="border border-gray-300 rounded-lg bg-gray-50 shadow-md">
+              {/* Record Header */}
+              <div
+                className="flex justify-between items-center p-3 bg-gray-200 cursor-pointer rounded-t-lg hover:bg-gray-300 transition"
+                onClick={() => setExpandedIndex(expandedIndex === index ? null : index)}
+              >
+                <h3 className="text-sm font-semibold text-gray-900">
+                  BP Record {index + 1} - {record.date || "No Date"} at {record.time || "No Time"}
+                </h3>
+                <span className="text-gray-700">{expandedIndex === index ? "▲" : "▼"}</span>
+              </div>
+
+              {/* Expanded Content */}
+              {expandedIndex === index && (
+                <div className="p-3 transition-all">
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Date Input */}
+                    <div>
+                      <label className="text-sm font-medium text-gray-800">Date</label>
+                      <input
+                        type="date"
+                        value={record.date}
+                        onChange={(e) => handleChange(index, "date", e.target.value)}
+                        className="w-full border border-gray-400 rounded-md px-2 py-1 focus:ring-0 focus:border-gray-600"
+                      />
+                    </div>
+
+                    {/* Time Input */}
+                    <div>
+                      <label className="text-sm font-medium text-gray-800">Time</label>
+                      <input
+                        type="time"
+                        value={record.time}
+                        onChange={(e) => handleChange(index, "time", e.target.value)}
+                        className="w-full border border-gray-400 rounded-md px-2 py-1 focus:ring-0 focus:border-gray-600"
+                      />
+                    </div>
+
+                    {/* BP Input with Warning */}
+                    <div className="col-span-2 relative">
+                      <label className="text-sm font-medium text-gray-800">Blood Pressure</label>
+                      <input
+                        type="text"
+                        value={record.blood_pressure}
+                        onChange={(e) => handleBpChange(index, e.target.value)}
+                        className={`w-full border border-gray-400 rounded-md px-2 py-1 focus:ring-0 focus:border-gray-600 ${record.severity}`}
+                        placeholder="e.g. 120/80"
+                      />
+
+                      {/* Warning Icon */}
+                      {record.warning && (
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                          <ExclamationTriangleIcon className={`w-5 h-5 ${record.severity}`} />
+                        </div>
+                      )}
+
+                      {/* Warning Message */}
+                      {record.warning && (
+                        <div className={`mt-1 text-xs p-2 rounded shadow-lg ${record.severity}`}>
+                          {record.warning}
+                        </div>
+                      )}
+
+                      {/* Remarks Display */}
+                      <div className="mt-2 p-2 rounded bg-gray-100 border border-gray-300">
+                        <strong>Remarks:</strong> {record.remarks}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Remove Button */}
+                  <div className="mt-3 flex justify-end">
+                    <button
+                      onClick={() => removeRecord(index)}
+                      className="text-sm text-red-600 bg-red-100 px-3 py-1 rounded-md hover:bg-red-200 transition"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
 
         {/* Add Record Button */}
         <div className="mt-4 flex justify-center">
-          <Button onClick={addRecord} disabled={formData.length >= MAX_RECORDS} className="bg-green-700 text-white px-6 py-2 rounded-lg shadow hover:bg-green-800">
+          <Button onClick={addRecord} disabled={data.readings.length >= MAX_RECORDS} className="bg-blue-600 text-white px-6 py-2 rounded-lg shadow hover:bg-blue-700">
             + Add BP Record
           </Button>
         </div>
 
         {/* Submit & Cancel Buttons */}
         <DialogFooter className="mt-6 flex justify-between">
-          <Button onClick={() => setOpen(false)} className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600">
+          <Button onClick={() => setOpen(false)} className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600">
             Cancel
           </Button>
-          <Button onClick={handleSubmit} className="bg-green-700 text-white px-6 py-2 rounded-lg hover:bg-green-800">
-            Save
+          <Button onClick={handleSubmit} disabled={processing} className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+            {processing ? "Saving..." : "Save"}
           </Button>
         </DialogFooter>
       </DialogContent>

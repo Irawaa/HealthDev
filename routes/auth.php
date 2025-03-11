@@ -9,6 +9,7 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\NonPersonnelController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\FDARFormController;
+use App\Http\Controllers\BPFormController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -63,6 +64,9 @@ Route::middleware(['web', 'auth'])->group(function () {
 
     // FDAR Forms //
     Route::post('/fdar-forms', [FDARFormController::class, 'store'])->name('fdar-forms.store');
+
+    // BP Forms (BP Pressure Monitoring Form) //
+    Route::post('/bp-forms', [BPFormController::class, 'store'])->name('bp-forms.store');
 
     // --- Logout ---
     Route::post('/logout', [AuthenticateController::class, 'destroy'])->name('logout');
