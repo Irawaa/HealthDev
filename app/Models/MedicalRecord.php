@@ -93,12 +93,12 @@ class MedicalRecord extends Model
             ->withTimestamps();
     }
 
-    public function obGyne(): HasOne
+    public function obGyneHistory(): HasOne
     {
         return $this->hasOne(ObGyneHistory::class, 'medical_record_id');
     }
 
-    public function details(): HasOne
+    public function medicalRecordDetail(): HasOne
     {
         return $this->hasOne(MedicalRecordDetail::class, 'medical_record_id');
     }
@@ -118,7 +118,7 @@ class MedicalRecord extends Model
     public function familyHistories(): BelongsToMany
     {
         return $this->belongsToMany(FamilyHistory::class, 'medical_record_family_history')
-            ->withPivot('family_member', 'remarks') // Additional fields for family member and remarks
+            ->withPivot('family_member', 'family_history_remarks') // Additional fields for family member and remarks
             ->withTimestamps();
     }
 }

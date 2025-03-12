@@ -3012,11 +3012,47 @@ namespace App\Models {
     /**
      * App\Models\IncidentReport
      *
+     * @property int|null $updated_by
+     * @property \Illuminate\Support\Carbon|null $updated_at
+     * @property \Illuminate\Support\Carbon|null $created_at
+     * @property int $recorded_by
+     * @property int $school_physician_id
+     * @property int $school_nurse_id
+     * @property string|null $hospital_specification
+     * @property mixed $management
+     * @property string|null $description_of_injury
+     * @property string $time_of_incident
+     * @property string $date_of_incident
+     * @property string $place_of_incident
+     * @property string $nature_of_incident
+     * @property string $history
+     * @property int $patient_id
+     * @property int $id
+     * @property-read mixed $school_nurse_name
+     * @property-read mixed $school_physician_name
+     * @property-read mixed $recorded_by_name
+     * @property-read mixed $updated_by_name
      * @property-read \App\Models\Patient $patient
      * @property-read \App\Models\ClinicStaff $schoolNurse
      * @property-read \App\Models\ClinicStaff $schoolPhysician
      * @property-read \App\Models\User $recordedBy
      * @property-read \App\Models\User $updatedBy
+     * @method static \Illuminate\Database\Eloquent\Builder<IncidentReport>|IncidentReport whereId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<IncidentReport>|IncidentReport wherePatientId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<IncidentReport>|IncidentReport whereHistory($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<IncidentReport>|IncidentReport whereNatureOfIncident($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<IncidentReport>|IncidentReport wherePlaceOfIncident($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<IncidentReport>|IncidentReport whereDateOfIncident($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<IncidentReport>|IncidentReport whereTimeOfIncident($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<IncidentReport>|IncidentReport whereDescriptionOfInjury($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<IncidentReport>|IncidentReport whereManagement($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<IncidentReport>|IncidentReport whereHospitalSpecification($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<IncidentReport>|IncidentReport whereSchoolNurseId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<IncidentReport>|IncidentReport whereSchoolPhysicianId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<IncidentReport>|IncidentReport whereRecordedBy($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<IncidentReport>|IncidentReport whereCreatedAt($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<IncidentReport>|IncidentReport whereUpdatedAt($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<IncidentReport>|IncidentReport whereUpdatedBy($value)
      * @method static \Illuminate\Database\Eloquent\Builder<IncidentReport>|IncidentReport newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<IncidentReport>|IncidentReport newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<IncidentReport>|IncidentReport query()
@@ -3292,8 +3328,8 @@ namespace App\Models {
      * @property-read \App\Models\MedicalRecordVitalSign $vitalSigns
      * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\PastMedicalHistory> $pastMedicalHistories
      * @property-read int|null $pastMedicalHistories_count
-     * @property-read \App\Models\ObGyneHistory $obGyne
-     * @property-read \App\Models\MedicalRecordDetail $details
+     * @property-read \App\Models\ObGyneHistory $obGyneHistory
+     * @property-read \App\Models\MedicalRecordDetail $medicalRecordDetail
      * @property-read \App\Models\PersonalSocialHistory $personalSocialHistory
      * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\PhysicalExamination> $physicalExaminations
      * @property-read int|null $physicalExaminations_count
@@ -4979,6 +5015,14 @@ namespace App\Models {
      * @property-read \App\Models\Student $student
      * @property-read \App\Models\Employee $personnel
      * @property-read \App\Models\NonPersonnel $nonpersonnel
+     * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\MedicalRecord> $medicalRecords
+     * @property-read int|null $medicalRecords_count
+     * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\BPForm> $bpForms
+     * @property-read int|null $bpForms_count
+     * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\FDARForm> $fdarForms
+     * @property-read int|null $fdarForms_count
+     * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\IncidentReport> $incidentReports
+     * @property-read int|null $incidentReports_count
      * @method static \Illuminate\Database\Eloquent\Builder<Patient>|Patient wherePatientId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Patient>|Patient whereType($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Patient>|Patient whereLname($value)

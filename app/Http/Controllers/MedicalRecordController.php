@@ -138,18 +138,18 @@ class MedicalRecordController extends Controller
                 return back()->withErrors('Unauthorized action.');
             }
 
-            // Check if Patient Already Has a Medical Record
-            $existingRecord = MedicalRecord::where('patient_id', $validated['patient_id'])->first();
+            // // Check if Patient Already Has a Medical Record
+            // $existingRecord = MedicalRecord::where('patient_id', $validated['patient_id'])->first();
 
-            if ($existingRecord) {
-                Log::info('Patient already has an existing medical record', [
-                    'patient_id' => $validated['patient_id'],
-                    'existing_record_id' => $existingRecord->id,
-                    'recorded_by' => Auth::id()
-                ]);
+            // if ($existingRecord) {
+            //     Log::info('Patient already has an existing medical record', [
+            //         'patient_id' => $validated['patient_id'],
+            //         'existing_record_id' => $existingRecord->id,
+            //         'recorded_by' => Auth::id()
+            //     ]);
 
-                return back()->withErrors('Patient already has an existing medical record.');
-            }
+            //     return back()->withErrors('Patient already has an existing medical record.');
+            // }
 
             // ✅ Create Medical Record
             $medicalRecord = MedicalRecord::create([

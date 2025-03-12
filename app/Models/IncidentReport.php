@@ -63,4 +63,40 @@ class IncidentReport extends Model
     {
         return $this->belongsTo(User::class, 'updated_by', 'user_id');
     }
+
+    /**
+     * Accessor to get the full name of the School Nurse
+     * @return string
+     */
+    public function getSchoolNurseNameAttribute()
+    {
+        return $this->schoolNurse ? $this->schoolNurse->fname . ' ' . $this->schoolNurse->lname : 'N/A';
+    }
+
+    /**
+     * Accessor to get the full name of the School Physician
+     * @return string
+     */
+    public function getSchoolPhysicianNameAttribute()
+    {
+        return $this->schoolPhysician ? $this->schoolPhysician->fname . ' ' . $this->schoolPhysician->lname : 'N/A';
+    }
+
+    /**
+     * Accessor to get the full name of the User who recorded the report
+     * @return string
+     */
+    public function getRecordedByNameAttribute()
+    {
+        return $this->recordedBy ? $this->recordedBy->clinicStaff->fname . ' ' . $this->recordedBy->clinicStaff->lname : 'N/A';
+    }
+
+    /**
+     * Accessor to get the full name of the User who updated the report
+     * @return string
+     */
+    public function getUpdatedByNameAttribute()
+    {
+        return $this->updatedBy ? $this->updatedBy->clinicStaff->fname . ' ' . $this->updatedBy->clinicStaff->lname : 'N/A';
+    }
 }

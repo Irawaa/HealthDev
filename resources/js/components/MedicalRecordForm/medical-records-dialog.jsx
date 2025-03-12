@@ -11,7 +11,7 @@ import Step6 from "./Steps/Step6";
 
 const MedicalRecordDialog = ({ patient }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [records, setRecords] = useState([]);
+  const [records, setRecords] = useState(patient?.medical_records || []);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [step, setStep] = useState(1);
 
@@ -415,15 +415,12 @@ const MedicalRecordDialog = ({ patient }) => {
       </Button>
 
       {records.length > 0 ? (
-        records.map((record) => (
-          <div key={record.id} className="p-4 bg-white shadow-md rounded-lg flex justify-between">
+        records.map((record, index) => (
+          <div key={index} className="p-4 bg-white shadow-md rounded-lg flex justify-between">
             <div>
-              <p>
-                <strong>Created by:</strong> {record.createdBy}
-              </p>
-              <p>
-                <strong>Date:</strong> {record.date}
-              </p>
+              <p><strong>Final Evaluation:</strong> {record.final_evaluation}</p>
+              <p><strong>Plan:</strong> {record.plan_recommendation}</p>
+              <p><strong>Date:</strong> {new Date(record.created_at).toLocaleDateString()}</p>
             </div>
             <div className="space-x-2">
               <Button onClick={() => handleEdit(record)} className="bg-green-600 text-white">
@@ -438,6 +435,7 @@ const MedicalRecordDialog = ({ patient }) => {
       ) : (
         <p className="text-gray-700 mt-4">No medical records available.</p>
       )}
+
 
       {isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">

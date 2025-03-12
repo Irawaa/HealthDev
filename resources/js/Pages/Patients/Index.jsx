@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { usePage, Head } from "@inertiajs/react";
+import { usePage, Head, router } from "@inertiajs/react";
 import PatientProfile from "./Profile";
 import AddStudentDialog from "@/components/StudentPatients/add-student-dialog";
-import FilterDropdown from "@/components/patient-filter";
+// import FilterDropdown from "@/components/patient-filter";
 import PatientRoleDialog from "@/components/patient-role-dialog";
 import AddEmployeeDialog from "@/components/EmployeePatients/add-employee-dialog";
 import AddNonPersonnelDialog from "@/components/NonPersonnelPatients/add-non-personnel-dialog";
@@ -19,13 +19,15 @@ export const PhysicianStaffContext = createContext();
 export const usePhysicianStaff = () => useContext(PhysicianStaffContext);
 
 const Index = () => {
-    const { patients, colleges, departments, commonDiseases, physicianStaff } = usePage().props;
+    const { patients, colleges, departments, commonDiseases, physicianStaff, search } = usePage().props;
+    console.log(patients);
+    const [searchTerm, setSearchTerm] = useState(search || ""); // Preserve search input
     const [selectedPatient, setSelectedPatient] = useState(null);
     const [openStudent, setOpenStudent] = useState(false);
     const [openEmployee, setOpenEmployee] = useState(false);
     const [openNonPersonnel, setOpenNonPersonnel] = useState(false);
     const [openRoleDialog, setOpenRoleDialog] = useState(false);
-    const [searchTerm, setSearchTerm] = useState("");
+    const [loading, setLoading] = useState(false);
     const [filters, setFilters] = useState({
         department: [],
         program: [],
@@ -41,22 +43,29 @@ const Index = () => {
         // default: "bg-gray-100 border-gray-300",
     };
 
+    const handleSearch = () => {
+        if (!searchTerm.trim()) {
+            router.get("/patients", {}, { preserveState: true, replace: true });
+            return;
+        }
+
+        setLoading(true); // Start loading
+
+        router.get(
+            "/patients",
+            { search: searchTerm },
+            {
+                preserveState: true,
+                replace: true,
+                onFinish: () => setLoading(false), // Stop loading when request is done
+            }
+        );
+    };
+
     const formatType = (type) => {
         if (!type) return "Unknown";
         return type.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
     };
-
-    const filteredPatients = patients.filter((patient) => {
-        const fullName = `${patient.lname} ${patient.fname} ${patient.mname || ""}`.toLowerCase();
-        const matchesSearch = fullName.includes(searchTerm.toLowerCase());
-
-        const matchesFilters = Object.entries(filters).every(([category, values]) => {
-            if (!values.length) return true;
-            return values.includes(patient[category]);
-        });
-
-        return matchesSearch && matchesFilters;
-    });
 
     const handleCloseDialog = () => {
         setOpenStudent(false);
@@ -98,17 +107,28 @@ const Index = () => {
                                     placeholder="Search by name"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
+                                    onKeyPress={(e) => e.key === "Enter" && handleSearch()} // Press Enter to search
                                     className="border border-green-400 p-2 text-base rounded-md w-full md:w-2/5 focus:ring-2 focus:ring-green-500"
                                 />
-                                <FilterDropdown filters={filters} setFilters={setFilters} />
+                                <Button onClick={handleSearch} className="bg-green-600 text-white hover:bg-green-700 transition">
+                                    Search
+                                </Button>
+                                {/* <FilterDropdown filters={filters} setFilters={setFilters} /> */}
                             </div>
 
                             {/* Patient Records */}
                             <div className="bg-white shadow-lg rounded-lg p-4 border border-green-300">
                                 <ScrollArea className="h-[500px] overflow-y-auto">
                                     <div className="flex flex-col gap-4 mr-[15px]">
-                                        {filteredPatients.length > 0 ? (
-                                            filteredPatients.map((patient) => {
+                                        {loading ? (
+                                            <div className="flex justify-center items-center h-[300px]"> {/* Adjust height as needed */}
+                                                <svg className="animate-spin h-12 w-12 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                                                </svg>
+                                            </div>
+                                        ) : patients.length > 0 ? (
+                                            patients.map((patient) => {
                                                 const bgColor = patientTypeColors[patient.type] || patientTypeColors.default;
 
                                                 // Find the corresponding college and program
@@ -176,7 +196,7 @@ const Index = () => {
                                                 );
                                             })
                                         ) : (
-                                            <p className="text-center text-green-600 col-span-full">No records found.</p>
+                                            <p className="text-center text-green-600 col-span-full">Please enter a search query to find patients.</p>
                                         )}
                                     </div>
                                 </ScrollArea>

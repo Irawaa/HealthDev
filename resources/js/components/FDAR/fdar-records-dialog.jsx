@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useForm } from "@inertiajs/react";
@@ -7,6 +7,8 @@ import FDARForm from "./FDARSteps/fdar-forms";
 
 const FDARModal = ({ patient }) => {
   const [open, setOpen] = useState(false);
+  const [fdarForms, setFdarForms] = useState([]);
+  const [expandedForms, setExpandedForms] = useState({});
 
   // ✅ Initialize Inertia form
   const { data, setData, post, processing, reset, errors } = useForm({
@@ -25,6 +27,20 @@ const FDARModal = ({ patient }) => {
     last_menstrual_period: "",
     common_disease_ids: [],
   });
+
+  useEffect(() => {
+    if (patient?.fdar_forms) {
+      setFdarForms(patient.fdar_forms);
+    }
+  }, [patient]);
+
+  const toggleForm = (id) => {
+    setExpandedForms((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
 
   // ✅ Handle input changes
   const handleChange = (e) => {
@@ -118,6 +134,74 @@ const FDARModal = ({ patient }) => {
       >
         Create New FDAR Record
       </Button>
+
+      <div className="mt-4 space-y-3">
+        {fdarForms.length > 0 ? (
+          fdarForms.map((form) => (
+            <div key={form.id} className="bg-white p-5 rounded-2xl shadow-md border border-gray-200 transition hover:shadow-lg">
+              {/* ✅ FDAR Form Header */}
+              <div className="flex justify-between items-center cursor-pointer" onClick={() => toggleForm(form.id)}>
+                <p className="font-medium text-gray-800">
+                  <span className="font-semibold">Recorded:</span>{" "}
+                  {new Date(form.created_at).toLocaleString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: true,
+                  })}
+                  <span className="font-semibold"> || Action:</span> {form.action}
+                </p>
+                <Button
+                  className="flex items-center gap-2 text-sm bg-gray-100 px-3 py-1 rounded-md shadow hover:bg-gray-200 transition"
+                  onClick={(e) => { e.stopPropagation(); toggleForm(form.id); }}
+                >
+                  {expandedForms[form.id] ? "Collapse" : "Expand"}
+                  {expandedForms[form.id] ? "🔼" : "🔽"}
+                </Button>
+              </div>
+
+              {/* ✅ Collapsible FDAR Details */}
+              {expandedForms[form.id] && (
+                <div className="mt-3 space-y-2 bg-gray-50 border border-gray-300 p-4 rounded-md shadow-sm">
+
+                  {/* ✅ Common Diseases */}
+                  {form.common_diseases?.length > 0 && (
+                    <div className="text-gray-700">
+                      <span className="font-semibold">Focus:</span>
+                      <ul className="flex flex-wrap gap-2 mt-1">
+                        {form.common_diseases.map((disease) => (
+                          <li key={disease.id} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm shadow">
+                            {disease.name}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-3 text-gray-700">
+                    <p><span className="font-semibold">Response:</span> {form.response}</p>
+                    <p><span className="font-semibold">BP:</span> {form.blood_pressure}</p>
+                    <p><span className="font-semibold">Weight:</span> {form.weight || "N/A"} kg</p>
+                    <p><span className="font-semibold">Height:</span> {form.height || "N/A"} m</p>
+                    <p><span className="font-semibold">Temperature:</span> {form.temperature || "N/A"}°C</p>
+                    <p><span className="font-semibold">Oxygen Saturation:</span> {form.oxygen_saturation || "N/A"}%</p>
+                  </div>
+
+                  {/* ✅ Actions */}
+                  <div className="flex justify-end space-x-2">
+                  </div>
+                </div>
+              )}
+            </div>
+          ))
+        ) : (
+          <p className="text-green-700 text-center">No FDAR records found.</p>
+        )}
+      </div>
+
 
       {/* ✅ FDAR Form Modal */}
       <Dialog open={open} onOpenChange={setOpen}>

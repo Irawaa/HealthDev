@@ -44,4 +44,24 @@ class Patient extends Model
     {
         return $this->hasOne(NonPersonnel::class, 'patient_id', 'patient_id');
     }
+
+    public function medicalRecords()
+    {
+        return $this->hasMany(MedicalRecord::class, 'patient_id', 'patient_id');
+    }
+
+    public function bpForms()
+    {
+        return $this->hasMany(BPForm::class, 'patient_id', 'patient_id');
+    }
+
+    public function fdarForms()
+    {
+        return $this->hasMany(FDARForm::class, 'patient_id', 'patient_id');
+    }
+
+    public function incidentReports()
+    {
+        return $this->hasMany(IncidentReport::class, 'patient_id', 'patient_id');
+    }
 }

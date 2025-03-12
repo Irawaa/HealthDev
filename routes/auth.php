@@ -50,6 +50,7 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/patients', [PatientController::class, 'store'])->name('patients.store');
     Route::put('/patients/{patient}', [PatientController::class, 'update'])->name('patients.update');
     Route::delete('/patients/{patient}', [PatientController::class, 'destroy'])->name('patients.destroy');
+    Route::get('/patients/search', [PatientController::class, 'search'])->name('patients.search'); // Search API route
 
     // Patient - Students //
     Route::post('/students', [StudentController::class, 'store'])->name('students.store');
