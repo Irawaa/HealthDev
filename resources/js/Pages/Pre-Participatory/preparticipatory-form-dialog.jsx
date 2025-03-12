@@ -1,18 +1,24 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import PreParticipatoryForm from "@/components/PreParticipatory/pre-participatory-form"; // Form Component
+import PreParticipatoryForm from "@/components/Pre-Participatory/pre-participatory-form"; // Ensure this is correctly imported
 
 const PreParticipatoryModal = ({ activeTab, patient }) => {
   const [evaluations, setEvaluations] = useState([]); // Stores evaluations
   const [showForm, setShowForm] = useState(false);
   const [selectedEvaluation, setSelectedEvaluation] = useState(null); // Stores the evaluation to view
 
+  // Log the active tab to debug
+  console.log("Active Tab:", activeTab);
+
   // Reset modal when switching tabs
   useEffect(() => {
     setShowForm(false);
   }, [activeTab]);
 
-  if (activeTab !== "pre-participatory") return null;
+  if (activeTab !== "pre-participatory") return null; // Ensure tab is matched correctly
+
+  // If patient is missing, avoid crashing
+  if (!patient) return <p className="text-red-500">No patient data available</p>;
 
   const handleCreate = (newEvaluation) => {
     setEvaluations([...evaluations, { ...newEvaluation, id: Date.now() }]);
@@ -33,7 +39,7 @@ const PreParticipatoryModal = ({ activeTab, patient }) => {
       </Button>
 
       {/* Show Form Component When Needed */}
-      <PreParticipatoryForm open={showForm} setOpen={setShowForm} onSave={handleCreate} />
+      {showForm && <PreParticipatoryForm open={showForm} setOpen={setShowForm} onSave={handleCreate} />}
 
       {/* List of Evaluations */}
       <div className="mt-4">

@@ -13,6 +13,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import PrescriptionModal from "@/components/Prescription/prescription-modal";
 import CertificatesModal from "@/components/Certificate/certificate-dialog";
 import ReferralModal from "@/components/Referral/referral-dialog";
+import PreParticipatoryModal from "../Pre-Participatory/preparticipatory-form-dialog";
 
 const InfoField = ({ label, value, name, type = "text", options = [], isEditing, handleChange }) => (
   <div className="flex flex-col w-full space-y-1">
@@ -251,6 +252,7 @@ const PatientProfile = ({ patient, onClose, onSave, colleges, departments }) => 
               {activeTab === "prescription" && <PrescriptionModal activeTab={activeTab} patient={patient} />}
               {activeTab === "certificates" && <CertificatesModal activeTab={activeTab} patient={patient} />}
               {activeTab === "referrals" && <ReferralModal activeTab={activeTab} patient={patient} />}
+              {activeTab === "pre-participatory" && <PreParticipatoryModal activeTab={activeTab} patient={patient} />}
             </div>
           </Tabs>
         </div >
