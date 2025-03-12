@@ -4999,6 +4999,7 @@ namespace App\Models {
      * @property int|null $updated_by
      * @property \Illuminate\Support\Carbon|null $updated_at
      * @property \Illuminate\Support\Carbon|null $created_at
+     * @property mixed $status
      * @property string|null $telephone
      * @property string|null $mobile
      * @property string|null $emailaddress
@@ -5035,6 +5036,7 @@ namespace App\Models {
      * @method static \Illuminate\Database\Eloquent\Builder<Patient>|Patient whereEmailaddress($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Patient>|Patient whereMobile($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Patient>|Patient whereTelephone($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Patient>|Patient whereStatus($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Patient>|Patient whereCreatedAt($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Patient>|Patient whereUpdatedAt($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Patient>|Patient whereUpdatedBy($value)

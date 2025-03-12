@@ -22,6 +22,7 @@ class Patient extends Model
         'email',
         'mobile',
         'telephone',
+        'status',
         'updated_by',
     ];
 

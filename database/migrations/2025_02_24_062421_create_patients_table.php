@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('emailaddress', 200)->nullable();
             $table->string('mobile', 50)->nullable();
             $table->string('telephone', 50)->nullable();
+            $table->enum('status', ['healthy', 'sick', 'under_treatment'])->default('healthy');
             $table->timestamps();
         
             // Ensure 'updated_by' matches the type in 'users'

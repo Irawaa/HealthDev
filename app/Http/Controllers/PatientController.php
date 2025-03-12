@@ -15,6 +15,10 @@ class PatientController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
+        $departmentFilter = $request->input('department', []);
+        $programFilter = $request->input('program', []);
+        $typeFilter = $request->input('type', []);
+        $medicalStatusFilter = $request->input('medicalStatus', []);
 
         // Query patients only if search is provided
         $patientsQuery = Patient::with([
@@ -91,16 +95,50 @@ class PatientController extends Controller
             },
         ]);
 
+        // Backend logic (PHP)
         if (!empty($search)) {
+            // Only apply search filters if the search term is not empty
             $patientsQuery->where(function ($query) use ($search) {
-                $query->where('lname', 'LIKE', "%{$search}%")
-                    ->orWhere('fname', 'LIKE', "%{$search}%")
-                    ->orWhere('mname', 'LIKE', "%{$search}%")
-                    ->orWhere('type', 'LIKE', "%{$search}%");
+                $query->where('lname', 'LIKE', "%$search%")
+                    ->orWhere('fname', 'LIKE', "%$search%")
+                    ->orWhere('mname', 'LIKE', "%$search%")
+                    ->orWhere('type', 'LIKE', "%$search%")
+                    ->orWhereHas('student', function ($query) use ($search) {
+                        $query->where('stud_id', 'LIKE', "%$search%");
+                    })
+                    ->orWhereHas('personnel', function ($query) use ($search) {
+                        $query->where('employee_no', 'LIKE', "%$search%");
+                    });
             });
+        } else {
+            // Optionally, add logic to prevent unnecessary querying when there's no search
+            $patientsQuery->whereRaw('1 = 1'); // This ensures no filtering is applied when no search term is present
         }
 
-        // Fetch patients only if searching; otherwise, keep empty
+        // Apply filters only if there is a search term
+        if (!empty($search)) {
+            if (!empty($departmentFilter)) {
+                $patientsQuery->whereHas('personnel', function ($query) use ($departmentFilter) {
+                    $query->whereIn('dept_id', $departmentFilter);
+                });
+            }
+
+            if (!empty($programFilter)) {
+                $patientsQuery->whereHas('student', function ($query) use ($programFilter) {
+                    $query->whereIn('program_id', $programFilter);
+                });
+            }
+
+            if (!empty($typeFilter)) {
+                $patientsQuery->whereIn('type', $typeFilter);
+            }
+
+            // Apply the new medical status filter if provided
+            if (!empty($medicalStatusFilter)) {
+                $patientsQuery->whereIn('status', $medicalStatusFilter);
+            }
+        }
+
         $patients = !empty($search) ? $patientsQuery->latest()->get() : [];
 
         // Fetch supporting data
