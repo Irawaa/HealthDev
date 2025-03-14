@@ -2,40 +2,57 @@ import { useState, useEffect } from "react";
 
 // Constants
 const illnesses = [
-  "Bronchial Asthma", "Cancer", "Diabetes Mellitus", "Kidney Disease",
-  "Heart Disease", "Hypertension", "Mental Illness",
+  "Bronchial Asthma",
+  "Cancer",
+  "Diabetes Mellitus",
+  "Kidney Disease",
+  "Heart Disease",
+  "Hypertension",
+  "Mental Illness",
 ];
 
 const bodyParts = [
-  "General Survey", "Eyes/Ear/Nose/Throat", "Hearing", "Vision", "Lymph Nodes",
-  "Heart", "Lungs", "Abdomen", "Skin", "Extremities",
+  "General Survey",
+  "Eyes/Ear/Nose/Throat",
+  "Hearing",
+  "Vision",
+  "Lymph Nodes",
+  "Heart",
+  "Lungs",
+  "Abdomen",
+  "Skin",
+  "Extremities",
 ];
 
 const Step5 = ({ formData, setFormData }) => {
   const [expandedSections, setExpandedSections] = useState({});
   const [siblingToDelete, setSiblingToDelete] = useState(null);
-
   useEffect(() => {
-    if (!formData?.family_histories) {
+    if (!formData?.family_histories || !formData?.physical_examinations) {
       setFormData((prev) => ({
         ...prev,
-        family_histories: illnesses.map((illness) => ({
-          condition: illness,
-          Father: "",
-          Mother: "",
-          Sister: [""],
-          Brother: [""],
-          remarks: "",
-        })),
-        physicalExam: prev?.physicalExam || {},
-        physical_examinations: prev?.physical_examinations || bodyParts.map((part) => ({
-          name: part,
-          result: "Normal",
-          remarks: "",
-        })),
+        family_histories:
+          prev?.family_histories?.length > 0
+            ? prev.family_histories
+            : illnesses.map((illness) => ({
+                condition: illness,
+                Father: "",
+                Mother: "",
+                Sister: [""],
+                Brother: [""],
+                remarks: "",
+              })),
+        physical_examinations:
+          prev?.physical_examinations?.length > 0
+            ? prev.physical_examinations
+            : bodyParts.map((part) => ({
+                name: part,
+                result: "Normal",
+                remarks: "",
+              })),
       }));
     }
-  }, []); // ✅ Add empty dependency array here  
+  }, [formData]);
 
   // Toggle Section Expansion
   const toggleSection = (condition) => {
@@ -86,9 +103,18 @@ const Step5 = ({ formData, setFormData }) => {
   const deleteSibling = () => {
     if (siblingToDelete) {
       setFormData((prev) => {
-        const updatedFamilyHistory = { ...prev.familyHistory };
-        delete updatedFamilyHistory[siblingToDelete];
-        return { ...prev, familyHistory: updatedFamilyHistory };
+        const updatedHistories = prev.family_histories.map((history) => {
+          if (history.condition === siblingToDelete.condition) {
+            return {
+              ...history,
+              [siblingToDelete.member]: history[siblingToDelete.member].filter(
+                (_, i) => i !== siblingToDelete.index
+              ),
+            };
+          }
+          return history;
+        });
+        return { ...prev, family_histories: updatedHistories };
       });
       setSiblingToDelete(null);
     }
@@ -97,15 +123,19 @@ const Step5 = ({ formData, setFormData }) => {
   const removeSibling = (index, member, subIndex) => {
     setFormData((prev) => {
       const updatedHistories = [...prev.family_histories];
-      updatedHistories[index][member] = updatedHistories[index][member].filter((_, i) => i !== subIndex);
+      updatedHistories[index][member] = updatedHistories[index][member].filter(
+        (_, i) => i !== subIndex
+      );
       return { ...prev, family_histories: updatedHistories };
     });
-  };  
+  };
 
   return (
     <div className="p-4">
       {/* Family History Section */}
-      <h3 className="text-xl font-semibold text-green-700 mb-4">Family History</h3>
+      <h3 className="text-xl font-semibold text-green-700 mb-4">
+        Family History
+      </h3>
       <div className="space-y-4">
         {formData.family_histories?.map((history, index) => (
           <CollapsibleSection
@@ -114,48 +144,56 @@ const Step5 = ({ formData, setFormData }) => {
             toggle={() => toggleSection(history.condition)}
             expanded={expandedSections[history.condition]}
           >
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Father & Mother Inputs */}
-              {["Father", "Mother"].map((member) => (
-                <TextInput
-                  key={`${history.condition}-${member}`}
-                  label={member}
-                  value={history[member]}
-                  onChange={(e) => handleInputChange(e, index, member)}
-                />
-              ))}
-
-              {/* Brother & Sister Inputs with Dynamic Add/Remove */}
-              {["Brother", "Sister"].map((member) => (
-                <div key={`${history.condition}-${member}`}>
-                  {history[member].map((sibling, subIndex) => (
-                    <div key={subIndex} className="flex items-center gap-2">
-                      <TextInput
-                        label={`${member} ${subIndex + 1}`}
-                        value={sibling}
-                        onChange={(e) =>
-                          handleInputChange(e, index, member, subIndex)
-                        }
-                      />
-                      <DeleteButton
-                        text="❌"
-                        onClick={() => removeSibling(index, member, subIndex)}
-                      />
-                    </div>
-                  ))}
-                  <AddButton
-                    text={`+ Add ${member}`}
-                    onClick={() => addSibling(index, member)}
+            <div
+              className={`transition-[max-height] duration-300 ease-in-out overflow-hidden ${
+                expandedSections[history.condition]
+                  ? "max-h-[500px]"
+                  : "max-h-0"
+              }`}
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4">
+                {/* Father & Mother Inputs */}
+                {["Father", "Mother"].map((member) => (
+                  <TextInput
+                    key={`${history.condition}-${member}`}
+                    label={member}
+                    value={history[member]}
+                    onChange={(e) => handleInputChange(e, index, member)}
                   />
-                </div>
-              ))}
+                ))}
 
-              {/* Overall Remarks Input */}
-              <TextInput
-                label="Overall Remarks"
-                value={history.remarks}
-                onChange={(e) => handleInputChange(e, index, "remarks")}
-              />
+                {/* Brother & Sister Inputs with Dynamic Add/Remove */}
+                {["Brother", "Sister"].map((member) => (
+                  <div key={`${history.condition}-${member}`}>
+                    {history[member].map((sibling, subIndex) => (
+                      <div key={subIndex} className="flex items-center gap-2">
+                        <TextInput
+                          label={`${member} ${subIndex + 1}`}
+                          value={sibling}
+                          onChange={(e) =>
+                            handleInputChange(e, index, member, subIndex)
+                          }
+                        />
+                        <DeleteButton
+                          text="❌"
+                          onClick={() => removeSibling(index, member, subIndex)}
+                        />
+                      </div>
+                    ))}
+                    <AddButton
+                      text={`+ Add ${member}`}
+                      onClick={() => addSibling(index, member)}
+                    />
+                  </div>
+                ))}
+
+                {/* Overall Remarks Input */}
+                <TextInput
+                  label="Overall Remarks"
+                  value={history.remarks}
+                  onChange={(e) => handleInputChange(e, index, "remarks")}
+                />
+              </div>
             </div>
           </CollapsibleSection>
         ))}
@@ -174,28 +212,43 @@ const Step5 = ({ formData, setFormData }) => {
       <hr className="border-t-2 border-green-400 my-6" />
 
       {/* Physical Examination Section */}
+
       <CollapsibleSection
         title="Physical Examination"
         toggle={() => toggleSection("PhysicalExam")}
         expanded={expandedSections["PhysicalExam"]}
       >
-        {expandedSections["PhysicalExam"] && (
-          <div className="overflow-x-auto mt-4">
+        <div
+          className={`transition-[max-height] duration-300 ease-in-out overflow-hidden ${
+            expandedSections["PhysicalExam"] ? "max-h-[1000px]" : "max-h-0"
+          }`}
+        >
+          <div className="overflow-x-auto mt-4 p-4">
             <table className="min-w-full bg-white border border-green-300 rounded-lg shadow-sm">
               <thead>
                 <tr className="bg-green-200 text-green-900">
-                  <th className="border border-green-300 px-4 py-2 text-left">Body Part</th>
-                  <th className="border border-green-300 px-4 py-2 text-left">Normal / Abnormal</th>
-                  <th className="border border-green-300 px-4 py-2 text-left">Remarks</th>
+                  <th className="border border-green-300 px-4 py-2 text-left">
+                    Body Part
+                  </th>
+                  <th className="border border-green-300 px-4 py-2 text-left">
+                    Normal / Abnormal
+                  </th>
+                  <th className="border border-green-300 px-4 py-2 text-left">
+                    Remarks
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {bodyParts.map((part) => {
-                  const exam = formData.physical_examinations.find((exam) => exam.name === part);
+                  const exam = formData.physical_examinations.find(
+                    (exam) => exam.name === part
+                  );
 
                   return (
                     <tr key={part} className="border-t border-green-300">
-                      <td className="border border-green-300 px-4 py-2 font-semibold text-green-800">{part}</td>
+                      <td className="border border-green-300 px-4 py-2 font-semibold text-green-800">
+                        {part}
+                      </td>
 
                       {/* Radio buttons for Normal/Abnormal */}
                       <td className="border border-green-300 px-4 py-2">
@@ -206,7 +259,9 @@ const Step5 = ({ formData, setFormData }) => {
                               name={`${part}-result`}
                               value="Normal"
                               checked={exam?.result === "Normal"}
-                              onChange={(e) => handleExamChange(e, part, "result")}
+                              onChange={(e) =>
+                                handleExamChange(e, part, "result")
+                              }
                               className="form-radio text-green-600"
                             />
                             <span className="text-green-800">Normal</span>
@@ -217,7 +272,9 @@ const Step5 = ({ formData, setFormData }) => {
                               name={`${part}-result`}
                               value="Abnormal"
                               checked={exam?.result === "Abnormal"}
-                              onChange={(e) => handleExamChange(e, part, "result")}
+                              onChange={(e) =>
+                                handleExamChange(e, part, "result")
+                              }
                               className="form-radio text-red-600"
                             />
                             <span className="text-red-800">Abnormal</span>
@@ -230,7 +287,11 @@ const Step5 = ({ formData, setFormData }) => {
                         <TextInput
                           value={exam?.remarks || ""}
                           onChange={(e) => handleExamChange(e, part, "remarks")}
-                          placeholder={exam?.result === "Abnormal" ? "Abnormal Condition Remarks" : "Remarks"}
+                          placeholder={
+                            exam?.result === "Abnormal"
+                              ? "Abnormal Condition Remarks"
+                              : "Remarks"
+                          }
                         />
                       </td>
                     </tr>
@@ -239,7 +300,7 @@ const Step5 = ({ formData, setFormData }) => {
               </tbody>
             </table>
           </div>
-        )}
+        </div>
       </CollapsibleSection>
     </div>
   );
@@ -248,7 +309,10 @@ const Step5 = ({ formData, setFormData }) => {
 // Reusable UI Components (Green Theme)
 const CollapsibleSection = ({ title, children, toggle, expanded }) => (
   <div className="border border-green-400 rounded-lg shadow-sm bg-green-50 mt-4">
-    <button className="w-full flex justify-between p-4 bg-green-200 text-green-900 font-semibold" onClick={() => toggle(title)}>
+    <button
+      className="w-full flex justify-between p-4 bg-green-200 text-green-900 font-semibold"
+      onClick={() => toggle(title)}
+    >
       {title}
       <span>{expanded ? "▲" : "▼"}</span>
     </button>
@@ -259,26 +323,48 @@ const CollapsibleSection = ({ title, children, toggle, expanded }) => (
 const TextInput = ({ label, value, onChange }) => (
   <div className="flex flex-col mb-3">
     <label className="text-sm font-medium text-green-700">{label}</label>
-    <input type="text" value={value} onChange={onChange} className="border border-green-400 rounded p-2 focus:ring-green-500 focus:border-green-500" />
+    <input
+      type="text"
+      value={value}
+      onChange={onChange}
+      className="border border-green-400 rounded p-2 focus:ring-0 focus:border-green-600"
+    />
   </div>
 );
 
 const AddButton = ({ text, onClick }) => (
-  <button onClick={onClick} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">{text}</button>
+  <button
+    onClick={onClick}
+    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+  >
+    {text}
+  </button>
 );
 
 const DeleteButton = ({ text, onClick }) => (
-  <button onClick={onClick} className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">{text}</button>
+  <button
+    onClick={onClick}
+    className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+  >
+    {text}
+  </button>
 );
 
 const DeleteConfirmation = ({ sibling, onDelete, onCancel }) => (
   <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
     <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm text-center">
       <h2 className="text-lg font-semibold text-green-700">Confirm Delete</h2>
-      <p className="text-gray-600 mt-2">Are you sure you want to delete <strong>{sibling}</strong>?</p>
+      <p className="text-gray-600 mt-2">
+        Are you sure you want to delete <strong>{sibling}</strong>?
+      </p>
       <div className="mt-4 flex justify-center space-x-4">
         <DeleteButton text="Yes, Delete" onClick={onDelete} />
-        <button onClick={onCancel} className="bg-green-300 px-4 py-2 rounded hover:bg-green-400">Cancel</button>
+        <button
+          onClick={onCancel}
+          className="bg-green-300 px-4 py-2 rounded hover:bg-green-400"
+        >
+          Cancel
+        </button>
       </div>
     </div>
   </div>
