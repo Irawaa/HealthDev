@@ -58,13 +58,62 @@ const MedicalRecordDialog = ({ patient }) => {
 
     // ✅ Family Histories
     family_histories: [
-      { condition: "Bronchial Asthma", Father: "", Mother: "", Sister: [""], Brother: [""], remarks: "" },
-      { condition: "Cancer", Father: "", Mother: "", Sister: [""], Brother: [""], remarks: "" },
-      { condition: "Diabetes Mellitus", Father: "", Mother: "", Sister: [""], Brother: [""], remarks: "" },
-      { condition: "Kidney Disease", Father: "", Mother: "", Sister: [""], Brother: [""], remarks: "" },
-      { condition: "Heart Disease", Father: "", Mother: "", Sister: [""], Brother: [""], remarks: "" },
-      { condition: "Hypertension", Father: "", Mother: "", Sister: [""], Brother: [""], remarks: "" },
-      { condition: "Mental Illness", Father: "", Mother: "", Sister: [""], Brother: [""], remarks: "" },
+      {
+        condition: "Bronchial Asthma",
+        Father: "",
+        Mother: "",
+        Sister: [""],
+        Brother: [""],
+        remarks: "",
+      },
+      {
+        condition: "Cancer",
+        Father: "",
+        Mother: "",
+        Sister: [""],
+        Brother: [""],
+        remarks: "",
+      },
+      {
+        condition: "Diabetes Mellitus",
+        Father: "",
+        Mother: "",
+        Sister: [""],
+        Brother: [""],
+        remarks: "",
+      },
+      {
+        condition: "Kidney Disease",
+        Father: "",
+        Mother: "",
+        Sister: [""],
+        Brother: [""],
+        remarks: "",
+      },
+      {
+        condition: "Heart Disease",
+        Father: "",
+        Mother: "",
+        Sister: [""],
+        Brother: [""],
+        remarks: "",
+      },
+      {
+        condition: "Hypertension",
+        Father: "",
+        Mother: "",
+        Sister: [""],
+        Brother: [""],
+        remarks: "",
+      },
+      {
+        condition: "Mental Illness",
+        Father: "",
+        Mother: "",
+        Sister: [""],
+        Brother: [""],
+        remarks: "",
+      },
     ],
 
     // ✅ Physical Examinations
@@ -145,7 +194,12 @@ const MedicalRecordDialog = ({ patient }) => {
 
       case 2:
         // Step 2: Vital Signs
-        if (!data.bp.trim() || !data.rr.trim() || !data.hr.trim() || !data.temperature.trim()) {
+        if (
+          !data.bp.trim() ||
+          !data.rr.trim() ||
+          !data.hr.trim() ||
+          !data.temperature.trim()
+        ) {
           toast.error("All Vital Signs are required.");
           focusInvalidField();
           return false;
@@ -153,7 +207,9 @@ const MedicalRecordDialog = ({ patient }) => {
 
         // Deformities Mandatory if Checked
         if (data.deformity && data.deformities.length === 0) {
-          toast.error("Please select at least one deformity if Deformities is checked.");
+          toast.error(
+            "Please select at least one deformity if Deformities is checked."
+          );
           focusInvalidField();
           return false;
         }
@@ -173,7 +229,10 @@ const MedicalRecordDialog = ({ patient }) => {
           return false;
         }
 
-        if (data.past_medical_histories.includes("Others") && !data.other_condition.trim()) {
+        if (
+          data.past_medical_histories.includes("Others") &&
+          !data.other_condition.trim()
+        ) {
           toast.error("Please specify the Other Condition.");
           focusInvalidField();
           return false;
@@ -188,7 +247,9 @@ const MedicalRecordDialog = ({ patient }) => {
 
           if (
             data.obGyneHistory &&
-            (!data.menstruation || !data.duration || !data.last_menstrual_period.trim())
+            (!data.menstruation ||
+              !data.duration ||
+              !data.last_menstrual_period.trim())
           ) {
             toast.error("Please complete all OB/Gyne History fields.");
             focusInvalidField();
@@ -233,8 +294,13 @@ const MedicalRecordDialog = ({ patient }) => {
         }
 
         // ✅ Smoker Validation
-        if (data.smoker && (!data.sticks_per_day.trim() || !data.years_smoking.trim())) {
-          toast.error("Please complete Smoking History (Sticks per Day and Years Smoking).");
+        if (
+          data.smoker &&
+          (!data.sticks_per_day.trim() || !data.years_smoking.trim())
+        ) {
+          toast.error(
+            "Please complete Smoking History (Sticks per Day and Years Smoking)."
+          );
           focusInvalidField();
           return false;
         }
@@ -255,7 +321,9 @@ const MedicalRecordDialog = ({ patient }) => {
 
         // ✅ Eye Disorder Validation
         if (data.eye_disorder_no && (data.eye_glasses || data.contact_lens)) {
-          toast.error("You cannot select Eye Glasses or Contact Lens if No Eye Disorder is selected.");
+          toast.error(
+            "You cannot select Eye Glasses or Contact Lens if No Eye Disorder is selected."
+          );
           return false;
         }
 
@@ -268,28 +336,48 @@ const MedicalRecordDialog = ({ patient }) => {
         );
 
         if (hasInvalidExam) {
-          toast.error("Please provide remarks for Abnormal Physical Examinations.");
+          toast.error(
+            "Please provide remarks for Abnormal Physical Examinations."
+          );
           focusInvalidField();
           return false;
         }
 
         break;
 
-
       case 6:
         // 🔥 Chest X-Ray File Validation (Optional but if selected, must be valid)
-        if (data.chest_xray && !(data.chest_xray.type.includes("image") || data.chest_xray.type.includes("pdf"))) {
-          toast.error("Invalid file type for Chest X-Ray. Only images or PDFs are allowed.");
+        if (
+          data.chest_xray &&
+          !(
+            data.chest_xray.type.includes("image") ||
+            data.chest_xray.type.includes("pdf")
+          )
+        ) {
+          toast.error(
+            "Invalid file type for Chest X-Ray. Only images or PDFs are allowed."
+          );
           focusInvalidField();
           return false;
         }
 
         // ✅ Laboratory Test Validation (Only Numeric Fields)
-        const numericTests = ["fbs", "uric_acid", "triglycerides", "t_cholesterol", "creatinine"];
+        const numericTests = [
+          "fbs",
+          "uric_acid",
+          "triglycerides",
+          "t_cholesterol",
+          "creatinine",
+        ];
 
         for (let test of numericTests) {
           if (data[test] && isNaN(Number(data[test]))) {
-            toast.error(`Invalid input for ${test.replace("_", " ")}. Please enter a numeric value.`);
+            toast.error(
+              `Invalid input for ${test.replace(
+                "_",
+                " "
+              )}. Please enter a numeric value.`
+            );
             focusInvalidField();
             return false;
           }
@@ -326,7 +414,6 @@ const MedicalRecordDialog = ({ patient }) => {
     }
   };
 
-
   const handleSave = async () => {
     // 🔥 Run Final Validation
     if (!validateStep()) {
@@ -336,7 +423,9 @@ const MedicalRecordDialog = ({ patient }) => {
     }
 
     // Confirm Submission
-    const confirmed = window.confirm("Are you sure you want to submit this Medical Record?");
+    const confirmed = window.confirm(
+      "Are you sure you want to submit this Medical Record?"
+    );
     if (!confirmed) return;
 
     data.family_histories = data.family_histories.map((history) => ({
@@ -416,17 +505,33 @@ const MedicalRecordDialog = ({ patient }) => {
 
       {records.length > 0 ? (
         records.map((record, index) => (
-          <div key={index} className="p-4 bg-white shadow-md rounded-lg flex justify-between">
+          <div
+            key={index}
+            className="p-4 bg-white shadow-md rounded-lg flex justify-between"
+          >
             <div>
-              <p><strong>Final Evaluation:</strong> {record.final_evaluation}</p>
-              <p><strong>Plan:</strong> {record.plan_recommendation}</p>
-              <p><strong>Date:</strong> {new Date(record.created_at).toLocaleDateString()}</p>
+              <p>
+                <strong>Final Evaluation:</strong> {record.final_evaluation}
+              </p>
+              <p>
+                <strong>Plan:</strong> {record.plan_recommendation}
+              </p>
+              <p>
+                <strong>Date:</strong>{" "}
+                {new Date(record.created_at).toLocaleDateString()}
+              </p>
             </div>
             <div className="space-x-2">
-              <Button onClick={() => handleEdit(record)} className="bg-green-600 text-white">
+              <Button
+                onClick={() => handleEdit(record)}
+                className="bg-green-600 text-white"
+              >
                 Edit
               </Button>
-              <Button onClick={() => handleDelete(record.id)} className="bg-red-600 text-white">
+              <Button
+                onClick={() => handleDelete(record.id)}
+                className="bg-red-600 text-white"
+              >
                 Delete
               </Button>
             </div>
@@ -436,10 +541,9 @@ const MedicalRecordDialog = ({ patient }) => {
         <p className="text-gray-700 mt-4">No medical records available.</p>
       )}
 
-
       {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl p-6 flex flex-col max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+          <div className="bg-white w-full h-full p-6 overflow-y-auto">
             <div className="flex justify-between items-center border-b pb-4">
               <h2 className="text-lg font-semibold text-green-700">
                 {selectedRecord ? "Edit Medical Record" : "New Medical Record"}
@@ -449,13 +553,17 @@ const MedicalRecordDialog = ({ patient }) => {
               </Button>
             </div>
 
+            {/* Render steps conditionally */}
             {step === 1 && <Step1 formData={data} setFormData={setData} />}
             {step === 2 && <Step2 formData={data} setFormData={setData} />}
-            {step === 3 && <Step3 formData={data} setFormData={setData} patient={patient} />}
+            {step === 3 && (
+              <Step3 formData={data} setFormData={setData} patient={patient} />
+            )}
             {step === 4 && <Step4 formData={data} setFormData={setData} />}
             {step === 5 && <Step5 formData={data} setFormData={setData} />}
             {step === 6 && <Step6 formData={data} setFormData={setData} />}
 
+            {/* Navigation buttons */}
             <div className="mt-4 flex justify-between">
               {step > 1 && (
                 <Button onClick={prevStep} className="bg-gray-400">

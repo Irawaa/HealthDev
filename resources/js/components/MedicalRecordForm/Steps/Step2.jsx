@@ -105,7 +105,7 @@ const Step2 = ({ formData, setFormData }) => {
               checked={formData.deformities.includes(name)}
               onChange={handleCheckboxChange}
               disabled={!formData.deformity}
-              className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500"
+              className="w-5 h-5 text-green-600 rounded border-green-500"
             />
             <span>{label}</span>
           </label>

@@ -156,7 +156,7 @@ const BPTable = ({ open, setOpen, patient }) => {
         </DialogHeader>
 
         {/* Overall Status Summary */}
-        <div className="mb-4 p-3 rounded-lg bg-gray-100 border border-gray-300 text-gray-800 font-semibold">
+        <div className="mb-4 p-3 rounded-lg bg-green-100 border border-gray-300 text-gray-800 font-semibold">
           Overall Status: <span className="font-bold">{data.status}</span>
         </div>
 
@@ -164,10 +164,10 @@ const BPTable = ({ open, setOpen, patient }) => {
         {/* BP Records List */}
         <div className="space-y-2 max-h-80 overflow-y-auto">
           {data.readings.map((record, index) => (
-            <div key={record.id || index} className="border border-gray-300 rounded-lg bg-gray-50 shadow-md">
+            <div key={record.id || index} className="border border-green-300 rounded-lg bg-green-50 shadow-md">
               {/* Record Header */}
               <div
-                className="flex justify-between items-center p-3 bg-gray-200 cursor-pointer rounded-t-lg hover:bg-gray-300 transition"
+                className="flex justify-between items-center p-3 bg-green-200 cursor-pointer rounded-t-lg hover:bg-green-300 transition"
                 onClick={() => setExpandedIndex(expandedIndex === index ? null : index)}
               >
                 <h3 className="text-sm font-semibold text-gray-900">
@@ -228,7 +228,7 @@ const BPTable = ({ open, setOpen, patient }) => {
                       )}
 
                       {/* Remarks Display */}
-                      <div className="mt-2 p-2 rounded bg-gray-100 border border-gray-300">
+                      <div className="mt-2 p-2 rounded bg-green-100 border border-gray-300">
                         <strong>Remarks:</strong> {record.remarks}
                       </div>
                     </div>
@@ -258,7 +258,7 @@ const BPTable = ({ open, setOpen, patient }) => {
 
         {/* Submit & Cancel Buttons */}
         <DialogFooter className="mt-6 flex justify-between">
-          <Button onClick={() => setOpen(false)} className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600">
+          <Button onClick={() => setOpen(false)} className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600">
             Cancel
           </Button>
           <Button
