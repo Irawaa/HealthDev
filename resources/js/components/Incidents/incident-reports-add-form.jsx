@@ -40,8 +40,60 @@ const AddIncidentForm = ({ open, setOpen, patient }) => {
   // Submit form to Laravel backend
   const handleSubmit = (e) => {
     e.preventDefault();
+  
+    // Trim all input values
+    const trimmedData = Object.keys(data).reduce((acc, key) => {
+      acc[key] = typeof data[key] === "string" ? data[key].trim() : data[key];
+      return acc;
+    }, {});
+  
+    // Required fields
+    const requiredFields = [
+      "history",
+      "nature_of_incident",
+      "place_of_incident",
+      "date_of_incident",
+      "time_of_incident",
+      "school_physician_id",
+    ];
+  
+    let missingFields = requiredFields.filter((field) => !trimmedData[field]);
+  
+    // Ensure `hospital_specification` is required if "Referred to Hospital" is selected
+    if (trimmedData.management === "Referred to Hospital" && !trimmedData.hospital_specification) {
+      missingFields.push("hospital_specification");
+    }
+  
+    // Ensure `description_of_injury` is required if the incident involves injury
+    if (
+      /injury|wound|fracture|burn|bruise|cut/i.test(trimmedData.nature_of_incident) &&
+      !trimmedData.description_of_injury
+    ) {
+      missingFields.push("description_of_injury");
+    }
+  
+    // Ensure `date_of_incident` is not in the future
+    const today = new Date().toISOString().split("T")[0];
+    if (trimmedData.date_of_incident && trimmedData.date_of_incident > today) {
+      toast.error("❌ Date of incident cannot be in the future.");
+      return;
+    }
+  
+    // Ensure `time_of_incident` is valid
+    if (!/^\d{2}:\d{2}$/.test(trimmedData.time_of_incident)) {
+      toast.error("❌ Invalid time format.");
+      return;
+    }
+  
+    if (missingFields.length > 0) {
+      missingFields.forEach((field) => 
+        toast.error(`❌ ${field.replace(/_/g, " ")} is required.`)
+      );
+      return; // Stop form submission
+    }
+  
     setPageLoading(true); // Show loading animation
-
+  
     post(route("incident-reports.store"), {
       onSuccess: () => {
         toast.success("Incident report saved successfully!");
@@ -51,7 +103,7 @@ const AddIncidentForm = ({ open, setOpen, patient }) => {
       onError: (errors) => {
         console.error("Validation Errors:", errors);
         toast.error("Failed to save the incident report.");
-
+  
         Object.entries(errors).forEach(([key, messages]) => {
           (Array.isArray(messages) ? messages : [messages]).forEach((message) =>
             toast.error(`❌ ${message}`)
@@ -63,7 +115,7 @@ const AddIncidentForm = ({ open, setOpen, patient }) => {
       },
     });
   };
-
+  
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="bg-white shadow-xl rounded-lg p-6 max-w-lg w-full mx-auto">
