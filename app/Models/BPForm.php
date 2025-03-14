@@ -31,9 +31,20 @@ class BPForm extends Model
         return $this->belongsTo(ClinicStaff::class, 'school_nurse_id', 'staff_id');
     }
 
-    public function recorder(): BelongsTo
+    public function recordedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'recorded_by', 'user_id');
+    }
+
+    public function schoolNurse()
+    {
+        return $this->belongsTo(ClinicStaff::class, 'school_nurse_id', 'staff_id');
+    }
+
+    // 📌 Relationship with School Physician (Clinic Staff)
+    public function schoolPhysician()
+    {
+        return $this->belongsTo(ClinicStaff::class, 'school_physician_id', 'staff_id');
     }
 
     public function updater(): BelongsTo

@@ -5,7 +5,7 @@ import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { useForm } from "@inertiajs/react";
 import { toast } from "react-hot-toast";
 
-const BPTable = ({ open, setOpen, patient }) => {
+const AddBPTable = ({ open, setOpen, patient }) => {
   const MAX_RECORDS = 7; // Limit for BP records
   const [expandedIndex, setExpandedIndex] = useState(null); // Track expanded record
 
@@ -274,4 +274,4 @@ const BPTable = ({ open, setOpen, patient }) => {
   );
 };
 
-export default BPTable;
+export default AddBPTable;

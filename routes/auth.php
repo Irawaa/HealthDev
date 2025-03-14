@@ -11,6 +11,7 @@ use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\FDARFormController;
 use App\Http\Controllers\BPFormController;
 use App\Http\Controllers\IncidentReportController;
+use App\Http\Controllers\PrescriptionController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -74,6 +75,10 @@ Route::middleware(['web', 'auth'])->group(function () {
 
     // BP Forms (BP Pressure Monitoring Form) //
     Route::post('/bp-forms', [BPFormController::class, 'store'])->name('bp-forms.store');
+    Route::put('/bp-forms/{id}', [BPFormController::class, 'update'])->name('bp-forms.update');
+    Route::delete('/bp-forms/{id}', [BPFormController::class, 'destroy'])->name('bp-forms.destroy');
+    Route::get('/bp-forms/{id}/pdf', [BPFormController::class, 'viewPDF'])->name('bp-forms.view-pdf');
+    Route::get('/bp-forms/preview/{id}', [BPFormController::class, 'preview'])->name('bp-forms.preview');
 
     // Incidents Reports Form //
     Route::post('/incident-reports', [IncidentReportController::class, 'store'])->name('incident-reports.store');
@@ -81,6 +86,12 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::delete('/incident-reports/{id}', [IncidentReportController::class, 'destroy'])->name('incident-reports.destroy');
     Route::get('/incident-reports/{id}/pdf', [IncidentReportController::class, 'viewPDF'])->name('incident-reports.view-pdf');
     Route::get('/incident-reports/preview/{id}', [IncidentReportController::class, 'preview'])->name('incident-reports.preview');
+
+    // Prescriptions Form //
+    Route::post('/prescriptions', [PrescriptionController::class, 'store'])->name('prescriptions.store');
+    Route::put('/prescriptions/{id}', [PrescriptionController::class, 'update'])->name('prescriptions.update');
+    Route::delete('/prescriptions/{id}', [PrescriptionController::class, 'destroy'])->name('prescriptions.destroy');
+    Route::get('/prescriptions/{id}/image', [PrescriptionController::class, 'showImage'])->name('prescriptions.show');
 
     // --- Logout ---
     Route::post('/logout', [AuthenticateController::class, 'destroy'])->name('logout');

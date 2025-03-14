@@ -161,7 +161,15 @@ class PatientController extends Controller
                     'updatedBy'
                 ])->latest();
             },
+
+            'prescriptions' => function ($query) {
+                $query->select(
+                    'patient_id',
+                    'prescription_number',
+                )->latest();
+            },
         ]);
+
 
         // Fetch supporting data
         $colleges = College::where('is_active', 1)

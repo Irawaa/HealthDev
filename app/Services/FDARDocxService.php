@@ -98,7 +98,7 @@ class FDARDocxService
             'dob' => $patient['birthdate'] ?? 'N/A',
             'age' => formatString(isset($patient['birthdate']) ? Carbon::parse($patient['birthdate'])->age : 'N/A', 9),
             'g' => formatString($gender, 11),
-            'pc' => formatString("{$programName} | {$collegeName}", 51),
+            'pc' => formatString("{$programName}/{$collegeName}", 51),
 
             'date' => formatString(now()->format('Y-m-d'), 8),
             'time' => formatString(now()->format('H:i'), 10),

@@ -160,8 +160,8 @@ const PatientProfile = ({ patient, colleges, departments, commonDiseases, physic
                       {patient.student?.stud_id && <p><strong>Student ID:</strong> {patient.student.stud_id}</p>}
                       {college?.college_description && <p><strong>College:</strong> {college.college_description}</p>}
                       {program?.program_description && <p><strong>Program:</strong> {program.program_description}</p>}
-                      {patient.type === "employee" && department?.dept_description && (
-                        <p><strong>Department:</strong> {department.dept_description}</p>
+                      {patient.type === "employee" && department?.name && (
+                        <p><strong>Department:</strong> {department.name}</p>
                       )}
 
                       {/* Address Section (Only if at least one part exists) */}
