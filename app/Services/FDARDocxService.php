@@ -22,7 +22,7 @@ class FDARDocxService
             return $formatted;
         }
 
-        $templatePath = storage_path('app/templates/Test6.docx');
+        $templatePath = storage_path('app/templates/Test7.docx');
         $storageDir = storage_path('app/generated');
 
         // ✅ Ensure "generated" directory exists

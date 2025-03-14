@@ -77,6 +77,10 @@ Route::middleware(['web', 'auth'])->group(function () {
 
     // Incidents Reports Form //
     Route::post('/incident-reports', [IncidentReportController::class, 'store'])->name('incident-reports.store');
+    Route::patch('/incident-reports/{id}', [IncidentReportController::class, 'update'])->name('incident-reports.update');
+    Route::delete('/incident-reports/{id}', [IncidentReportController::class, 'destroy'])->name('incident-reports.destroy');
+    Route::get('/incident-reports/{id}/pdf', [IncidentReportController::class, 'viewPDF'])->name('incident-reports.view-pdf');
+    Route::get('/incident-reports/preview/{id}', [IncidentReportController::class, 'preview'])->name('incident-reports.preview');
 
     // --- Logout ---
     Route::post('/logout', [AuthenticateController::class, 'destroy'])->name('logout');

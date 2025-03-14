@@ -1,10 +1,13 @@
 import { useForm } from "@inertiajs/react";
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { usePhysicianStaff } from "@/Pages/Patients/ProfilePage"; // Import context
 import { Button } from "@/components/ui/button";
 import { toast } from "react-hot-toast";
+import { motion } from "framer-motion";
 
-const IncidentForm = ({ open, setOpen, patient }) => {
+const AddIncidentForm = ({ open, setOpen, patient }) => {
+  const [pageLoading, setPageLoading] = useState(false);
   const physicianStaff = usePhysicianStaff(); // Get physicians from context
   const { data, setData, post, processing, errors, reset } = useForm({
     patient_id: patient?.patient_id || "",
@@ -32,11 +35,12 @@ const IncidentForm = ({ open, setOpen, patient }) => {
     }
   };
 
+  console.log(data);
+
   // Submit form to Laravel backend
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    console.log("Form Data before submission:", data); // ✅ Debugging Log
+    setPageLoading(true); // Show loading animation
 
     post(route("incident-reports.store"), {
       onSuccess: () => {
@@ -46,20 +50,16 @@ const IncidentForm = ({ open, setOpen, patient }) => {
       },
       onError: (errors) => {
         console.error("Validation Errors:", errors);
+        toast.error("Failed to save the incident report.");
 
-        // 🔥 Show general error message if available
-        if (typeof errors.error === "string") {
-          toast.error(`❌ ${errors.error}`);
-        }
-
-        // 🔥 Loop through all errors safely
         Object.entries(errors).forEach(([key, messages]) => {
-          if (Array.isArray(messages)) {
-            messages.forEach((message) => toast.error(`❌ ${message}`));
-          } else if (typeof messages === "string") {
-            toast.error(`❌ ${messages}`);
-          }
+          (Array.isArray(messages) ? messages : [messages]).forEach((message) =>
+            toast.error(`❌ ${message}`)
+          );
         });
+      },
+      onFinish: () => {
+        setPageLoading(false); // Hide loading animation after request finishes
       },
     });
   };
@@ -232,8 +232,26 @@ const IncidentForm = ({ open, setOpen, patient }) => {
           </DialogFooter>
         </form>
       </DialogContent>
+
+      {pageLoading && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[9999]">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="relative flex flex-col items-center"
+          >
+            {/* Smooth Spinning Loader */}
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-transparent border-t-green-500 border-l-green-400 border-r-green-300 border-b-green-200"></div>
+            <p className="mt-4 text-green-300 text-lg font-semibold animate-pulse">
+              Saving, please wait...
+            </p>
+          </motion.div>
+        </div>
+      )}
+
     </Dialog>
   );
 };
 
-export default IncidentForm;
+export default AddIncidentForm;

@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use App\Services\FDARDocxService;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\File;
 
 class FDARFormController extends Controller
 {
@@ -167,6 +169,41 @@ class FDARFormController extends Controller
                     'custom_diseases' => $validated['custom_diseases']
                 ]);
             }
+
+            // Prepare for file handling
+            $storageDir = storage_path('app/generated');
+            $fdarFormId = $fdarForm->id;
+
+            // Generate file names for the DOCX and PDF
+            $createdAt = isset($fdarForm['created_at'])
+                ? Carbon::parse($fdarForm['created_at'])->format('Ymd_His')
+                : now()->format('Ymd_His');
+
+            $patientName = isset($fdarForm['patient']['fname'], $fdarForm['patient']['lname'])
+                ? trim("{$fdarForm['patient']['fname']}_{$fdarForm['patient']['lname']}")
+                : 'unknown_student';
+
+            $patientName = preg_replace('/[^A-Za-z0-9_-]/', '', $patientName); // Remove special characters
+
+            // Paths for DOCX and PDF
+            $docxFilePath = "{$storageDir}/fdar_{$fdarFormId}_{$patientName}_{$createdAt}.docx";
+            $pdfFilePath = "{$storageDir}/fdar_{$fdarFormId}_{$patientName}_{$createdAt}.pdf";
+
+            // Check and delete old files if they exist
+            if (File::exists($docxFilePath)) {
+                File::delete($docxFilePath);
+                Log::info("Deleted old DOCX file for FDAR form ID: {$fdarFormId}", ['file' => $docxFilePath]);
+            }
+
+            if (File::exists($pdfFilePath)) {
+                File::delete($pdfFilePath);
+                Log::info("Deleted old PDF file for FDAR form ID: {$fdarFormId}", ['file' => $pdfFilePath]);
+            }
+
+            // Regenerate the files if needed (optional)
+            // This would depend on your use case for file regeneration
+
+            Log::info('FDAR form updated successfully', ['fdar_form_id' => $id]);
 
             return redirect()->back()->with('success', 'FDAR form updated successfully');
         } catch (\Exception $e) {
