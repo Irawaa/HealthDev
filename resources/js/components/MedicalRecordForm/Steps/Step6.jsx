@@ -1,4 +1,4 @@
-import { usePhysicianStaff } from "@/Pages/Patients/Index"; // Import context
+import { usePhysicianStaff } from "@/Pages/Patients/ProfilePage"; // Import context
 
 const Step6 = ({ formData, setFormData }) => {
   const physicianStaff = usePhysicianStaff();

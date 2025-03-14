@@ -1,8 +1,8 @@
 import { useState, useEffect, useContext } from "react";
 import Cookies from "js-cookie";
-import { CommonDiseasesContext } from "@/pages/Patients/Index"; // Adjust the import path
+import { CommonDiseasesContext } from "@/pages/Patients/ProfilePage"; // Adjust the import path
 
-const FDARTags = ({ selectedTagIds, setSelectedTagIds }) => {
+const FDARTags = ({ selectedTagIds, setSelectedTagIds, customTags, setCustomTags }) => {
   const commonDiseases = useContext(CommonDiseasesContext); // Retrieve data from context
   const [suggestedTags, setSuggestedTags] = useState([]);
   const [inputValue, setInputValue] = useState("");
@@ -15,8 +15,8 @@ const FDARTags = ({ selectedTagIds, setSelectedTagIds }) => {
     }
   }, [commonDiseases]);
 
-  const saveTagsToCookies = (tagIds) => {
-    Cookies.set("focus_tags", JSON.stringify(tagIds), { expires: 7 });
+  const saveTagsToCookies = (tagIds, customTags) => {
+    Cookies.set("focus_tags", JSON.stringify({ tagIds, customTags }), { expires: 7 });
   };
 
   const handleTagInput = (e) => {
@@ -32,8 +32,13 @@ const FDARTags = ({ selectedTagIds, setSelectedTagIds }) => {
     if (matchedTag && !selectedTagIds.includes(matchedTag.id)) {
       const updatedTagIds = [...selectedTagIds, matchedTag.id];
       setSelectedTagIds(updatedTagIds);
-      saveTagsToCookies(updatedTagIds);
+      saveTagsToCookies(updatedTagIds, customTags);
+    } else if (!matchedTag && !customTags.includes(tagName)) {
+      const updatedCustomTags = [...customTags, tagName];
+      setCustomTags(updatedCustomTags);
+      saveTagsToCookies(selectedTagIds, updatedCustomTags);
     }
+
     setInputValue("");
     setFilteredSuggestions([]);
     setShowSuggestions(false);
@@ -42,7 +47,13 @@ const FDARTags = ({ selectedTagIds, setSelectedTagIds }) => {
   const removeTag = (tagIdToRemove) => {
     const updatedTagIds = selectedTagIds.filter(id => id !== tagIdToRemove);
     setSelectedTagIds(updatedTagIds);
-    saveTagsToCookies(updatedTagIds);
+    saveTagsToCookies(updatedTagIds, customTags);
+  };
+
+  const removeCustomTag = (tagNameToRemove) => {
+    const updatedCustomTags = customTags.filter(tag => tag !== tagNameToRemove);
+    setCustomTags(updatedCustomTags);
+    saveTagsToCookies(selectedTagIds, updatedCustomTags);
   };
 
   const handleInputChange = (e) => {
@@ -63,7 +74,9 @@ const FDARTags = ({ selectedTagIds, setSelectedTagIds }) => {
 
   return (
     <div className="flex flex-col mb-4 relative">
-      <label className="text-xs font-medium text-gray-700">Focus</label>
+      <label className="text-xs font-medium text-gray-700">
+        Focus <span className="text-red-500">*</span>
+      </label>
 
       {/* ✅ Tag Input Field */}
       <div className="border border-gray-300 bg-white p-2 rounded focus-within:ring-1 focus-within:ring-green-500 transition-all relative">
@@ -84,6 +97,17 @@ const FDARTags = ({ selectedTagIds, setSelectedTagIds }) => {
               )
             );
           })}
+          {customTags.map((tag, index) => (
+            <div key={index} className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded flex items-center">
+              {tag}
+              <button
+                onClick={() => removeCustomTag(tag)}
+                className="ml-2 text-red-500 hover:text-red-700 focus:outline-none"
+              >
+                &times;
+              </button>
+            </div>
+          ))}
         </div>
         <input
           type="text"

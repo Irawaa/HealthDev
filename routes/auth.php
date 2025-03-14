@@ -66,6 +66,11 @@ Route::middleware(['web', 'auth'])->group(function () {
 
     // FDAR Forms //
     Route::post('/fdar-forms', [FDARFormController::class, 'store'])->name('fdar-forms.store');
+    Route::put('/fdar-forms/{id}', [FDARFormController::class, 'update'])->name('fdar.update'); // Update FDAR Form
+    Route::delete('/fdar-forms/{id}', [FDARFormController::class, 'destroy'])->name('fdar-forms.destroy');
+    Route::get('/fdar/{id}/pdf', [FDARFormController::class, 'viewPDF']);
+    Route::get('/fdar/preview/{id}', [FDARFormController::class, 'preview']);
+
 
     // BP Forms (BP Pressure Monitoring Form) //
     Route::post('/bp-forms', [BPFormController::class, 'store'])->name('bp-forms.store');

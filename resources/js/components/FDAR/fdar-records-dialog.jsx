@@ -1,16 +1,18 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useForm } from "@inertiajs/react";
-import { toast } from "react-hot-toast"; // ✅ Import toast
-import FDARForm from "./FDARSteps/fdar-forms";
+import { useForm, router } from "@inertiajs/react";
+import { toast } from "react-hot-toast";
+import FDARForm from "./FDARSteps/add-fdar-forms";
+import FDARRecords from "./fdar-records"; // ✅ Import the new component
+import ConfirmationModal from "../confirmation-modal";
 
-const FDARModal = ({ patient }) => {
+const FDARModal = ({ patient, refreshPatientData }) => {
   const [open, setOpen] = useState(false);
   const [fdarForms, setFdarForms] = useState([]);
-  const [expandedForms, setExpandedForms] = useState({});
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedFDARId, setSelectedFDARId] = useState(null);
 
-  // ✅ Initialize Inertia form
   const { data, setData, post, processing, reset, errors } = useForm({
     patient_id: patient?.patient_id || null,
     school_nurse_id: "",
@@ -26,101 +28,74 @@ const FDARModal = ({ patient }) => {
     oxygen_saturation: "",
     last_menstrual_period: "",
     common_disease_ids: [],
+    custom_diseases: [],
   });
 
   useEffect(() => {
     if (patient?.fdar_forms) {
       setFdarForms(patient.fdar_forms);
+      console.log("FDAR Forms:", patient.fdar_forms);
     }
   }, [patient]);
 
-  const toggleForm = (id) => {
-    setExpandedForms((prev) => ({
+  const handleChange = (e) => {
+    setData((prev) => ({
       ...prev,
-      [id]: !prev[id],
+      [e.target.name]: e.target.value,
     }));
   };
 
-
-  // ✅ Handle input changes
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setData(name, value);
-  };
-
-  // ✅ Capitalize First Letter of Error Messages
-  const capitalizeFirstLetter = (str) => {
-    return str.charAt(0).toUpperCase() + str.slice(1).replace(/_/g, " ");
-  };
-
-  // ✅ Frontend Validation
-  const validateForm = () => {
-    let isValid = true;
-
-    // 🔥 Required Fields
-    const requiredFields = ["data", "action", "response", "blood_pressure", "cardiac_rate", "respiratory_rate", "temperature"];
-    requiredFields.forEach((field) => {
-      if (!data[field]?.trim()) {
-        toast.error(`❌ ${capitalizeFirstLetter(field)} is required`);
-        isValid = false;
-      }
-    });
-
-    // 🔥 Numeric Fields Validation
-    const numericFields = ["weight", "height", "temperature", "oxygen_saturation"];
-    numericFields.forEach((field) => {
-      if (data[field] && isNaN(Number(data[field]))) {
-        toast.error(`❌ ${capitalizeFirstLetter(field)} must be a valid number`);
-        isValid = false;
-      }
-    });
-
-    // 🔥 Dropdown / Array Validation
-    if (!data.common_disease_ids.length) {
-      toast.error("❌ Please select at least one Common Disease");
-      isValid = false;
-    }
-
-    return isValid;
-  };
-
-  // ✅ Handle form submission using Inertia.js
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // 🔥 Validate before submission
-    if (!validateForm()) return;
-
     post(route("fdar-forms.store"), {
+      preserveScroll: true,
+      preserveState: true,
       onSuccess: () => {
         toast.success("✅ FDAR Record Saved Successfully!");
         setOpen(false);
         reset();
+        if (refreshPatientData) {
+          refreshPatientData(); // 🔄 Reload patient data
+        }
       },
       onError: (errors) => {
         console.error("Validation Errors:", errors);
-
-        // 🔥 Show general error message if available
-        if (typeof errors.error === "string") {
-          toast.error(`❌ ${capitalizeFirstLetter(errors.error)}`);
-        }
-
-        // 🔥 Loop through all validation errors safely
         Object.entries(errors).forEach(([key, messages]) => {
           if (Array.isArray(messages)) {
-            messages.forEach((message) => toast.error(`❌ ${capitalizeFirstLetter(message)}`));
-          } else if (typeof messages === "string") {
-            toast.error(`❌ ${capitalizeFirstLetter(messages)}`);
+            messages.forEach((message) => toast.error(`❌ ${message}`));
           }
         });
       },
     });
   };
 
-  // ✅ Open modal for creating a new FDAR record
-  const openCreateModal = () => {
-    reset(); // Clear form
-    setOpen(true);
+  const handleDeleteClick = (fdarId) => {
+    setSelectedFDARId(fdarId);
+    setConfirmOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (!selectedFDARId) return;
+
+    router.delete(route("fdar-forms.destroy", selectedFDARId), {
+      preserveScroll: true,
+      onSuccess: () => {
+        toast.success("✅ FDAR record deleted successfully!");
+        setFdarForms((prevForms) => prevForms.filter((form) => form.id !== selectedFDARId));
+        if (refreshPatientData) {
+          refreshPatientData(); // Refresh patient data after deletion
+        }
+      },
+      onError: (errors) => {
+        toast.error("❌ Failed to delete FDAR record.");
+        console.error(errors);
+      },
+      onFinish: () => {
+        setConfirmOpen(false);
+        setSelectedFDARId(null);
+      },
+    });
   };
 
   return (
@@ -130,78 +105,13 @@ const FDARModal = ({ patient }) => {
       {/* ✅ Button to Open Create Form */}
       <Button
         className="mt-4 bg-blue-600 text-white px-4 py-2 rounded shadow-md hover:bg-blue-700 transition"
-        onClick={openCreateModal}
+        onClick={() => setOpen(true)}
       >
         Create New FDAR Record
       </Button>
 
-      <div className="mt-4 space-y-3">
-        {fdarForms.length > 0 ? (
-          fdarForms.map((form) => (
-            <div key={form.id} className="bg-white p-5 rounded-2xl shadow-md border border-gray-200 transition hover:shadow-lg">
-              {/* ✅ FDAR Form Header */}
-              <div className="flex justify-between items-center cursor-pointer" onClick={() => toggleForm(form.id)}>
-                <p className="font-medium text-gray-800">
-                  <span className="font-semibold">Recorded:</span>{" "}
-                  {new Date(form.created_at).toLocaleString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    second: "2-digit",
-                    hour12: true,
-                  })}
-                  <span className="font-semibold"> || Action:</span> {form.action}
-                </p>
-                <Button
-                  className="flex items-center gap-2 text-sm bg-gray-100 px-3 py-1 rounded-md shadow hover:bg-gray-200 transition"
-                  onClick={(e) => { e.stopPropagation(); toggleForm(form.id); }}
-                >
-                  {expandedForms[form.id] ? "Collapse" : "Expand"}
-                  {expandedForms[form.id] ? "🔼" : "🔽"}
-                </Button>
-              </div>
-
-              {/* ✅ Collapsible FDAR Details */}
-              {expandedForms[form.id] && (
-                <div className="mt-3 space-y-2 bg-gray-50 border border-gray-300 p-4 rounded-md shadow-sm">
-
-                  {/* ✅ Common Diseases */}
-                  {form.common_diseases?.length > 0 && (
-                    <div className="text-gray-700">
-                      <span className="font-semibold">Focus:</span>
-                      <ul className="flex flex-wrap gap-2 mt-1">
-                        {form.common_diseases.map((disease) => (
-                          <li key={disease.id} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm shadow">
-                            {disease.name}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  <div className="grid grid-cols-2 gap-3 text-gray-700">
-                    <p><span className="font-semibold">Response:</span> {form.response}</p>
-                    <p><span className="font-semibold">BP:</span> {form.blood_pressure}</p>
-                    <p><span className="font-semibold">Weight:</span> {form.weight || "N/A"} kg</p>
-                    <p><span className="font-semibold">Height:</span> {form.height || "N/A"} m</p>
-                    <p><span className="font-semibold">Temperature:</span> {form.temperature || "N/A"}°C</p>
-                    <p><span className="font-semibold">Oxygen Saturation:</span> {form.oxygen_saturation || "N/A"}%</p>
-                  </div>
-
-                  {/* ✅ Actions */}
-                  <div className="flex justify-end space-x-2">
-                  </div>
-                </div>
-              )}
-            </div>
-          ))
-        ) : (
-          <p className="text-green-700 text-center">No FDAR records found.</p>
-        )}
-      </div>
-
+      {/* ✅ Render FDAR Records Component */}
+      <FDARRecords fdarForms={fdarForms} onDelete={handleDeleteClick} />
 
       {/* ✅ FDAR Form Modal */}
       <Dialog open={open} onOpenChange={setOpen}>
@@ -216,7 +126,7 @@ const FDARModal = ({ patient }) => {
               <DialogTitle className="text-transparent select-none">‎</DialogTitle>
             </DialogHeader>
 
-            {/* ✅ Render Single Combined Form */}
+            {/* ✅ Render FDAR Form */}
             <FDARForm formData={data} handleChange={handleChange} />
           </div>
 
@@ -235,6 +145,15 @@ const FDARModal = ({ patient }) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ConfirmationModal
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        title="Delete FDAR Record"
+        message="Are you sure you want to delete this FDAR record? This action cannot be undone."
+        actionType="Remove"
+      />
     </div>
   );
 };

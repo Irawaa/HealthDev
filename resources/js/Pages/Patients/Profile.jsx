@@ -55,7 +55,18 @@ const PatientProfile = ({ patient, onClose, onSave, colleges, departments }) => 
   const [editablePatient, setEditablePatient] = useState({ ...patient });
   const [activeTab, setActiveTab] = useState("medical");
   const [showInfo, setShowInfo] = useState(false);
+  const [patientData, setPatientData] = useState(patient);
   const [age, setAge] = useState("0"); // State for age
+
+  const refreshPatientData = async () => {
+    try {
+      const response = await fetch(`/api/patients/${patient.patient_id}`); // Update API route as needed
+      const updatedPatient = await response.json();
+      setPatientData(updatedPatient);
+    } catch (error) {
+      console.error("Error refreshing patient data:", error);
+    }
+  };
 
   const college = colleges?.find(col =>
     col.college_id === patient.student?.college_id ||
@@ -119,7 +130,7 @@ const PatientProfile = ({ patient, onClose, onSave, colleges, departments }) => 
     return age;
   };
 
-  const fullName = `${editablePatient.lname}, ${editablePatient.fname} ${editablePatient.mname || ""}`;
+  const fullName = `${editablePatient.lname}, ${editablePatient.fname}${editablePatient.mname ? ' ' + editablePatient.mname.trim() + '.' : ''}`;
 
   return (
     <Dialog open={!!patient} onOpenChange={onClose}>
@@ -246,7 +257,7 @@ const PatientProfile = ({ patient, onClose, onSave, colleges, departments }) => 
 
             <div className="mt-3">
               {activeTab === "medical" && <MedicalRecordDialog activeTab={activeTab} patient={patient} />}
-              {activeTab === "fdar" && <FDARModal activeTab={activeTab} patient={patient} />}
+              {activeTab === "fdar" && <FDARModal activeTab={activeTab} patient={patient} refreshPatientData={refreshPatientData} />}
               {activeTab === "bp" && <BPModal activeTab={activeTab} patient={patient} />}
               {activeTab === "incident" && <IncidentModal activeTab={activeTab} patient={patient} />}
               {activeTab === "prescription" && <PrescriptionModal activeTab={activeTab} patient={patient} />}

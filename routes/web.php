@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\PatientController;
 
-Route::get('/patients/{id}', [PatientController::class, 'show'])->name('patients.show');
+Route::get('/patients/{patient}', [PatientController::class, 'show'])->name('patients.show');
 
 Route::get('/edit-patients', [PatientController::class, 'index'])->name('edit_patients.index');
 Route::post('/edit-patients', [PatientController::class, 'store'])->name('edit_patients.store');

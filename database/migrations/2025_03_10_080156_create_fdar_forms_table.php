@@ -17,7 +17,7 @@ return new class extends Migration
 
             // Vital Signs
             $table->decimal('weight', 5, 2);
-            $table->decimal('height', 4, 2);
+            $table->decimal('height', 5, 2);
             $table->string('blood_pressure', 10);
             $table->smallInteger('cardiac_rate');
             $table->smallInteger('respiratory_rate');

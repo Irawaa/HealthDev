@@ -13,15 +13,40 @@ class Employee extends Model
     public $incrementing = true;
 
     protected $fillable = [
-        'patient_id', 'employee_no', 'date_hired', 'is_active',
-        'height', 'weight', 'blood_type', 'father_name', 'mother_name',
-        'spouse_name', 'spouse_occupation', 'emergency_contact_person',
-        'emergency_contact_number', 'res_brgy', 'res_city', 'res_prov',
-        'res_region', 'res_zipcode', 'dept_id', 'college_id'
+        'patient_id',
+        'employee_no',
+        'date_hired',
+        'is_active',
+        'height',
+        'weight',
+        'blood_type',
+        'father_name',
+        'mother_name',
+        'spouse_name',
+        'spouse_occupation',
+        'emergency_contact_person',
+        'emergency_contact_number',
+        'res_brgy',
+        'res_city',
+        'res_prov',
+        'res_region',
+        'res_zipcode',
+        'dept_id',
+        'college_id'
     ];
 
     public function patient()
     {
         return $this->belongsTo(Patient::class, 'patient_id', 'patient_id');
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'dept_id', 'dept_id'); // ✅ Correct relationship for Department
+    }
+
+    public function college()
+    {
+        return $this->belongsTo(College::class, 'college_id', 'college_id'); // ✅ Correct relationship for College
     }
 }

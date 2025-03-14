@@ -12,18 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('fdar_form_common_disease', function (Blueprint $table) {
+            $table->id(); // Primary Key
             $table->unsignedBigInteger('fdar_form_id');
-            $table->unsignedBigInteger('common_disease_id');
+            $table->unsignedBigInteger('common_disease_id')->nullable(); // Predefined disease (optional)
+            $table->string('custom_disease')->nullable(); // Custom disease (optional)
 
-            // Timestamps
+            // Ensure either common_disease_id or custom_disease is present
             $table->timestamps();
 
             // Foreign Keys
             $table->foreign('fdar_form_id')->references('id')->on('fdar_forms')->onDelete('cascade');
             $table->foreign('common_disease_id')->references('id')->on('common_diseases')->onDelete('cascade');
-
-            // Composite Primary Key
-            $table->primary(['fdar_form_id', 'common_disease_id']);
         });
     }
 

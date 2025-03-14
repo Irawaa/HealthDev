@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 
 class FDARForm extends Model
 {
@@ -70,6 +72,16 @@ class FDARForm extends Model
     public function commonDiseases(): BelongsToMany
     {
         return $this->belongsToMany(CommonDisease::class, 'fdar_form_common_disease', 'fdar_form_id', 'common_disease_id')
+            ->withPivot('custom_disease') // ✅ Ensure custom disease is included
             ->withTimestamps();
+    }
+
+    /**
+     * Retrieve all diseases (predefined + custom)
+     */
+    public function allDiseases()
+    {
+        return $this->hasMany(FDARFormCommonDisease::class, 'fdar_form_id')
+            ->select('fdar_form_id', 'common_disease_id', 'custom_disease');
     }
 }

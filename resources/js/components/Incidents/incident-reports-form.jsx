@@ -1,6 +1,6 @@
 import { useForm } from "@inertiajs/react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { usePhysicianStaff } from "@/Pages/Patients/Index"; // Import context
+import { usePhysicianStaff } from "@/Pages/Patients/ProfilePage"; // Import context
 import { Button } from "@/components/ui/button";
 import { toast } from "react-hot-toast";
 
