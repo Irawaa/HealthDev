@@ -8,6 +8,7 @@ import FDARTags from "@/components/FDAR/fdar-tags";
 const EditFDARModal = ({ isOpen, onClose, formData }) => {
   const [bpWarning, setBpWarning] = useState("");
   const [bpSeverity, setBpSeverity] = useState("");
+  const [formErrors, setFormErrors] = useState({}); // Added form errors state
 
   const { data, setData, put, processing, errors } = useForm({
     id: "",
@@ -47,6 +48,26 @@ const EditFDARModal = ({ isOpen, onClose, formData }) => {
     }
   }, [formData]);
 
+  const validateField = (name, value) => {
+    let error = "";
+    if (!value.trim()) {
+      error = "This field is required.";
+    } else if (name === "blood_pressure" && !/^\d+\/\d+$/.test(value)) {
+      error = "Blood pressure must be in format '120/80'.";
+    } else if (name === "temperature" && (isNaN(value) || value < 30 || value > 45)) {
+      error = "Temperature must be between 30-45°C.";
+    }
+    return error;
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setData(name, value);
+
+    const error = validateField(name, value);
+    setFormErrors((prev) => ({ ...prev, [name]: error || undefined }));
+  };
+
   const checkBpWarning = (value) => {
     if (!value) {
       setBpWarning("");
@@ -73,6 +94,18 @@ const EditFDARModal = ({ isOpen, onClose, formData }) => {
   };
 
   const handleSubmit = async () => {
+    const newErrors = {};
+    Object.keys(data).forEach((key) => {
+      const error = validateField(key, data[key]);
+      if (error) newErrors[key] = error;
+    });
+
+    if (Object.keys(newErrors).length > 0) {
+      setFormErrors(newErrors);
+      toast.error("Please fix the validation errors.");
+      return;
+    }
+
     put(`/fdar-forms/${data.id}`, {
       onSuccess: () => {
         toast.success("FDAR Record updated successfully!");
@@ -123,17 +156,16 @@ const EditFDARModal = ({ isOpen, onClose, formData }) => {
           <div className="grid grid-cols-1 gap-4 mt-7">
             {["data", "action", "response"].map((key) => (
               <div key={key} className="flex flex-col">
-                <label className="text-xs font-medium text-gray-700">
-                  {key.charAt(0).toUpperCase() + key.slice(1)} <span className="text-red-500">*</span>
-                </label>
+                <label className="text-xs font-medium text-gray-700">{key.charAt(0).toUpperCase() + key.slice(1)} <span className="text-red-500">*</span></label>
                 <textarea
                   name={key}
                   value={data[key] || ""}
-                  onChange={(e) => setData(e.target.name, e.target.value)}
+                  onChange={handleChange}
                   rows={3}
                   className="border border-gray-300 bg-white px-2 py-1 text-sm rounded focus:ring-1 focus:ring-green-500 resize-none"
                   placeholder={`Enter ${key}`}
                 />
+                {formErrors[key] && <p className="text-red-500 text-xs">{formErrors[key]}</p>}
               </div>
             ))}
           </div>
@@ -142,20 +174,19 @@ const EditFDARModal = ({ isOpen, onClose, formData }) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
             {fields.map(({ key, label, bp, required, type }) => (
               <div key={key} className="relative flex flex-col">
-                <label className="text-xs font-medium text-gray-700">
-                  {label} {required && <span className="text-red-500">*</span>}
-                </label>
+                <label className="text-xs font-medium text-gray-700">{label} {required && <span className="text-red-500">*</span>}</label>
                 <input
                   type={type || "text"}
                   name={key}
                   value={data[key] || ""}
                   onChange={(e) => {
-                    setData(e.target.name, e.target.value);
+                    handleChange(e);
                     if (bp) checkBpWarning(e.target.value);
                   }}
                   className={`border p-2 w-full rounded focus:ring-green-500 focus:border-green-500 ${bp ? bpSeverity : ""}`}
                   placeholder={label}
                 />
+                {formErrors[key] && <p className="text-red-500 text-xs">{formErrors[key]}</p>}
               </div>
             ))}
           </div>
