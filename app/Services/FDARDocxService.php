@@ -15,7 +15,7 @@ class FDARDocxService
 
     public static function generateDocx(array $fdarForm)
     {
-        function formatString($input, $length = 57, $padChar = ' ')
+        function formatString($input, $length = 70, $padChar = ' ')
         {
             $formatted = str_pad(substr($input ?? '', 0, $length), $length, $padChar);
             Log::info("formatString debug", ['input' => $input, 'formatted' => $formatted]);
@@ -42,12 +42,14 @@ class FDARDocxService
             throw new \Exception("FDAR Form ID is missing.");
         }
 
-        $studentName = isset($fdarForm['patient']['fname'], $fdarForm['patient']['lname'])
+        $createdAt = isset($fdarForm['created_at']) ? Carbon::parse($fdarForm['created_at'])->format('Ymd_His') : now()->format('Ymd_His');
+
+        $patientName = isset($fdarForm['patient']['fname'], $fdarForm['patient']['lname'])
             ? trim("{$fdarForm['patient']['fname']}_{$fdarForm['patient']['lname']}")
             : 'unknown_student';
 
-        $studentName = preg_replace('/[^A-Za-z0-9_-]/', '', $studentName); // Remove special characters
-        $outputPath = "{$storageDir}/fdar_{$fdarFormId}_{$studentName}.docx";
+        $patientName = preg_replace('/[^A-Za-z0-9_-]/', '', $patientName); // Remove special characters
+        $outputPath = "{$storageDir}/fdar_{$fdarFormId}_{$patientName}_{$createdAt}.docx";
 
 
         $templateProcessor = new TemplateProcessor($templatePath);
@@ -143,12 +145,14 @@ class FDARDocxService
     {
         Log::info("🔹 Starting PDF generation", ['fdar_id' => $data['id']]);
 
-        $studentName = isset($data['patient']['fname'], $data['patient']['lname'])
+        $createdAt = isset($data['created_at']) ? Carbon::parse($data['created_at'])->format('Ymd_His') : now()->format('Ymd_His');
+
+        $patientName = isset($data['patient']['fname'], $data['patient']['lname'])
             ? trim("{$data['patient']['fname']}_{$data['patient']['lname']}")
             : 'unknown_student';
 
-        $studentName = preg_replace('/[^A-Za-z0-9_-]/', '', $studentName); // Remove special characters
-        $pdfPath = storage_path("app/generated/fdar_{$data['id']}_{$studentName}.pdf");
+        $patientName = preg_replace('/[^A-Za-z0-9_-]/', '', $patientName); // Remove special characters
+        $pdfPath = storage_path("app/generated/fdar_{$data['id']}_{$patientName}_{$createdAt}.pdf");
 
 
         // ✅ Check if the PDF already exists
@@ -209,12 +213,14 @@ class FDARDocxService
     {
         Log::info("Starting PDF preview for FDAR ID: " . $data['id']);
 
-        $studentName = isset($data['patient']['fname'], $data['patient']['lname'])
+        $createdAt = isset($data['created_at']) ? Carbon::parse($data['created_at'])->format('Ymd_His') : now()->format('Ymd_His');
+
+        $patientName = isset($data['patient']['fname'], $data['patient']['lname'])
             ? trim("{$data['patient']['fname']}_{$data['patient']['lname']}")
             : 'unknown_student';
 
-        $studentName = preg_replace('/[^A-Za-z0-9_-]/', '', $studentName); // Remove special characters
-        $pdfPath = storage_path("app/generated/fdar_{$data['id']}_{$studentName}.pdf");
+        $patientName = preg_replace('/[^A-Za-z0-9_-]/', '', $patientName); // Remove special characters
+        $pdfPath = storage_path("app/generated/fdar_{$data['id']}_{$patientName}_{$createdAt}.pdf");
 
         Log::info("Checking PDF path: " . $pdfPath);
 
