@@ -1,27 +1,22 @@
 import { useState, useEffect } from "react";
-import { ExclamationTriangleIcon } from "@heroicons/react/24/outline"; // ✅ Warning icon
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import FDARTags from "@/components/FDAR/fdar-tags";
 
 const AddFDARForm = ({ formData, handleChange }) => {
   const [bpWarning, setBpWarning] = useState("");
   const [bpSeverity, setBpSeverity] = useState("");
   const [isBpFocused, setIsBpFocused] = useState(false);
+  const [validationErrors, setValidationErrors] = useState({});
 
   const [selectedTagIds, setSelectedTagIds] = useState(formData.common_disease_ids || []);
   const [customTags, setCustomTags] = useState(formData.custom_diseases || []);
 
   useEffect(() => {
     handleChange({
-      target: {
-        name: "common_disease_ids",
-        value: selectedTagIds,
-      },
+      target: { name: "common_disease_ids", value: selectedTagIds },
     });
     handleChange({
-      target: {
-        name: "custom_diseases",
-        value: customTags,
-      },
+      target: { name: "custom_diseases", value: customTags },
     });
   }, [selectedTagIds, customTags]);
 
@@ -67,6 +62,13 @@ const AddFDARForm = ({ formData, handleChange }) => {
     { key: "last_menstrual_period", label: "LMP", type: "date" },
   ];
 
+  const validateField = (key, value) => {
+    setValidationErrors((prevErrors) => ({
+      ...prevErrors,
+      [key]: value ? "" : "This field should not be empty.",
+    }));
+  };
+
   return (
     <div className="p-4 space-y-4">
       <h3 className="text-lg font-semibold text-green-800">FDAR & Patient Vitals</h3>
@@ -80,29 +82,28 @@ const AddFDARForm = ({ formData, handleChange }) => {
 
       {/* ✅ FDAR Inputs */}
       <div className="grid grid-cols-1 gap-4">
-        {["data", "action", "response"].map((key) => {
-          const isRequired = ["data", "action", "response"].includes(key); // Mark all as required
-
-          return (
-            <div key={key} className="flex flex-col">
-              <label className="text-xs font-medium text-gray-700">
-                {key.charAt(0).toUpperCase() + key.slice(1)}{" "}
-                {isRequired && <span className="text-red-500">*</span>}
-              </label>
-              <textarea
-                name={key}
-                value={formData[key] || ""}
-                onChange={handleChange}
-                rows={3}
-                className="border border-gray-300 bg-white px-2 py-1 text-sm rounded focus:ring-1 focus:ring-green-500 transition-all resize-none"
-                placeholder={`Enter ${key}`}
-              />
-            </div>
-          );
-        })}
+        {["data", "action", "response"].map((key) => (
+          <div key={key} className="flex flex-col">
+            <label className="text-xs font-medium text-gray-700">
+              {key.charAt(0).toUpperCase() + key.slice(1)} <span className="text-red-500">*</span>
+            </label>
+            <textarea
+              name={key}
+              value={formData[key] || ""}
+              onChange={handleChange}
+              onBlur={() => validateField(key, formData[key])}
+              rows={3}
+              className={`border px-2 py-1 text-sm rounded focus:ring-1 focus:ring-green-500 transition-all resize-none ${
+                validationErrors[key] ? "border-red-500" : "border-gray-300"
+              }`}
+              placeholder={`Enter ${key}`}
+            />
+            {validationErrors[key] && <span className="text-red-500 text-xs">{validationErrors[key]}</span>}
+          </div>
+        ))}
       </div>
 
-      {/* ✅ Patient Vitals (2-Column Grid) */}
+      {/* ✅ Patient Vitals */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {fields.map(({ key, label, bp, required }) => (
           <div key={key} className="relative flex flex-col">
@@ -115,11 +116,16 @@ const AddFDARForm = ({ formData, handleChange }) => {
               value={formData[key] || ""}
               onChange={bp ? handleBpChange : handleChange}
               onFocus={bp ? () => setIsBpFocused(true) : undefined}
-              onBlur={bp ? () => setIsBpFocused(false) : undefined}
-              className={`border p-2 w-full rounded focus:ring-green-500 focus:border-green-500 ${bp ? bpSeverity : ""
-                }`}
+              onBlur={(e) => {
+                if (required) validateField(key, e.target.value);
+                if (bp) setIsBpFocused(false);
+              }}
+              className={`border p-2 w-full rounded focus:ring-green-500 focus:border-green-500 ${
+                validationErrors[key] ? "border-red-500" : bp ? bpSeverity : "border-gray-300"
+              }`}
               placeholder={label}
             />
+            {validationErrors[key] && <span className="text-red-500 text-xs">{validationErrors[key]}</span>}
 
             {/* ✅ BP Warning & Icon */}
             {bp && bpWarning && (
@@ -129,8 +135,9 @@ const AddFDARForm = ({ formData, handleChange }) => {
             )}
             {bp && bpWarning && isBpFocused && (
               <div
-                className={`absolute top-full left-0 mt-1 p-2 rounded shadow-lg text-xs ${bpSeverity.includes("red") ? "bg-red-100 text-red-800" : "bg-orange-100 text-orange-800"
-                  }`}
+                className={`absolute top-full left-0 mt-1 p-2 rounded shadow-lg text-xs ${
+                  bpSeverity.includes("red") ? "bg-red-100 text-red-800" : "bg-orange-100 text-orange-800"
+                }`}
               >
                 {bpWarning}
               </div>
