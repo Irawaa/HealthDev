@@ -22,7 +22,7 @@ class FDARDocxService
             return $formatted;
         }
 
-        $templatePath = storage_path('app/templates/Test7.docx');
+        $templatePath = storage_path('app/templates/FDAR.docx');
         $storageDir = storage_path('app/generated');
 
         // ✅ Ensure "generated" directory exists
@@ -100,17 +100,17 @@ class FDARDocxService
             'g' => formatString($gender, 11),
             'pc' => formatString("{$programName}/{$collegeName}", 51),
 
-            'date' => formatString(now()->format('Y-m-d'), 8),
+            'date' => formatString(now()->format('m-d'), 8),
             'time' => formatString(now()->format('H:i'), 10),
             'year' => formatString(now()->format('Y'), 9),
 
-            'sem1' => formatString($semester == 1 ? ' / ' : '   ', 3),
-            'sem2' => formatString($semester == 2 ? ' / ' : '   ', 3),
+            'o' => formatString($semester == 1 ? ' /' : '   ', 3),
+            't' => formatString($semester == 2 ? ' /' : '   ', 3),
 
             // Student 
             'sad' => isset($studentData['address_house'], $studentData['address_brgy'], $studentData['address_citytown'], $studentData['address_province'], $studentData['address_zipcode'])
                 ? formatString(trim("{$studentData['address_house']} {$studentData['address_brgy']} {$studentData['address_citytown']} {$studentData['address_province']} {$studentData['address_zipcode']}"), 60)
-                : formatString('N/A', 60),
+                : formatString('N/A', 37),
 
             'dat' => $fdarForm['data'] ?? 'N/A',
             'act' => $fdarForm['action'] ?? 'N/A',
