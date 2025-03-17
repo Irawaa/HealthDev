@@ -22,6 +22,9 @@ export const useCommonDiseases = () => useContext(CommonDiseasesContext);
 export const PhysicianStaffContext = createContext();
 export const usePhysicianStaff = () => useContext(PhysicianStaffContext);
 
+// export const PatientContext = createContext();
+// export const usePatient = () => useContext(PatientContext);
+
 const PatientProfile = ({ patient, colleges, departments, commonDiseases, physicianStaff }) => {
   if (!patient) return null;
   console.log(patient);

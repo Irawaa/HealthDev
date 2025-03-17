@@ -12,6 +12,8 @@ use App\Http\Controllers\FDARFormController;
 use App\Http\Controllers\BPFormController;
 use App\Http\Controllers\IncidentReportController;
 use App\Http\Controllers\PrescriptionController;
+
+use App\Http\Controllers\MedicalCertificateController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -92,6 +94,14 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::put('/prescriptions/{id}', [PrescriptionController::class, 'update'])->name('prescriptions.update');
     Route::delete('/prescriptions/{id}', [PrescriptionController::class, 'destroy'])->name('prescriptions.destroy');
     Route::get('/prescriptions/{id}/image', [PrescriptionController::class, 'showImage'])->name('prescriptions.show');
+
+
+    // Medical Certificates //
+    Route::post('/medical-certificates', [MedicalCertificateController::class, 'store'])->name('medical-certificates.store');
+    // Route::put('/medical-certificates/{id}', [MedicalCertificateController::class, 'update'])->name('medical-certificates.update');
+    Route::delete('/medical-certificates/{id}', [MedicalCertificateController::class, 'destroy'])->name('medical-certificates.destroy');
+    Route::get('/medical-certificates/{id}/pdf', [MedicalCertificateController::class, 'viewPDF'])->name('medical-certificates.pdf');
+    Route::get('/medical-certificates/preview/{id}', [MedicalCertificateController::class, 'preview'])->name('medical-certificates.preview');
 
     // --- Logout ---
     Route::post('/logout', [AuthenticateController::class, 'destroy'])->name('logout');

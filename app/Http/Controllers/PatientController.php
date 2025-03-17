@@ -60,11 +60,13 @@ class PatientController extends Controller
         $colleges = College::where('is_active', 1)
             ->orderBy('college_id')
             ->select('college_id', 'description as college_description')
-            ->with(['programs' => function ($query) {
-                $query->where('is_active', 1)
-                    ->orderBy('program_id')
-                    ->select('program_id', 'college_id', 'description as program_description');
-            }])
+            ->with([
+                'programs' => function ($query) {
+                    $query->where('is_active', 1)
+                        ->orderBy('program_id')
+                        ->select('program_id', 'college_id', 'description as program_description');
+                }
+            ])
             ->get();
 
         $departments = Department::select('dept_id', 'name')->get();
@@ -168,6 +170,13 @@ class PatientController extends Controller
                     'prescription_number',
                 )->latest();
             },
+
+            'medicalCertificates' => function ($query) {
+                $query->with([
+                    'schoolPhysician:staff_id,fname,lname,mname,license_no', // ✅ Fix staff_id reference
+                    'schoolNurse:staff_id,fname,lname,mname', // ✅ Load Nurse Details
+                ])->latest();
+            },
         ]);
 
 
@@ -176,11 +185,13 @@ class PatientController extends Controller
             ->orderBy('college_id')
             ->select('college_id', 'description as college_description', 'college_code')
             ->distinct()
-            ->with(['programs' => function ($query) {
-                $query->where('is_active', 1)
-                    ->orderBy('program_id')
-                    ->select('program_id', 'college_id', 'description as program_description', 'program_code', 'section_code', 'type');
-            }])
+            ->with([
+                'programs' => function ($query) {
+                    $query->where('is_active', 1)
+                        ->orderBy('program_id')
+                        ->select('program_id', 'college_id', 'description as program_description', 'program_code', 'section_code', 'type');
+                }
+            ])
             ->get();
 
         $departments = Department::select('dept_id', 'name', 'acronym')->get();

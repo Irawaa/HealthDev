@@ -70,4 +70,9 @@ class Patient extends Model
     {
         return $this->hasMany(Prescription::class, 'patient_id', 'patient_id');
     }
+
+    public function medicalCertificates()
+    {
+        return $this->hasMany(MedicalCertificate::class, 'patient_id', 'patient_id');
+    }
 }

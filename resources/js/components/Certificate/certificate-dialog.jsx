@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import CertificateForm from "@/components/Certificate/Form/certificate-form"; // Import the form
+import CertificateForm from "@/components/Certificate/Form/certificate-form";
+import CertificateList from "@/components/Certificate/List/certificate-list"; // ✅ Import List Component
 
 const CertificatesModal = ({ patient }) => {
   const [certificates, setCertificates] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [selectedCertificate, setSelectedCertificate] = useState(null); // Stores the certificate to view
+  const [selectedCertificate, setSelectedCertificate] = useState(null);
 
   const handleCreate = (newCertificate) => {
     setCertificates([...certificates, { ...newCertificate, id: Date.now() }]);
@@ -26,35 +27,10 @@ const CertificatesModal = ({ patient }) => {
       </Button>
 
       {/* Show Form Component When Needed */}
-      <CertificateForm open={showForm} setOpen={setShowForm} onSave={handleCreate} />
+      <CertificateForm open={showForm} setOpen={setShowForm} onSave={handleCreate} patient={patient} />
 
       {/* List of Certificates */}
-      <div className="mt-4">
-        {certificates.length > 0 ? (
-          certificates.map((cert) => (
-            <div key={cert.id} className="bg-white p-4 rounded-lg shadow my-2 flex justify-between items-center">
-              <div>
-                <p className="text-gray-800">
-                  <strong>Date:</strong> {cert.date} | <strong>Type:</strong> {cert.type}
-                </p>
-                <p className="text-sm text-gray-500">
-                  <strong>Remarks:</strong> {cert.remarks || "None"}
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <Button className="bg-gray-600 text-white px-3 py-1 rounded" onClick={() => setSelectedCertificate(cert)}>
-                  View
-                </Button>
-                <Button className="bg-red-600 text-white px-3 py-1 rounded" onClick={() => handleDelete(cert.id)}>
-                  Delete
-                </Button>
-              </div>
-            </div>
-          ))
-        ) : (
-          <p className="text-gray-500 mt-2">No certificates available.</p>
-        )}
-      </div>
+      <CertificateList certificates={certificates} onDelete={handleDelete} onView={setSelectedCertificate} patient={patient} />
 
       {/* View Certificate Modal */}
       {selectedCertificate && (

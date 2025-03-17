@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
-const DentalForm = ({ onSave, setOpen }) => {
+const DentalForm = ({ onSave, setOpen, patient }) => {
     const [formData, setFormData] = useState({
         procedures: [],
         remarks: "",
@@ -61,17 +61,6 @@ const DentalForm = ({ onSave, setOpen }) => {
 
                 <div className="border-t border-green-300 my-4"></div>
 
-                <label className="font-bold text-lg text-green-900">School Nurse:</label>
-                <Select onValueChange={(value) => handleSelectChange("schoolNurse", value)}>
-                    <SelectTrigger className="w-full border border-green-400 p-2 rounded-md bg-white text-green-800 hover:bg-green-100">
-                        <SelectValue placeholder="Select School Nurse" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-green-50 border border-green-300">
-                        <SelectItem value="Nurse A" className="hover:bg-green-200">Nurse A</SelectItem>
-                        <SelectItem value="Nurse B" className="hover:bg-green-200">Nurse B</SelectItem>
-                    </SelectContent>
-                </Select>
-
                 <div className="border-t border-green-300 my-4"></div>
 
                 <label className="font-bold text-lg text-green-900">School Dentist:</label>
@@ -104,3 +93,15 @@ const DentalForm = ({ onSave, setOpen }) => {
 };
 
 export default DentalForm;
+
+
+                {/* <label className="font-bold text-lg text-green-900">School Nurse:</label>
+                <Select onValueChange={(value) => handleSelectChange("schoolNurse", value)}>
+                    <SelectTrigger className="w-full border border-green-400 p-2 rounded-md bg-white text-green-800 hover:bg-green-100">
+                        <SelectValue placeholder="Select School Nurse" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-green-50 border border-green-300">
+                        <SelectItem value="Nurse A" className="hover:bg-green-200">Nurse A</SelectItem>
+                        <SelectItem value="Nurse B" className="hover:bg-green-200">Nurse B</SelectItem>
+                    </SelectContent>
+                </Select> */}

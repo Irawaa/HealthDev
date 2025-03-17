@@ -128,7 +128,7 @@ class IncidentReportDocxService
         return $outputPath;
     }
 
-    public static function generatePDF($data)
+    public static function generatePDF($data, $schoolNurse = [], $schoolPhysician = [])
     {
         Log::info("🔹 Starting PDF generation", ['incident_report_id' => $data['id']]);
 

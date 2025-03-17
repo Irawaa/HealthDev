@@ -5,7 +5,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import MedicalForm from "@/components/Certificate/Form/medical-form";
 import DentalForm from "@/components/Certificate/Form/dental-form";
 
-const CertificateForm = ({ open, setOpen, onSave }) => {
+const CertificateForm = ({ open, setOpen, onSave, patient }) => {
   const [activeTab, setActiveTab] = useState("medical");
 
   return (
@@ -34,10 +34,10 @@ const CertificateForm = ({ open, setOpen, onSave }) => {
 
           {/* Medical and Dental Forms */}
           <TabsContent value="medical" className="w-full">
-            <MedicalForm onSave={onSave} setOpen={setOpen} />
+            <MedicalForm onSave={onSave} setOpen={setOpen} patient={patient}/>
           </TabsContent>
           <TabsContent value="dental" className="w-full">
-            <DentalForm onSave={onSave} setOpen={setOpen} />
+            <DentalForm onSave={onSave} setOpen={setOpen} patient={patient}/>
           </TabsContent>
         </Tabs>
       </DialogContent>
