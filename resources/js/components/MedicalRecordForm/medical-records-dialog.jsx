@@ -8,6 +8,7 @@ import Step3 from "./Steps/Step3";
 import Step4 from "./Steps/Step4";
 import Step5 from "./Steps/Step5";
 import Step6 from "./Steps/Step6";
+import MedicalRecordsList from "./List/medical-records-list";
 
 const MedicalRecordDialog = ({ patient }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -503,43 +504,14 @@ const MedicalRecordDialog = ({ patient }) => {
         Create New Medical Record
       </Button>
 
-      {records.length > 0 ? (
-        records.map((record, index) => (
-          <div
-            key={index}
-            className="p-4 bg-white shadow-md rounded-lg flex justify-between"
-          >
-            <div>
-              <p>
-                <strong>Final Evaluation:</strong> {record.final_evaluation}
-              </p>
-              <p>
-                <strong>Plan:</strong> {record.plan_recommendation}
-              </p>
-              <p>
-                <strong>Date:</strong>{" "}
-                {new Date(record.created_at).toLocaleDateString()}
-              </p>
-            </div>
-            <div className="space-x-2">
-              <Button
-                onClick={() => handleEdit(record)}
-                className="bg-green-600 text-white"
-              >
-                Edit
-              </Button>
-              <Button
-                onClick={() => handleDelete(record.id)}
-                className="bg-red-600 text-white"
-              >
-                Delete
-              </Button>
-            </div>
-          </div>
-        ))
-      ) : (
-        <p className="text-gray-700 mt-4">No medical records available.</p>
-      )}
+
+      {/* Use the new MedicalRecordsList component */}
+      <MedicalRecordsList
+        patient={patient}
+        records={records}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
 
       {isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">

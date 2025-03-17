@@ -358,10 +358,191 @@ class MedicalRecordController extends Controller
 
 
             Log::info('Medical record stored successfully', ['medical_record_id' => $medicalRecord->id]);
-            return redirect()->route('patients.index')->with('success', 'Medical record created successfully');
+            return redirect()->with('success', 'Medical record created successfully');
         } catch (\Exception $e) {
             Log::error('Error storing medical record', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return back()->withErrors('Failed to create medical record. Please try again.');
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        Log::info('Update request received', ['medical_record_id' => $id, 'request' => $request->all()]);
+
+        // Find the medical record
+        $medicalRecord = MedicalRecord::findOrFail($id);
+
+        try {
+            $validated = $request->validate([
+                'final_evaluation' => 'nullable|in:Class A,Class B,Pending',
+                'plan_recommendation' => 'nullable|string',
+
+                // ✅ Review of Systems
+                'review_of_systems' => 'array',
+                'review_of_systems.*' => 'string',
+                'others' => 'nullable|string',
+
+                // ✅ Deformities
+                'deformities' => 'array',
+                'deformities.*' => 'string|exists:deformities,symptom',
+
+                // ✅ Vital Signs
+                'bp' => 'required|string|max:10',
+                'rr' => 'required|integer|min:0',
+                'hr' => 'required|integer|min:0',
+                'temperature' => 'required|numeric|min:30|max:45',
+                'weight' => 'required|numeric|min:1|max:300',
+                'height' => 'required|numeric|min:0.5|max:5.0',
+
+                // ✅ Medical Record Details
+                'chief_complaint' => 'nullable|string',
+                'present_illness' => 'nullable|string',
+                'medication' => 'nullable|string',
+                'hospitalized' => 'nullable|boolean',
+                'hospitalized_reason' => 'nullable|string',
+                'previous_surgeries' => 'nullable|boolean',
+                'surgery_reason' => 'nullable|string',
+                'vaccination_status' => 'nullable|string',
+
+                // ✅ Personal & Social History
+                'alcoholic_drinker' => 'nullable|in:Regular,Occasional,No',
+                'smoker' => 'nullable|boolean',
+                'sticks_per_day' => 'nullable|integer|min:0',
+                'years_smoking' => 'nullable|integer|min:0',
+                'illicit_drugs' => 'nullable|boolean',
+                'eye_glasses' => 'nullable|boolean',
+                'contact_lens' => 'nullable|boolean',
+                'eye_disorder_no' => 'nullable|boolean',
+
+                // ✅ Family History
+                'family_histories' => 'array',
+                'family_histories.*.condition' => 'required|string|exists:family_histories,condition',
+                'family_histories.*.Father' => 'nullable|string',
+                'family_histories.*.Mother' => 'nullable|string',
+                'family_histories.*.Sister' => 'nullable|array',
+                'family_histories.*.Sister.*' => 'nullable|string',
+                'family_histories.*.Brother' => 'nullable|array',
+                'family_histories.*.Brother.*' => 'nullable|string',
+                'family_histories.*.remarks' => 'nullable|string',
+
+                // ✅ Physical Examination
+                'physical_examinations' => 'array',
+                'physical_examinations.*.name' => 'required|string|exists:physical_examinations,name',
+                'physical_examinations.*.result' => 'nullable|in:Normal,Abnormal',
+                'physical_examinations.*.remarks' => 'nullable|string',
+
+                // ✅ X-Ray Image
+                'chest_xray' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+
+                // ✅ Laboratory
+                'blood_chemistry' => 'nullable|string',
+                'fbs' => 'nullable|numeric',
+                'uric_acid' => 'nullable|numeric',
+                'triglycerides' => 'nullable|numeric',
+                't_cholesterol' => 'nullable|numeric',
+                'creatinine' => 'nullable|numeric',
+            ]);
+
+            Log::info('Validation passed', ['validated' => $validated]);
+
+            // ✅ Update Medical Record
+            $medicalRecord->update([
+                'final_evaluation' => $validated['final_evaluation'] ?? $medicalRecord->final_evaluation,
+                'plan_recommendation' => $validated['plan_recommendation'] ?? $medicalRecord->plan_recommendation,
+            ]);
+
+            Log::info('Medical record updated', ['medical_record' => $medicalRecord]);
+
+            // ✅ Update Review of Systems
+            if ($request->has('review_of_systems')) {
+                $reviewOfSystems = ReviewOfSystem::whereIn('symptom', $validated['review_of_systems'])->get();
+                $syncData = [];
+
+                foreach ($reviewOfSystems as $review) {
+                    $syncData[$review->id] = ['custom_symptom' => null];
+                }
+
+                if (!empty($validated['others'])) {
+                    $customReview = ReviewOfSystem::firstOrCreate(['symptom' => 'Others']);
+                    $syncData[$customReview->id] = ['custom_symptom' => $validated['others']];
+                }
+
+                $medicalRecord->reviewOfSystems()->sync($syncData);
+            }
+
+            // ✅ Update Deformities
+            if (!empty($validated['deformities'])) {
+                $deformities = Deformity::whereIn('symptom', $validated['deformities'])->get();
+                $syncData = [];
+                foreach ($deformities as $deformity) {
+                    $syncData[$deformity->id] = [];
+                }
+                $medicalRecord->deformities()->sync($syncData);
+            }
+
+            // ✅ Update Vital Signs
+            $medicalRecord->vitalSigns()->update([
+                'bp' => $validated['bp'],
+                'rr' => $validated['rr'],
+                'hr' => $validated['hr'],
+                'temperature' => $validated['temperature'],
+                'weight' => $validated['weight'],
+                'height' => $validated['height'],
+            ]);
+
+            // ✅ Update Personal & Social History
+            $medicalRecord->personalSocialHistory()->update([
+                'alcoholic_drinker' => $validated['alcoholic_drinker'] ?? null,
+                'smoker' => $validated['smoker'] ?? null,
+                'sticks_per_day' => $validated['sticks_per_day'] ?? null,
+                'years_smoking' => $validated['years_smoking'] ?? null,
+                'illicit_drugs' => $validated['illicit_drugs'] ?? null,
+                'eye_glasses' => $validated['eye_glasses'] ?? null,
+                'contact_lens' => $validated['contact_lens'] ?? null,
+                'eye_disorder_no' => $validated['eye_disorder_no'] ?? null,
+            ]);
+
+            // ✅ Update Family History
+            if ($request->filled('family_histories')) {
+                $syncData = [];
+
+                foreach ($validated['family_histories'] as $history) {
+                    $familyHistory = FamilyHistory::where('condition', $history['condition'])->first();
+
+                    if ($familyHistory) {
+                        foreach (['Father', 'Mother'] as $member) {
+                            if (!empty($history[$member])) {
+                                $syncData[] = [
+                                    'family_history_id' => $familyHistory->id,
+                                    'family_member' => $member,
+                                    'family_history_remarks' => $history[$member],
+                                    'overall_remarks' => $history['remarks'] ?? null,
+                                ];
+                            }
+                        }
+                    }
+                }
+
+                $medicalRecord->familyHistories()->sync($syncData);
+            }
+
+            // ✅ Update Medical Record Details
+            $medicalRecord->medicalRecordDetail()->update([
+                'chief_complaint' => $validated['chief_complaint'] ?? null,
+                'present_illness' => $validated['present_illness'] ?? null,
+                'medication' => $validated['medication'] ?? null,
+                'hospitalized' => $validated['hospitalized'] ?? false,
+                'hospitalized_reason' => $validated['hospitalized_reason'] ?? null,
+                'previous_surgeries' => $validated['previous_surgeries'] ?? false,
+                'surgery_reason' => $validated['surgery_reason'] ?? null,
+                'vaccination_status' => $validated['vaccination_status'] ?? null,
+            ]);
+
+            Log::info('Medical record updated successfully', ['medical_record_id' => $medicalRecord->id]);
+            return redirect()->with('success', 'Medical record updated successfully.');
+        } catch (\Exception $e) {
+            Log::error('Error updating medical record', ['message' => $e->getMessage()]);
+            return back()->withErrors('Failed to update medical record. Please try again.');
         }
     }
 }
