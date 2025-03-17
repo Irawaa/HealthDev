@@ -101,6 +101,7 @@ const MedicalForm = ({ setOpen, patient }) => {
             },
             onError: (errors) => {
                 Object.values(errors).forEach((error) => toast.error(`❌ ${error}`));
+                setPageLoading(false);
             },
             onFinish: () => {
                 setPageLoading(false); // ✅ Hide loading after request finishes

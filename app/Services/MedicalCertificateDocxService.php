@@ -13,6 +13,10 @@ class MedicalCertificateDocxService
 {
     public static function generateDocx(array $medicalCertificate)
     {
+        $setCheckbox = function ($condition) {
+            return $condition ? '☑' : '☐';
+        };
+
         $templatePath = storage_path('app/templates/Medical_Certificate.docx');
         $storageDir = storage_path('app/generated');
 
@@ -74,6 +78,10 @@ class MedicalCertificateDocxService
             $contactNumber .= " / " . $telephone;
         }
 
+        $student = $medicalCertificate['patient']['student'] ?? null;
+        $emergencyContactName = $student['emergency_contact_name'] ?? 'N/A';
+        $emergencyContactNo = $student['emergency_contact_no'] ?? 'N/A';
+        $guardianRelation = $student['guardian_relation'] ?? 'N/A';
 
         $collegeName = $patient['student']['college']['college_name'] ?? '   ';
         $programName = $patient['student']['program']['program_name'] ?? '   ';
@@ -81,7 +89,7 @@ class MedicalCertificateDocxService
         // ✅ Extract School Nurse Details
         $schoolNurse = $medicalCertificate['schoolNurse'] ?? [];
         $schoolNurseDetails = [
-            'sn_n' => "{$schoolNurse['fname']} {$schoolNurse['lname']}" ?? '    ',
+            'sn_n' => $schoolNurse['name'] ?? '    ',
             'sn_r' => $schoolNurse['role'] ?? '    ',
             'sn_l' => $schoolNurse['license_no'] ?? '    ',
             'sn_p' => $schoolNurse['ptr_no'] ?? '    ',
@@ -94,7 +102,7 @@ class MedicalCertificateDocxService
         // ✅ Extract School Physician Details
         $schoolPhysician = $medicalCertificate['schoolPhysician'] ?? [];
         $schoolPhysicianDetails = [
-            'sp_n' => "{$schoolPhysician['fname']} {$schoolPhysician['lname']}" ?? '    ',
+            'sp_n' => $schoolPhysician['name'] ?? '    ',
             'sp_r' => $schoolPhysician['role'] ?? '    ',
             'sp_l' => $schoolPhysician['license_no'] ?? '    ',
             'sp_p' => $schoolPhysician['ptr_no'] ?? '    ',
@@ -104,6 +112,34 @@ class MedicalCertificateDocxService
 
         Log::info("✅ School Physician Data", ['school_physician' => $schoolPhysicianDetails]);
 
+        $advisedMedicationRestRequired = $medicalCertificate['advised_medication_rest_required'] ?? false;
+        $advisedMedicationRestDate = $medicalCertificate['advised_medication_rest'] ?? '';
+
+        // Set placeholders for checkboxes and underscores
+        $purpose = $medicalCertificate['purpose'] ?? '';
+        $recommendationValue = $medicalCertificate['recommendation'] ?? null;
+        $clearanceStatusValue = $medicalCertificate['clearance_status'] ?? null;
+        $furtherEvaluation = $medicalCertificate['further_evaluation'] ?? '';
+        $notClearedFor = $medicalCertificate['not_cleared_for'] ?? '';
+        $activitySpecification = $medicalCertificate['activity_specification'] ?? '';
+
+        // Desired length for the diagnosis (e.g., 100 characters)
+        $desiredLength = 88;
+
+        // Check if diagnosis exists and if it is shorter than the desired length
+        $diagnosis = $medicalCertificate['diagnosis'] ?? '_______________________________________________________________________________________';
+
+        // The Unicode character for a blank space (U+2800)
+        $spaceCharacter = "_";
+
+        // If there's a diagnosis and it's shorter than the desired length, add the blank space character
+        if (!empty($diagnosis) && strlen($diagnosis) < $desiredLength) {
+            $diagnosis = str_pad($diagnosis, $desiredLength, $spaceCharacter);
+        } elseif (empty($diagnosis)) {
+            // If no diagnosis, just display a line of the blank space character
+            $diagnosis = str_repeat($spaceCharacter, $desiredLength);
+        }
+
         // ✅ Prepare shortcode replacements
         $shortcodes = [
             'pn' => trim("{$patient['fname']} {$patient['lname']} " . ($patient['mname'] ?? '')),
@@ -111,31 +147,65 @@ class MedicalCertificateDocxService
             'age' => $age,
             'g' => $gender,
             'date' => now()->format('Y-m-d'),
+            'ay' => now()->year . ' - ' . now()->addYear()->year,
+            'sem' => $semester,
 
             // Academic Information
             'pro' => $programName,
             'col' => $collegeName,
 
-            'dia' => $medicalCertificate['diagnosis'] ?? '  ',
+            'mob' => $mobile,
+            'tel' => $telephone,
+            'con' => $contactNumber,
+
+            'ecn' => $emergencyContactName,
+            'ecno' => $emergencyContactNo,
+            'gr' => $guardianRelation,
+
+            'dia' => $diagnosis,
             'rec' => $medicalCertificate['recommendation'] ?? '  ',
             'pur' => $medicalCertificate['purpose'] ?? '  ',
             'sta' => $medicalCertificate['clearance_status'] ?? '  ',
 
             // ✅ School Nurse Information
-            'sn_n' => $schoolNurseDetails['sn_name'],
-            'sn_r' => $schoolNurseDetails['sn_role'],
-            'sn_l' => $schoolNurseDetails['sn_license'],
-            'sn_p' => $schoolNurseDetails['sn_ptr'],
-            'sn_e' => $schoolNurseDetails['sn_email'],
-            'sn_c' => $schoolNurseDetails['sn_contact_no'],
+            'sn_n' => $schoolNurseDetails['sn_n'],
+            'sn_r' => $schoolNurseDetails['sn_r'],
+            'sn_l' => $schoolNurseDetails['sn_l'],
+            'sn_p' => $schoolNurseDetails['sn_p'],
+            'sn_e' => $schoolNurseDetails['sn_e'],
+            'sn_c' => $schoolNurseDetails['sn_c'],
 
             // ✅ School Physician Information
-            'sp_n' => $schoolPhysicianDetails['sp_name'],
-            'sp_r' => $schoolPhysicianDetails['sp_role'],
-            'sp_l' => $schoolPhysicianDetails['sp_license'],
-            'sp_p' => $schoolPhysicianDetails['sp_ptr'],
-            'sp_' => $schoolPhysicianDetails['sp_email'],
-            'sp_c' => $schoolPhysicianDetails['sp_contact_no'],
+            'sp_n' => $schoolPhysicianDetails['sp_n'],
+            'sp_r' => $schoolPhysicianDetails['sp_r'],
+            'sp_l' => $schoolPhysicianDetails['sp_l'],
+            'sp_p' => $schoolPhysicianDetails['sp_p'],
+            'sp_e' => $schoolPhysicianDetails['sp_e'],
+            'sp_c' => $schoolPhysicianDetails['sp_c'],
+
+            // ✅ Checkboxes
+            'ad' => ($medicalCertificate['advised_medication_rest_required'] ?? false) ? '☑ ' : ' ☐ ',
+            'ex' => ($medicalCertificate['purpose'] ?? '' === 'Excuse Slip') ? ' ☑ ' : '☐',
+            'of' => ($medicalCertificate['purpose'] ?? '' === 'Off school activity') ? ' ☑ ' : ' ☐ ',
+            'ojt' => ($medicalCertificate['purpose'] ?? '' === 'OJT') ? ' ☑ ' : '☐',
+            'spo' => ($medicalCertificate['purpose'] ?? '' === 'Sports') ? ' ☑ ' : '☐',
+            'rot' => ($medicalCertificate['purpose'] ?? '' === 'ROTC') ? ' ☑ ' : '☐',
+            'oth' => ($medicalCertificate['purpose'] ?? '' === 'Others') ? ' ☑ ' : '☐',
+            'ret' => (($medicalCertificate['recommendation'] ?? null) === 0) ? '☑ ' : ' ☐ ',
+            'csh' => (($medicalCertificate['recommendation'] ?? null) === 1) ? ' ☑ ' : ' ☐ ',
+            'cho' => (($medicalCertificate['recommendation'] ?? null) === 2) ? ' ☑ ' : ' ☐ ',
+            'cf' => (($medicalCertificate['clearance_status'] ?? null) === 0) ? '☑ ' : ' ☐ ',
+            'e' => (($medicalCertificate['clearance_status'] ?? null) === 1) ? '☑ ' : ' ☐ ',
+            'cn' => (($medicalCertificate['clearance_status'] ?? null) === 2) ? '☑ ' : ' ☐ ',
+            'cs' => ($medicalCertificate['not_cleared_for'] ?? '' === 'All sports') ? ' ☑ ' : ' ☐ ',
+            'cc' => ($medicalCertificate['not_cleared_for'] ?? '' === 'Certain sports') ? '  ☑ ' : ' ☐ ',
+            'ca' => ($medicalCertificate['not_cleared_for'] ?? '' === 'Activity') ? '  ☑ ' : ' ☐ ',
+
+            // ✅ Underscores
+            'ur' => $advisedMedicationRestRequired ? $advisedMedicationRestDate : '_____________',
+            'uo' => ($purpose === 'Others') ? ($medicalCertificate['purpose_other'] ?? '__________') : '__________',
+            'ue' => $furtherEvaluation ?: '_______________________',
+            'ua' => ($notClearedFor === 'Activity') ? $activitySpecification : '_____________________',
         ];
 
         // ✅ Apply values to DOCX template
