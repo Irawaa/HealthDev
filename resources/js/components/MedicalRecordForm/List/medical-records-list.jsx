@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import MedicalRecordDetails from "../components/medical-records-details";
 import { router } from "@inertiajs/react";
@@ -11,6 +11,11 @@ const MedicalRecordsList = ({ patient, onEdit }) => {
     const [confirmOpen, setConfirmOpen] = useState(false);
     const [pageLoading, setPageLoading] = useState(false);
     const [selectedMedicalRecordId, setSelectedMedicalRecordId] = useState(null);
+
+    useEffect(() => {
+        setRecords(patient?.medical_records || []);
+        // setSelectedMedicalRecordId(patient.medical_records);
+    }, [patient]);
 
     const handleDeleteClick = (id) => {
         setSelectedMedicalRecordId(id);

@@ -17,7 +17,7 @@ const MedicalRecordDialog = ({ patient }) => {
   const [records, setRecords] = useState(patient?.medical_records || []);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [step, setStep] = useState(1);
-  const { data, setData, post, processing, reset, errors } = useForm({
+  const { data, setData, post, put, processing, reset, errors } = useForm({
     patient_id: patient?.patient_id || null,
     school_physician_id: 1,
 
@@ -201,12 +201,16 @@ const MedicalRecordDialog = ({ patient }) => {
       })),
     };
 
+    console.log("Submitting Data:", formattedData);
+
     if (selectedRecord) {
       // 🔄 Edit Mode (Update Existing Record)
-      post(route("medical-records.update", selectedRecord.id), {
+      put(route("medical-records.update", selectedRecord.id), {
         data: formattedData,
         method: "put",
+        preserveScroll: true,
         onSuccess: () => {
+          console.log("Record Updated:", formattedData);
           toast.success("✅ Medical record updated successfully!");
           setRecords((prev) =>
             prev.map((record) =>
@@ -224,7 +228,9 @@ const MedicalRecordDialog = ({ patient }) => {
       post(route("medical-records.store"), {
         data: formattedData,
         method: "post",
+        preserveScroll: true,
         onSuccess: () => {
+          console.log("New Record Added:", formattedData);
           toast.success("✅ Medical record created successfully!");
           setRecords([{ id: Date.now(), ...formattedData }, ...records]); // Add new record to list
           reset();
@@ -259,7 +265,7 @@ const MedicalRecordDialog = ({ patient }) => {
 
       // ✅ Review of Systems (Extract Symptoms)
       review_of_systems: record.review_of_systems?.map((symptom) => symptom.symptom) || [],
-      others: "", // If you store "Others" separately, fetch it here
+      others: record.review_of_systems?.find(symptom => symptom.symptom === "Others")?.pivot?.custom_symptom || "",
 
       // ✅ Deformities
       deformities: record.deformities?.map((deformity) => deformity.symptom) || [],
@@ -274,7 +280,7 @@ const MedicalRecordDialog = ({ patient }) => {
 
       // ✅ Past Medical Histories (Extract Condition Names)
       past_medical_histories: record.past_medical_histories?.map((history) => history.condition_name) || [],
-      other_condition: "", // Modify this if "Other Conditions" exist separately
+      other_condition: record.past_medical_histories?.find(history => history.condition_name === "Others")?.pivot?.custom_condition || "",
 
       // ✅ OB/Gyne History (Handle `null` values)
       menstruation: record.ob_gyne_history?.menstruation || "",
@@ -286,29 +292,67 @@ const MedicalRecordDialog = ({ patient }) => {
 
       // ✅ Personal & Social History
       alcoholic_drinker: record.personal_social_history?.alcoholic_drinker || "",
-      smoker: record.personal_social_history?.smoker || false,
+      smoker: Boolean(record.personal_social_history?.smoker),
       sticks_per_day: record.personal_social_history?.sticks_per_day || "",
       years_smoking: record.personal_social_history?.years_smoking || "",
-      illicit_drugs: record.personal_social_history?.illicit_drugs || false,
+      illicit_drugs: Boolean(record.personal_social_history?.illicit_drugs),
       eye_glasses: record.personal_social_history?.eye_glasses || false,
       contact_lens: record.personal_social_history?.contact_lens || false,
       eye_disorder_no: record.personal_social_history?.eye_disorder_no || false,
 
-      // ✅ Family Histories (Extract Conditions)
-      family_histories: record.family_histories?.map((history) => ({
-        condition: history.condition_name,
-        Father: "",
-        Mother: "",
-        Sister: [""],
-        Brother: [""],
-        remarks: "",
-      })) || [],
+      // ✅ Family History
+      family_histories: (() => {
+        const familyHistoryMap = {};
+
+        // Initialize with default structure
+        [
+          "Bronchial Asthma",
+          "Cancer",
+          "Diabetes Mellitus",
+          "Kidney Disease",
+          "Heart Disease",
+          "Hypertension",
+          "Mental Illness",
+        ].forEach(condition => {
+          familyHistoryMap[condition] = {
+            condition,
+            Father: "",
+            Mother: "",
+            Sister: [],
+            Brother: [],
+            remarks: "",
+          };
+        });
+
+        // Populate from record data
+        record.family_histories?.forEach(fh => {
+          const condition = fh.condition;
+          const member = fh.pivot.family_member;
+          const remarks = fh.pivot.family_history_remarks || "";  // Correctly get remarks
+          const overallRemarks = fh.pivot.overall_remarks || "";
+
+          if (familyHistoryMap[condition]) {
+            if (member.includes("Sister")) {
+              familyHistoryMap[condition].Sister.push(remarks);
+            } else if (member.includes("Brother")) {
+              familyHistoryMap[condition].Brother.push(remarks);
+            } else {
+              familyHistoryMap[condition][member] = remarks; // Assign remarks to Father & Mother
+            }
+            familyHistoryMap[condition].remarks = overallRemarks;
+          }
+        });
+
+
+        return Object.values(familyHistoryMap);
+      })(),
 
       // ✅ Physical Examinations (Extract Names & Results)
       physical_examinations: record.physical_examinations?.map((exam) => ({
+        id: exam.id, // Store ID to ensure correct updates
         name: exam.name,
-        result: exam.pivot?.result || "Normal",
-        remarks: exam.pivot?.remarks || "",
+        result: exam.pivot?.result ?? "Normal", // Ensure result is not undefined
+        remarks: exam.pivot?.remarks ?? "", // Ensure remarks are properly initialized
       })) || [],
 
       // ✅ Medical Record Details
@@ -320,8 +364,9 @@ const MedicalRecordDialog = ({ patient }) => {
       previous_surgeries: record.medical_record_detail?.previous_surgeries || false,
       surgery_reason: record.medical_record_detail?.surgery_reason || "",
 
-      // ✅ X-Ray Image (If applicable)
-      chest_xray: record.medical_record_detail?.chest_xray || null,
+      // chest_xray: record.id ? `/medical-records/${record.id}/image` : null, // Use record.id instead
+      chest_xray: "",
+      medical_record: record.medical_record_detail?.id,
 
       // ✅ Vaccination Status
       vaccination_status: record.medical_record_detail?.vaccination_status || "",
@@ -349,7 +394,13 @@ const MedicalRecordDialog = ({ patient }) => {
     }
   }, [selectedRecord]);
 
+  useEffect(() => {
+    setRecords(patient?.medical_records || []);
+  }, [patient?.medical_records]);
+
   const nextStep = () => {
+    console.log("Data before next step:", data);
+
     if (!validateStep(step)) {
       return;
     }

@@ -118,7 +118,7 @@ class MedicalRecord extends Model
     public function familyHistories(): BelongsToMany
     {
         return $this->belongsToMany(FamilyHistory::class, 'medical_record_family_history')
-            ->withPivot('family_member', 'family_history_remarks') // Additional fields for family member and remarks
+            ->withPivot('family_member', 'family_history_remarks', 'overall_remarks') // Additional fields for family member and remarks
             ->withTimestamps();
     }
 }

@@ -24,6 +24,13 @@ const Step6 = ({ formData, setFormData }) => {
     }
   };
 
+  const imageUrl =
+    formData.medical_record && !formData.chest_xray
+      ? `/medical-records/${formData.medical_record}/image`
+      : typeof formData.chest_xray === "string"
+        ? formData.chest_xray // Treat as image URL
+        : null;
+
   return (
     <div className="form-container p-4 space-y-5">
       <style>
@@ -56,9 +63,9 @@ const Step6 = ({ formData, setFormData }) => {
           <small id="xray-helper" className="text-sm text-gray-600">
             Upload your chest X-ray image or PDF.
           </small>
-          {formData.chest_xray && (
+          {imageUrl && (
             <img
-              src={URL.createObjectURL(formData.chest_xray)}
+              src={imageUrl}
               alt="X-Ray Preview"
               className="w-28 h-28 object-contain rounded mt-2"
             />
@@ -125,8 +132,8 @@ const Step6 = ({ formData, setFormData }) => {
                 {option === "Class A"
                   ? "(Physically Fit)"
                   : option === "Class B"
-                  ? "(Physically Fit with Minor Illness)"
-                  : "(Needs Clearance)"}
+                    ? "(Physically Fit with Minor Illness)"
+                    : "(Needs Clearance)"}
               </span>
             </label>
           ))}

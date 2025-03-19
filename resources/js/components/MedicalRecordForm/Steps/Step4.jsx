@@ -225,15 +225,8 @@ const Step4 = ({ formData, setFormData }) => {
                 type="checkbox" // 🔥 Changed to Radio
                 name="smoker"
                 value="1"
-                checked={formData.smoker === true}
-                onChange={() =>
-                  setFormData({
-                    ...formData,
-                    smoker: true,
-                    sticks_per_day: "",
-                    years_smoking: "",
-                  })
-                }
+                checked={formData.smoker || false} // ✅ Ensure boolean value
+                onChange={handleCheckboxChange}
                 className="w-5 h-5 text-green-600 border-green-600 rounded focus:ring-green-500"
               />
               <span>Yes</span>
@@ -328,10 +321,8 @@ const Step4 = ({ formData, setFormData }) => {
                 type="checkbox"
                 name="illicit_drugs"
                 value="1"
-                checked={formData.illicit_drugs === true}
-                onChange={() =>
-                  setFormData({ ...formData, illicit_drugs: true })
-                }
+                checked={formData.illicit_drugs || false} // ✅ Ensure boolean value
+                onChange={handleCheckboxChange}
                 className="w-5 h-5 text-green-600 border-green-600 rounded focus:ring-green-500"
               />
               <span>Yes</span>

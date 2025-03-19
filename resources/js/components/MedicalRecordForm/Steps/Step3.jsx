@@ -1,5 +1,16 @@
+import { useEffect } from "react";
+
+useEffect
+
 const Step3 = ({ formData, setFormData, patient }) => {
   const isMale = patient.gender === 1;
+
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      obGyneHistory: prev.obGyneHistory ?? true, // ✅ Default to true if not set
+    }));
+  }, []);
 
   const medicalHistoryOptions = [
     { name: "Allergy", label: "Allergy" },
@@ -46,7 +57,17 @@ const Step3 = ({ formData, setFormData, patient }) => {
 
       if (name === "obGyneHistory") {
         updatedData.obGyneHistory = checked;
-        if (!checked) {
+        if (checked) {
+          updatedData = {
+            ...updatedData,
+            menstruation: updatedData.menstruation || "Regular",
+            duration: updatedData.duration || "4-6 days",
+            dysmenorrhea: updatedData.dysmenorrhea ?? false,
+            pregnant_before: updatedData.pregnant_before ?? false,
+            num_of_pregnancies: updatedData.num_of_pregnancies || "",
+            last_menstrual_period: updatedData.last_menstrual_period || "",
+          };
+        } else {
           updatedData = {
             ...updatedData,
             menstruation: "",
@@ -126,7 +147,7 @@ const Step3 = ({ formData, setFormData, patient }) => {
             <input
               type="checkbox"
               name="obGyneHistory"
-              checked={formData.obGyneHistory || false}
+              checked={formData.obGyneHistory ?? false}
               onChange={handleCheckboxChange}
               className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500"
             />
@@ -144,11 +165,15 @@ const Step3 = ({ formData, setFormData, patient }) => {
                     {options.map(({ name, label }) => (
                       <label key={name} className="flex items-center space-x-2">
                         <input
-                          type="radio"
-                          name={key}
-                          value={name}
-                          checked={formData[key] === name}
-                          onChange={handleTextChange}
+                          type="checkbox"
+                          name={name}
+                          checked={formData[key] === name} // ✅ Only one can be checked
+                          onChange={() => {
+                            setFormData((prev) => ({
+                              ...prev,
+                              [key]: name, // ✅ Ensures only one checkbox is selected at a time
+                            }));
+                          }}
                           className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500"
                         />
                         <span>{label}</span>

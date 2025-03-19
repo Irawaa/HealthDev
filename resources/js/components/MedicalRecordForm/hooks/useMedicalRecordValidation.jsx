@@ -24,10 +24,10 @@ const useMedicalRecordValidation = (data, patient) => {
             case 2:
                 // Step 2: Vital Signs
                 if (
-                    !data.bp.trim() ||
-                    !data.rr.trim() ||
-                    !data.hr.trim() ||
-                    !data.temperature.trim()
+                    !String(data.bp).trim() ||
+                    !String(data.rr).trim() ||
+                    !String(data.hr).trim() ||
+                    !String(data.temperature).trim()
                 ) {
                     toast.error("All Vital Signs are required.");
                     focusInvalidField();
@@ -176,19 +176,19 @@ const useMedicalRecordValidation = (data, patient) => {
 
             case 6:
                 // 🔥 Chest X-Ray File Validation (Optional but if selected, must be valid)
-                if (
-                    data.chest_xray &&
-                    !(
-                        data.chest_xray.type.includes("image") ||
-                        data.chest_xray.type.includes("pdf")
-                    )
-                ) {
-                    toast.error(
-                        "Invalid file type for Chest X-Ray. Only images or PDFs are allowed."
-                    );
-                    focusInvalidField();
-                    return false;
-                }
+                // if (
+                //     data.chest_xray &&
+                //     !(
+                //         data.chest_xray.type.includes("image") ||
+                //         data.chest_xray.type.includes("pdf")
+                //     )
+                // ) {
+                //     toast.error(
+                //         "Invalid file type for Chest X-Ray. Only images or PDFs are allowed."
+                //     );
+                //     focusInvalidField();
+                //     return false;
+                // }
 
                 // ✅ Laboratory Test Validation (Only Numeric Fields)
                 const numericTests = [

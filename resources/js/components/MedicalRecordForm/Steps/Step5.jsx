@@ -31,28 +31,17 @@ const Step5 = ({ formData, setFormData }) => {
     if (!formData?.family_histories || !formData?.physical_examinations) {
       setFormData((prev) => ({
         ...prev,
-        family_histories:
-          prev?.family_histories?.length > 0
-            ? prev.family_histories
-            : illnesses.map((illness) => ({
-                condition: illness,
-                Father: "",
-                Mother: "",
-                Sister: [""],
-                Brother: [""],
-                remarks: "",
-              })),
-        physical_examinations:
-          prev?.physical_examinations?.length > 0
-            ? prev.physical_examinations
-            : bodyParts.map((part) => ({
-                name: part,
-                result: "Normal",
-                remarks: "",
-              })),
+        family_histories: prev?.family_histories?.length > 0 ? prev.family_histories : [],
+        physical_examinations: prev?.physical_examinations?.length > 0
+          ? prev.physical_examinations  // ✅ Use retrieved data if available
+          : bodyParts.map((part) => ({
+            name: part,
+            result: "Normal",
+            remarks: "",
+          })),
       }));
     }
-  }, [formData]);
+  }, [formData, setFormData]);
 
   // Toggle Section Expansion
   const toggleSection = (condition) => {
@@ -79,15 +68,13 @@ const Step5 = ({ formData, setFormData }) => {
   const handleExamChange = (e, part, field) => {
     const { value } = e.target;
 
-    setFormData((prev) => ({
-      ...prev,
-      physical_examinations: prev.physical_examinations.map((exam) => {
-        if (exam.name === part) {
-          return { ...exam, [field]: value };
-        }
-        return exam;
-      }),
-    }));
+    setFormData((prev) => {
+      const updatedExaminations = prev.physical_examinations.map((exam) =>
+        exam.name === part ? { ...exam, [field]: value } : exam
+      );
+
+      return { ...prev, physical_examinations: updatedExaminations };
+    });
   };
 
   // Add sibling
@@ -145,11 +132,10 @@ const Step5 = ({ formData, setFormData }) => {
             expanded={expandedSections[history.condition]}
           >
             <div
-              className={`transition-[max-height] duration-300 ease-in-out overflow-hidden ${
-                expandedSections[history.condition]
-                  ? "max-h-[500px]"
-                  : "max-h-0"
-              }`}
+              className={`transition-[max-height] duration-300 ease-in-out overflow-hidden ${expandedSections[history.condition]
+                ? "max-h-[500px]"
+                : "max-h-0"
+                }`}
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4">
                 {/* Father & Mother Inputs */}
@@ -219,9 +205,8 @@ const Step5 = ({ formData, setFormData }) => {
         expanded={expandedSections["PhysicalExam"]}
       >
         <div
-          className={`transition-[max-height] duration-300 ease-in-out overflow-hidden ${
-            expandedSections["PhysicalExam"] ? "max-h-[1000px]" : "max-h-0"
-          }`}
+          className={`transition-[max-height] duration-300 ease-in-out overflow-hidden ${expandedSections["PhysicalExam"] ? "max-h-[1000px]" : "max-h-0"
+            }`}
         >
           <div className="overflow-x-auto mt-4 p-4">
             <table className="min-w-full bg-white border border-green-300 rounded-lg shadow-sm">

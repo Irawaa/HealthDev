@@ -124,7 +124,17 @@ class PatientController extends Controller
 
             // Load medical records for the specific patient
             'medicalRecords' => function ($query) {
-                $query->with([
+                $query->select(
+                    'id',
+                    'patient_id',
+                    'school_nurse_id',
+                    'school_physician_id',
+                    'recorded_by',
+                    'updated_by',
+                    'final_evaluation',
+                    'plan_recommendation',
+                    'created_at'
+                )->with([
                     'reviewOfSystems',
                     'deformities',
                     'vitalSigns',

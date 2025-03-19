@@ -15,6 +15,7 @@ use App\Models\MedicalRecordDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class MedicalRecordController extends Controller
@@ -117,6 +118,7 @@ class MedicalRecordController extends Controller
 
                 // ✅ X-Ray Image
                 'chest_xray' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Image Validation
+                'reset_xray' => 'nullable|boolean',
 
                 // ✅ Vaccination Status
                 'vaccination_status' => 'nullable|string',
@@ -393,6 +395,11 @@ class MedicalRecordController extends Controller
                 'weight' => 'required|numeric|min:1|max:300',
                 'height' => 'required|numeric|min:0.5|max:5.0',
 
+                // ✅ Past Medical History
+                'past_medical_histories' => 'array',
+                'past_medical_histories.*' => 'string',
+                'other_condition' => 'nullable|string',
+
                 // ✅ Medical Record Details
                 'chief_complaint' => 'nullable|string',
                 'present_illness' => 'nullable|string',
@@ -402,6 +409,14 @@ class MedicalRecordController extends Controller
                 'previous_surgeries' => 'nullable|boolean',
                 'surgery_reason' => 'nullable|string',
                 'vaccination_status' => 'nullable|string',
+
+                // ✅ OB/Gyne History Validation (Optional)
+                'menstruation' => 'nullable|in:Regular,Irregular',
+                'duration' => 'nullable|in:1-3 days,4-6 days,7-9 days',
+                'dysmenorrhea' => 'nullable|boolean',
+                'pregnant_before' => 'nullable|boolean',
+                'num_of_pregnancies' => 'nullable|integer|min:0',
+                'last_menstrual_period' => 'nullable|date',
 
                 // ✅ Personal & Social History
                 'alcoholic_drinker' => 'nullable|in:Regular,Occasional,No',
@@ -429,9 +444,6 @@ class MedicalRecordController extends Controller
                 'physical_examinations.*.name' => 'required|string|exists:physical_examinations,name',
                 'physical_examinations.*.result' => 'nullable|in:Normal,Abnormal',
                 'physical_examinations.*.remarks' => 'nullable|string',
-
-                // ✅ X-Ray Image
-                'chest_xray' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
 
                 // ✅ Laboratory
                 'blood_chemistry' => 'nullable|string',
@@ -489,6 +501,78 @@ class MedicalRecordController extends Controller
                 'height' => $validated['height'],
             ]);
 
+            // ✅ Update Past Medical History
+            if ($request->has('past_medical_histories')) {
+                $syncData = [];
+
+                // Ensure all conditions exist in `past_medical_histories` table
+                foreach ($validated['past_medical_histories'] as $condition) {
+                    $history = PastMedicalHistory::firstOrCreate(['condition_name' => $condition]);
+                    $syncData[$history->id] = ['custom_condition' => null];
+                }
+
+                // ✅ Handle "Other" Condition
+                if (!empty($validated['other_condition'])) {
+                    $customCondition = PastMedicalHistory::firstOrCreate(['condition_name' => 'Others']);
+                    $syncData[$customCondition->id] = ['custom_condition' => $validated['other_condition']];
+                }
+
+                // Sync Past Medical Histories
+                $medicalRecord->pastMedicalHistories()->sync($syncData);
+            }
+
+            // ✅ Update OB/Gyne History (Optional)
+            if ($request->filled(['menstruation', 'duration'])) {
+                $obGyneData = [
+                    'medical_record_id' => $medicalRecord->id,
+                    'menstruation' => $validated['menstruation'],
+                    'duration' => $validated['duration'],
+                    'dysmenorrhea' => $validated['dysmenorrhea'] ?? null,
+                    'pregnant_before' => $validated['pregnant_before'] ?? null,
+                    'num_of_pregnancies' => $validated['num_of_pregnancies'] ?? null,
+                    'last_menstrual_period' => $validated['last_menstrual_period'] ?? null,
+                ];
+
+                // ✅ Check if record exists
+                $obGyne = ObGyneHistory::where('medical_record_id', $medicalRecord->id)->first();
+
+                if ($obGyne) {
+                    // ✅ Update existing record
+                    $obGyne->update($obGyneData);
+                    Log::info('OB/Gyne history updated', ['ob_gyne' => $obGyne]);
+                } else {
+                    // ✅ Create new record if not found
+                    $obGyne = ObGyneHistory::create($obGyneData);
+                    Log::info('OB/Gyne history created', ['ob_gyne' => $obGyne]);
+                }
+            }
+
+            // ✅ Reset Old Physical Examinations Before Syncing New Ones
+            if ($request->filled('physical_examinations')) {
+                Log::info('Resetting old physical examinations for medical record ID: ' . $medicalRecord->id);
+
+                // ❗ First, detach all existing physical examinations
+                $medicalRecord->physicalExaminations()->detach();
+
+                $syncData = [];
+
+                foreach ($validated['physical_examinations'] as $exam) {
+                    $physicalExam = PhysicalExamination::where('name', $exam['name'])->first();
+
+                    if ($physicalExam) {
+                        $syncData[$physicalExam->id] = [
+                            'result' => $exam['result'] ?? 'Normal', // Default Normal
+                            'remarks' => $exam['remarks'] ?? null,
+                        ];
+                    }
+                }
+
+                Log::info('Syncing updated Physical Examinations', ['sync_data' => $syncData]);
+
+                // ❗ Now, sync with the new data
+                $medicalRecord->physicalExaminations()->sync($syncData);
+            }
+
             // ✅ Update Personal & Social History
             $medicalRecord->personalSocialHistory()->update([
                 'alcoholic_drinker' => $validated['alcoholic_drinker'] ?? null,
@@ -505,6 +589,9 @@ class MedicalRecordController extends Controller
             if ($request->filled('family_histories')) {
                 $syncData = [];
 
+                // ❗ First, detach all existing related family histories
+                $medicalRecord->familyHistories()->detach();
+
                 foreach ($validated['family_histories'] as $history) {
                     $familyHistory = FamilyHistory::where('condition', $history['condition'])->first();
 
@@ -519,9 +606,25 @@ class MedicalRecordController extends Controller
                                 ];
                             }
                         }
+
+                        foreach (['Sister', 'Brother'] as $sibling) {
+                            if (!empty($history[$sibling])) {
+                                foreach ($history[$sibling] as $key => $note) {
+                                    $syncData[] = [
+                                        'family_history_id' => $familyHistory->id,
+                                        'family_member' => $sibling . ' ' . ($key + 1), // 🔥 Sister 1, Sister 2
+                                        'family_history_remarks' => $note,
+                                        'overall_remarks' => $history['remarks'] ?? null,
+                                    ];
+                                }
+                            }
+                        }
                     }
                 }
 
+                Log::info('Updating Family Histories', ['sync_data' => $syncData]);
+
+                // ❗ Now, sync with the new data
                 $medicalRecord->familyHistories()->sync($syncData);
             }
 
@@ -535,7 +638,17 @@ class MedicalRecordController extends Controller
                 'previous_surgeries' => $validated['previous_surgeries'] ?? false,
                 'surgery_reason' => $validated['surgery_reason'] ?? null,
                 'vaccination_status' => $validated['vaccination_status'] ?? null,
+
+                // ✅ Laborartory
+                'blood_chemistry' => $validated['blood_chemistry'] ?? null,
+                'fbs' => $validated['fbs'] ?? null,
+                'uric_acid' => $validated['uric_acid'] ?? null,
+                'triglycerides' => $validated['triglycerides'] ?? null,
+                't_cholesterol' => $validated['t_cholesterol'] ?? null,
+                'creatinine' => $validated['creatinine'] ?? null,
             ]);
+
+            Log::info('Received data', ['data' => $request->all()]);
 
             Log::info('Medical record updated successfully', ['medical_record_id' => $medicalRecord->id]);
             return redirect()->back()->with('success', 'Medical record updated successfully.');
@@ -571,10 +684,46 @@ class MedicalRecordController extends Controller
 
             Log::info("Medical record ID: {$medicalRecord->id} deleted successfully.");
             return redirect()->back()->with('success', 'Medical record deleted successfully.');
-
         } catch (\Exception $e) {
             Log::error("Failed to delete medical record ID: $id", ['error' => $e->getMessage()]);
             return back()->withErrors('Failed to delete medical record.');
+        }
+    }
+
+    public function showXrayImage($id)
+    {
+        // Find the medical record detail
+        $medicalRecordDetail = MedicalRecordDetail::findOrFail($id);
+
+        // Ensure X-ray exists
+        if (!$medicalRecordDetail->chest_xray) {
+            return response()->json(['error' => 'No X-ray image found'], 404);
+        }
+
+        // Decode Base64 image and return with correct MIME type
+        return response(base64_decode($medicalRecordDetail->chest_xray))
+            ->header('Content-Type', 'image/jpeg'); // Adjust MIME type if needed
+    }
+
+    public function updateChestXray($request, $medicalRecord)
+    {
+        if ($request->hasFile('chest_xray')) {
+            $request->validate([
+                'chest_xray' => 'image|mimes:jpeg,png,jpg|max:2048',
+            ]);
+
+            // Delete the old image to ensure it's replaced
+            Log::info('Overwriting X-ray image for medical record ID: ' . $medicalRecord->id);
+            $medicalRecord->medicalRecordDetail()->update(['chest_xray' => null]);
+
+            // Store the new image
+            $medicalRecord->medicalRecordDetail()->update([
+                'chest_xray' => $request->file('chest_xray')->getContent(),
+            ]);
+        } elseif ($request->filled('chest_xray') && $request->chest_xray !== null) {
+            // Explicitly resetting the X-ray image
+            Log::info('Resetting X-ray image for medical record ID: ' . $medicalRecord->id);
+            $medicalRecord->medicalRecordDetail()->update(['chest_xray' => null]);
         }
     }
 }

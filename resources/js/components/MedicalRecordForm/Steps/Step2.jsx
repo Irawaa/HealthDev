@@ -40,21 +40,43 @@ const Step2 = ({ formData, setFormData }) => {
     }
   }, [formData.height, formData.weight, setFormData]);
 
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      deformity: prev.deformities.length > 0,
+    }));
+  }, [formData.deformities, setFormData]);
+
+
   const handleCheckboxChange = ({ target: { name, checked } }) => {
-    if (name === "deformity") {
-      setFormData((prev) => ({
+    setFormData((prev) => {
+      if (name === "deformity") {
+        return {
+          ...prev,
+          deformity: checked,
+          deformities: checked ? prev.deformities : [], // Reset deformities if unchecked
+        };
+      }
+
+      if (name === "None") {
+        return {
+          ...prev,
+          deformities: checked ? ["None"] : [],
+          deformity: checked,
+        };
+      }
+
+      // Handle individual deformities
+      const updatedDeformities = checked
+        ? [...prev.deformities.filter((d) => d !== "None"), name] // Add deformity
+        : prev.deformities.filter((d) => d !== name); // Remove deformity
+
+      return {
         ...prev,
-        deformity: checked,
-        deformities: checked ? prev.deformities : [], // Reset if unchecked
-      }));
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        deformities: checked
-          ? [...prev.deformities, name] // Add deformity
-          : prev.deformities.filter((d) => d !== name), // Remove if unchecked
-      }));
-    }
+        deformities: updatedDeformities,
+        deformity: updatedDeformities.length > 0, // Keep "Deformities" checked if any is selected
+      };
+    });
   };
 
   const handleInputChange = ({ target: { name, value } }) => {
