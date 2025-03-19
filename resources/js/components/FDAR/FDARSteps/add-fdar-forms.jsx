@@ -58,7 +58,7 @@ const AddFDARForm = ({ formData, handleChange }) => {
     { key: "cardiac_rate", label: "CR", type: "input", required: true },
     { key: "respiratory_rate", label: "RR", type: "input", required: true },
     { key: "temperature", label: "Temperature (T)", type: "input", required: true },
-    { key: "oxygen_saturation", label: "O₂ Saturation", type: "input" },
+    { key: "oxygen_saturation", label: "O₂ Saturation", type: "input", required: true },
     { key: "last_menstrual_period", label: "LMP", type: "date" },
   ];
 
