@@ -54,8 +54,8 @@ const EditFDARModal = ({ isOpen, onClose, formData }) => {
       error = "This field is required.";
     } else if (name === "blood_pressure" && !/^\d+\/\d+$/.test(value)) {
       error = "Blood pressure must be in format '120/80'.";
-    } else if (name === "temperature" && (isNaN(value) || value < 30 || value > 45)) {
-      error = "Temperature must be between 30-45°C.";
+    } else if (name === "temperature" && (isNaN(value) || value < 30 || value > 50)) {
+      error = "Temperature must be between 30-50°C.";
     }
     return error;
   };
@@ -126,7 +126,7 @@ const EditFDARModal = ({ isOpen, onClose, formData }) => {
     { key: "cardiac_rate", label: "CR", required: true },
     { key: "respiratory_rate", label: "RR", required: true },
     { key: "temperature", label: "Temperature (T)", required: true },
-    { key: "oxygen_saturation", label: "O₂ Saturation" },
+    { key: "oxygen_saturation", label: "O₂ Saturation", required: true },
     { key: "last_menstrual_period", label: "LMP", type: "date" },
   ];
 
