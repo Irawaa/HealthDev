@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useForm } from "@inertiajs/react";
 import { toast } from "react-hot-toast";
@@ -9,13 +9,14 @@ import Step4 from "./Steps/Step4";
 import Step5 from "./Steps/Step5";
 import Step6 from "./Steps/Step6";
 import MedicalRecordsList from "./List/medical-records-list";
+import useMedicalRecordValidation from "./hooks/useMedicalRecordValidation";
+
 
 const MedicalRecordDialog = ({ patient }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [records, setRecords] = useState(patient?.medical_records || []);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [step, setStep] = useState(1);
-
   const { data, setData, post, processing, reset, errors } = useForm({
     patient_id: patient?.patient_id || null,
     school_physician_id: 1,
@@ -163,10 +164,84 @@ const MedicalRecordDialog = ({ patient }) => {
     triglycerides: "",
     t_cholesterol: "",
     creatinine: "",
-
     final_evaluation: "",
     plan_recommendation: "",
   });
+
+  const { validateStep } = useMedicalRecordValidation(data, patient);
+
+  const handleSave = async () => {
+    if (!validateStep(step)) {
+      toast.error("Please complete all required fields before submission.");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      selectedRecord
+        ? "Are you sure you want to update this Medical Record?"
+        : "Are you sure you want to create this Medical Record?"
+    );
+    if (!confirmed) return;
+
+    // 🔥 Clean data before submission
+    const formattedData = {
+      ...data,
+      family_histories: data.family_histories.map((history) => ({
+        condition: history.condition,
+        Father: history.Father,
+        Mother: history.Mother,
+        Sister: history.Sister.filter((s) => s.trim() !== ""),
+        Brother: history.Brother.filter((b) => b.trim() !== ""),
+        remarks: history.remarks,
+      })),
+      physical_examinations: data.physical_examinations.map((exam) => ({
+        name: exam.name,
+        result: exam.result,
+        remarks: exam.remarks,
+      })),
+    };
+
+    if (selectedRecord) {
+      // 🔄 Edit Mode (Update Existing Record)
+      post(route("medical-records.update", selectedRecord.id), {
+        data: formattedData,
+        method: "put",
+        onSuccess: () => {
+          toast.success("✅ Medical record updated successfully!");
+          setRecords((prev) =>
+            prev.map((record) =>
+              record.id === selectedRecord.id ? { ...formattedData, id: record.id } : record
+            )
+          );
+          reset();
+          setSelectedRecord(null);
+          setIsOpen(false);
+        },
+        onError: handleFormErrors,
+      });
+    } else {
+      // ➕ Create Mode (New Record)
+      post(route("medical-records.store"), {
+        data: formattedData,
+        method: "post",
+        onSuccess: () => {
+          toast.success("✅ Medical record created successfully!");
+          setRecords([{ id: Date.now(), ...formattedData }, ...records]); // Add new record to list
+          reset();
+          setIsOpen(false);
+        },
+        onError: handleFormErrors,
+      });
+    }
+  };
+
+  // 🔥 Handle form errors
+  const handleFormErrors = (errors) => {
+    console.error("Validation Errors:", errors);
+    Object.entries(errors).forEach(([key, messages]) => {
+      toast.error(Array.isArray(messages) ? messages.join(", ") : messages);
+    });
+  };
 
   const handleCreateNew = () => {
     reset();
@@ -175,321 +250,108 @@ const MedicalRecordDialog = ({ patient }) => {
     setStep(1);
   };
 
-  const handleEdit = (record) => {
+  const handleEditClick = (record) => {
     setSelectedRecord(record);
+
+    setData({
+      patient_id: record.patient_id || "",
+      school_physician_id: record.school_physician_id || 1,
+
+      // ✅ Review of Systems (Extract Symptoms)
+      review_of_systems: record.review_of_systems?.map((symptom) => symptom.symptom) || [],
+      others: "", // If you store "Others" separately, fetch it here
+
+      // ✅ Deformities
+      deformities: record.deformities?.map((deformity) => deformity.symptom) || [],
+
+      // ✅ Vital Signs (From `vital_signs`)
+      bp: record.vital_signs?.bp || "",
+      rr: record.vital_signs?.rr || "",
+      hr: record.vital_signs?.hr || "",
+      temperature: record.vital_signs?.temperature || "",
+      weight: record.vital_signs?.weight || "",
+      height: record.vital_signs?.height || "",
+
+      // ✅ Past Medical Histories (Extract Condition Names)
+      past_medical_histories: record.past_medical_histories?.map((history) => history.condition_name) || [],
+      other_condition: "", // Modify this if "Other Conditions" exist separately
+
+      // ✅ OB/Gyne History (Handle `null` values)
+      menstruation: record.ob_gyne_history?.menstruation || "",
+      duration: record.ob_gyne_history?.duration || "",
+      dysmenorrhea: record.ob_gyne_history?.dysmenorrhea || false,
+      pregnant_before: record.ob_gyne_history?.pregnant_before || false,
+      num_of_pregnancies: record.ob_gyne_history?.num_of_pregnancies || "",
+      last_menstrual_period: record.ob_gyne_history?.last_menstrual_period || "",
+
+      // ✅ Personal & Social History
+      alcoholic_drinker: record.personal_social_history?.alcoholic_drinker || "",
+      smoker: record.personal_social_history?.smoker || false,
+      sticks_per_day: record.personal_social_history?.sticks_per_day || "",
+      years_smoking: record.personal_social_history?.years_smoking || "",
+      illicit_drugs: record.personal_social_history?.illicit_drugs || false,
+      eye_glasses: record.personal_social_history?.eye_glasses || false,
+      contact_lens: record.personal_social_history?.contact_lens || false,
+      eye_disorder_no: record.personal_social_history?.eye_disorder_no || false,
+
+      // ✅ Family Histories (Extract Conditions)
+      family_histories: record.family_histories?.map((history) => ({
+        condition: history.condition_name,
+        Father: "",
+        Mother: "",
+        Sister: [""],
+        Brother: [""],
+        remarks: "",
+      })) || [],
+
+      // ✅ Physical Examinations (Extract Names & Results)
+      physical_examinations: record.physical_examinations?.map((exam) => ({
+        name: exam.name,
+        result: exam.pivot?.result || "Normal",
+        remarks: exam.pivot?.remarks || "",
+      })) || [],
+
+      // ✅ Medical Record Details
+      chief_complaint: record.medical_record_detail?.chief_complaint || "",
+      present_illness: record.medical_record_detail?.present_illness || "",
+      medication: record.medical_record_detail?.medication || "",
+      hospitalized: record.medical_record_detail?.hospitalized || false,
+      hospitalized_reason: record.medical_record_detail?.hospitalized_reason || "",
+      previous_surgeries: record.medical_record_detail?.previous_surgeries || false,
+      surgery_reason: record.medical_record_detail?.surgery_reason || "",
+
+      // ✅ X-Ray Image (If applicable)
+      chest_xray: record.medical_record_detail?.chest_xray || null,
+
+      // ✅ Vaccination Status
+      vaccination_status: record.medical_record_detail?.vaccination_status || "",
+
+      // ✅ Laboratory Fields
+      blood_chemistry: record.medical_record_detail?.blood_chemistry || "",
+      fbs: record.medical_record_detail?.fbs || "",
+      uric_acid: record.medical_record_detail?.uric_acid || "",
+      triglycerides: record.medical_record_detail?.triglycerides || "",
+      t_cholesterol: record.medical_record_detail?.t_cholesterol || "",
+      creatinine: record.medical_record_detail?.creatinine || "",
+
+      // ✅ Final Evaluation & Plan
+      final_evaluation: record.final_evaluation || "",
+      plan_recommendation: record.plan_recommendation || "",
+    });
+
     setIsOpen(true);
     setStep(1);
   };
 
-  const validateStep = () => {
-    switch (step) {
-      case 1:
-        // Step 1: Review of Systems
-        // If "Others" is checked, input must not be empty
-        if (data.review_of_systems.includes("Others") && !data.others.trim()) {
-          toast.error("Please specify the other symptom.");
-          focusInvalidField();
-          return false;
-        }
-        break;
-
-      case 2:
-        // Step 2: Vital Signs
-        if (
-          !data.bp.trim() ||
-          !data.rr.trim() ||
-          !data.hr.trim() ||
-          !data.temperature.trim()
-        ) {
-          toast.error("All Vital Signs are required.");
-          focusInvalidField();
-          return false;
-        }
-
-        // Deformities Mandatory if Checked
-        if (data.deformity && data.deformities.length === 0) {
-          toast.error(
-            "Please select at least one deformity if Deformities is checked."
-          );
-          focusInvalidField();
-          return false;
-        }
-        break;
-
-      case 3:
-        // Step 3: Hospitalized & Surgery Reason
-        if (data.hospitalized && !data.hospitalized_reason.trim()) {
-          toast.error("Hospitalized Reason is required.");
-          focusInvalidField();
-          return false;
-        }
-
-        if (data.previous_surgeries && !data.surgery_reason.trim()) {
-          toast.error("Surgery Reason is required.");
-          focusInvalidField();
-          return false;
-        }
-
-        if (
-          data.past_medical_histories.includes("Others") &&
-          !data.other_condition.trim()
-        ) {
-          toast.error("Please specify the Other Condition.");
-          focusInvalidField();
-          return false;
-        }
-
-        // Female Patients OB/Gyne Validation 🔥
-        if (patient.gender !== 1) {
-          if (!data.obGyneHistory) {
-            toast.error("OB/Gyne History is required for Female Patients.");
-            return false;
-          }
-
-          if (
-            data.obGyneHistory &&
-            (!data.menstruation ||
-              !data.duration ||
-              !data.last_menstrual_period.trim())
-          ) {
-            toast.error("Please complete all OB/Gyne History fields.");
-            focusInvalidField();
-            return false;
-          }
-
-          if (data.pregnant_before && !data.num_of_pregnancies) {
-            toast.error("Number of Pregnancies is required.");
-            focusInvalidField();
-            return false;
-          }
-        }
-        break;
-
-      case 4:
-        // ✅ Chief Complaint Validation
-        if (!data.chief_complaint.trim()) {
-          toast.error("Chief Complaint is required.");
-          focusInvalidField();
-          return false;
-        }
-
-        // ✅ Present Illness Validation
-        if (!data.present_illness.trim()) {
-          toast.error("Present Illness is required.");
-          focusInvalidField();
-          return false;
-        }
-
-        // ✅ Hospitalization Reason
-        if (data.hospitalized && !data.hospitalized_reason.trim()) {
-          toast.error("Please provide a reason for hospitalization.");
-          focusInvalidField();
-          return false;
-        }
-
-        // ✅ Surgery Reason
-        if (data.previous_surgeries && !data.surgery_reason.trim()) {
-          toast.error("Please provide a reason for previous surgeries.");
-          focusInvalidField();
-          return false;
-        }
-
-        // ✅ Smoker Validation
-        if (
-          data.smoker &&
-          (!data.sticks_per_day.trim() || !data.years_smoking.trim())
-        ) {
-          toast.error(
-            "Please complete Smoking History (Sticks per Day and Years Smoking)."
-          );
-          focusInvalidField();
-          return false;
-        }
-
-        // ✅ Alcoholic Drinker Validation
-        if (!data.alcoholic_drinker) {
-          toast.error("Please select Alcoholic Drinker status.");
-          focusInvalidField();
-          return false;
-        }
-
-        // ✅ Illicit Drugs
-        if (data.illicit_drugs === "") {
-          toast.error("Please select Illicit Drugs status.");
-          focusInvalidField();
-          return false;
-        }
-
-        // ✅ Eye Disorder Validation
-        if (data.eye_disorder_no && (data.eye_glasses || data.contact_lens)) {
-          toast.error(
-            "You cannot select Eye Glasses or Contact Lens if No Eye Disorder is selected."
-          );
-          return false;
-        }
-
-        break;
-
-      case 5:
-        // ✅ Physical Examination Validation
-        const hasInvalidExam = data.physical_examinations.some(
-          (exam) => exam.result === "Abnormal" && !exam.remarks.trim()
-        );
-
-        if (hasInvalidExam) {
-          toast.error(
-            "Please provide remarks for Abnormal Physical Examinations."
-          );
-          focusInvalidField();
-          return false;
-        }
-
-        break;
-
-      case 6:
-        // 🔥 Chest X-Ray File Validation (Optional but if selected, must be valid)
-        if (
-          data.chest_xray &&
-          !(
-            data.chest_xray.type.includes("image") ||
-            data.chest_xray.type.includes("pdf")
-          )
-        ) {
-          toast.error(
-            "Invalid file type for Chest X-Ray. Only images or PDFs are allowed."
-          );
-          focusInvalidField();
-          return false;
-        }
-
-        // ✅ Laboratory Test Validation (Only Numeric Fields)
-        const numericTests = [
-          "fbs",
-          "uric_acid",
-          "triglycerides",
-          "t_cholesterol",
-          "creatinine",
-        ];
-
-        for (let test of numericTests) {
-          if (data[test] && isNaN(Number(data[test]))) {
-            toast.error(
-              `Invalid input for ${test.replace(
-                "_",
-                " "
-              )}. Please enter a numeric value.`
-            );
-            focusInvalidField();
-            return false;
-          }
-        }
-
-        // 🔥 Final Evaluation (Required)
-        if (!data.final_evaluation.trim()) {
-          toast.error("Final Evaluation is required.");
-          focusInvalidField();
-          return false;
-        }
-
-        // 🔥 Plan Recommendation (Required)
-        if (!data.plan_recommendation.trim()) {
-          toast.error("Plan/Recommendation is required.");
-          focusInvalidField();
-          return false;
-        }
-
-        return true;
-
-      default:
-        return true;
+  useEffect(() => {
+    if (selectedRecord) {
+      handleEditClick(selectedRecord);
     }
-
-    return true; // ✅ Passed
-  };
-
-  const focusInvalidField = () => {
-    const invalidInput = document.querySelector("input:invalid");
-    if (invalidInput) {
-      invalidInput.scrollIntoView({ behavior: "smooth", block: "center" }); // Smooth scroll
-      invalidInput.focus();
-    }
-  };
-
-  const handleSave = async () => {
-    // 🔥 Run Final Validation
-    if (!validateStep()) {
-      toast.error("Please complete all required fields before submission.");
-      focusInvalidField();
-      return; // Stop Submission if Validation Fails
-    }
-
-    // Confirm Submission
-    const confirmed = window.confirm(
-      "Are you sure you want to submit this Medical Record?"
-    );
-    if (!confirmed) return;
-
-    data.family_histories = data.family_histories.map((history) => ({
-      condition: history.condition,
-      Father: history.Father,
-      Mother: history.Mother,
-      Sister: history.Sister.filter((s) => s.trim() !== ""),
-      Brother: history.Brother.filter((b) => b.trim() !== ""),
-      remarks: history.remarks,
-    }));
-
-    data.physical_examinations = data.physical_examinations.map((exam) => ({
-      name: exam.name,
-      result: exam.result,
-      remarks: exam.remarks,
-    }));
-
-    post(route("medical-records.store"), {
-      onSuccess: () => {
-        toast.success("✅ Medical record saved successfully!");
-
-        if (!selectedRecord) {
-          setRecords([{ id: Date.now(), ...data }, ...records]);
-        } else {
-          const updated = records.map((r) =>
-            r.id === selectedRecord.id ? { ...data } : r
-          );
-          setRecords(updated);
-        }
-        reset();
-        setIsOpen(false);
-      },
-      onError: (errors) => {
-        console.error("Validation Errors:", errors);
-
-        // 🔥 Show general error message if available
-        if (typeof errors.error === "string") {
-          toast.error(`❌ ${errors.error}`);
-        }
-
-        // 🔥 Loop through all errors safely
-        Object.entries(errors).forEach(([key, messages]) => {
-          if (Array.isArray(messages)) {
-            messages.forEach((message) => toast.error(`❌ ${message}`));
-          } else if (typeof messages === "string") {
-            toast.error(`❌ ${messages}`);
-          }
-        });
-      },
-    });
-  };
-
-  const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to delete this record?")) {
-      setRecords(records.filter((r) => r.id !== id));
-      toast.success("Record deleted successfully.");
-    }
-  };
+  }, [selectedRecord]);
 
   const nextStep = () => {
-    if (!validateStep()) {
-      focusInvalidField(); // Auto Focus on the First Invalid Input
-      return; // Stop from going to the next step
+    if (!validateStep(step)) {
+      return;
     }
     setStep((prev) => Math.min(prev + 1, 6));
   };
@@ -508,9 +370,7 @@ const MedicalRecordDialog = ({ patient }) => {
       {/* Use the new MedicalRecordsList component */}
       <MedicalRecordsList
         patient={patient}
-        records={records}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
+        onEdit={handleEditClick}
       />
 
       {isOpen && (

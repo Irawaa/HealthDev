@@ -27,7 +27,7 @@ class MedicalRecordController extends Controller
         $clinicStaffId = Auth::user()->clinicStaff->staff_id ?? null;
         if (!$clinicStaffId) {
             Log::warning('Authenticated user is not linked to clinic staff.');
-            return back()->withErrors('You are not authorized to submit an incident report.');
+            return back()->withErrors('You are not authorized to submit an medical record.');
         }
 
         try {
@@ -356,9 +356,8 @@ class MedicalRecordController extends Controller
             $medicalRecordDetail = MedicalRecordDetail::create($medicalRecordDetailData);
             Log::info('Medical Record Detail stored', ['medical_record_detail' => $medicalRecordDetail]);
 
-
             Log::info('Medical record stored successfully', ['medical_record_id' => $medicalRecord->id]);
-            return redirect()->with('success', 'Medical record created successfully');
+            return redirect()->back()->with('success', 'Medical record created successfully');
         } catch (\Exception $e) {
             Log::error('Error storing medical record', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return back()->withErrors('Failed to create medical record. Please try again.');
@@ -539,10 +538,43 @@ class MedicalRecordController extends Controller
             ]);
 
             Log::info('Medical record updated successfully', ['medical_record_id' => $medicalRecord->id]);
-            return redirect()->with('success', 'Medical record updated successfully.');
+            return redirect()->back()->with('success', 'Medical record updated successfully.');
         } catch (\Exception $e) {
             Log::error('Error updating medical record', ['message' => $e->getMessage()]);
             return back()->withErrors('Failed to update medical record. Please try again.');
+        }
+    }
+
+    public function destroy($id)
+    {
+        try {
+            // Fetch the medical record
+            $medicalRecord = MedicalRecord::findOrFail($id);
+
+            // ✅ Log the deletion process
+            Log::info("Deleting medical record ID: {$medicalRecord->id}");
+
+            // ✅ Detach many-to-many relationships
+            $medicalRecord->reviewOfSystems()->detach();
+            $medicalRecord->deformities()->detach();
+            $medicalRecord->familyHistories()->detach();
+            $medicalRecord->physicalExaminations()->detach();
+
+            // ✅ Delete related one-to-many models (Fix: `delete()`, not `detach()`)
+            MedicalRecordVitalSign::where('medical_record_id', $medicalRecord->id)->delete();
+            ObGyneHistory::where('medical_record_id', $medicalRecord->id)->delete();
+            PersonalSocialHistory::where('medical_record_id', $medicalRecord->id)->delete();
+            MedicalRecordDetail::where('medical_record_id', $medicalRecord->id)->delete();
+
+            // ✅ Delete the main medical record
+            $medicalRecord->delete();
+
+            Log::info("Medical record ID: {$medicalRecord->id} deleted successfully.");
+            return redirect()->back()->with('success', 'Medical record deleted successfully.');
+
+        } catch (\Exception $e) {
+            Log::error("Failed to delete medical record ID: $id", ['error' => $e->getMessage()]);
+            return back()->withErrors('Failed to delete medical record.');
         }
     }
 }

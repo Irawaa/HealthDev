@@ -66,7 +66,8 @@ Route::middleware(['web', 'auth'])->group(function () {
 
     // Medical Records //
     Route::post('/medical-records', [MedicalRecordController::class, 'store'])->name('medical-records.store');
-    Route::put('/medical-records/{medical_record}', [MedicalRecordController::class, 'update'])->name('medical-records.update');
+    Route::put('/medical-records/{id}', [MedicalRecordController::class, 'update'])->name('medical-records.update');
+    Route::delete('/medical-records/{id}', [MedicalRecordController::class, 'destroy'])->name('medical-records.destroy');
 
     // FDAR Forms //
     Route::post('/fdar-forms', [FDARFormController::class, 'store'])->name('fdar-forms.store');
