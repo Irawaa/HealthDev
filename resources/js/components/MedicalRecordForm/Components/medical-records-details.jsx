@@ -1,8 +1,20 @@
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const MedicalRecordDetails = ({ record, onClose }) => {
+  const [imageUrl, setImageUrl] = useState(null);
+  console.log(record);
+
+  useEffect(() => {
+    if (record?.medical_record_detail?.medical_record_id) {
+      setImageUrl(`/medical-records/${record.medical_record_detail.medical_record_id}/image?timestamp=${new Date().getTime()}`);
+    } else {
+      setImageUrl(null);
+    }
+  }, [record?.medical_record_detail?.medical_record_id]);
+
   if (!record) return null;
 
   return (
@@ -101,11 +113,11 @@ const MedicalRecordDetails = ({ record, onClose }) => {
             <p><strong>Total Cholesterol:</strong> {record.medical_record_detail.t_cholesterol}</p>
             <p><strong>Creatinine:</strong> {record.medical_record_detail.creatinine}</p>
 
-            {record.medical_record_detail.chest_xray && (
+            {imageUrl && (
               <div className="mt-2">
                 <h3 className="font-semibold">Chest X-ray:</h3>
                 <img
-                  src={record.medical_record_detail.chest_xray}
+                  src={imageUrl}
                   alt="Chest X-ray"
                   className="w-full max-h-64 object-cover rounded-lg border border-green-500"
                 />

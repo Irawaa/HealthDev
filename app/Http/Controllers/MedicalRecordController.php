@@ -118,7 +118,7 @@ class MedicalRecordController extends Controller
 
                 // ✅ X-Ray Image
                 'chest_xray' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Image Validation
-                'reset_xray' => 'nullable|boolean',
+                // 'reset_xray' => 'nullable|boolean',
 
                 // ✅ Vaccination Status
                 'vaccination_status' => 'nullable|string',
@@ -409,6 +409,7 @@ class MedicalRecordController extends Controller
                 'previous_surgeries' => 'nullable|boolean',
                 'surgery_reason' => 'nullable|string',
                 'vaccination_status' => 'nullable|string',
+                'chest_xray' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
 
                 // ✅ OB/Gyne History Validation (Optional)
                 'menstruation' => 'nullable|in:Regular,Irregular',
@@ -648,6 +649,48 @@ class MedicalRecordController extends Controller
                 'creatinine' => $validated['creatinine'] ?? null,
             ]);
 
+            // if ($request->hasFile('chest_xray')) {
+            //     $file = $request->file('chest_xray');
+
+            //     if ($file) {
+            //         // Retrieve or create MedicalRecordDetail
+            //         $medicalRecordDetail = $medicalRecord->medicalRecordDetail ?? new MedicalRecordDetail(['medical_record_id' => $medicalRecord->id]);
+
+            //         // Convert file to base64 before saving
+            //         $medicalRecordDetail->chest_xray = base64_encode(file_get_contents($file->getRealPath()));
+            //         $medicalRecordDetail->save(); // ✅ Save changes
+
+            //         Log::info('Chest X-ray updated as Base64 string');
+            //     }
+            // } else {
+            //     // If no new file is uploaded, delete the existing chest_xray
+            //     if ($medicalRecord->medicalRecordDetail) {
+            //         $medicalRecord->medicalRecordDetail->chest_xray = null;
+            //         $medicalRecord->medicalRecordDetail->save();
+            //         Log::info('Chest X-ray deleted');
+            //     }
+            // }
+
+            if ($request->hasFile('chest_xray')) {
+                Log::info('Setting chest_xray to null for MedicalRecordDetail ID:', ['id' => $medicalRecord->medicalRecordDetail->id]);
+
+                // Step 1: Delete the old chest_xray
+                $medicalRecord->medicalRecordDetail->chest_xray = null;
+                $medicalRecord->medicalRecordDetail->save();
+
+                Log::info('After deleting:', ['chest_xray' => $medicalRecord->medicalRecordDetail->chest_xray]);
+
+                // Step 2: Refresh the model to ensure we have the latest state
+                $medicalRecord->medicalRecordDetail->refresh();
+
+                // Step 3: Store the new file content
+                $file = $request->file('chest_xray');
+                $medicalRecord->medicalRecordDetail->chest_xray = $file->getContent(); // Use getContent() to store raw file data
+                $medicalRecord->medicalRecordDetail->save();
+
+                Log::info('After uploading new file:', ['chest_xray' => $medicalRecord->medicalRecordDetail->chest_xray]);
+            }
+
             Log::info('Received data', ['data' => $request->all()]);
 
             Log::info('Medical record updated successfully', ['medical_record_id' => $medicalRecord->id]);
@@ -705,25 +748,35 @@ class MedicalRecordController extends Controller
             ->header('Content-Type', 'image/jpeg'); // Adjust MIME type if needed
     }
 
-    public function updateChestXray($request, $medicalRecord)
+    public function updateChestXray(Request $request, $id)
     {
-        if ($request->hasFile('chest_xray')) {
+        $medicalRecordDetail = MedicalRecordDetail::findOrFail($id);
+
+        if ($request->hasFile('chest_xray') && $request->file('chest_xray')->isValid()) {
             $request->validate([
                 'chest_xray' => 'image|mimes:jpeg,png,jpg|max:2048',
             ]);
 
-            // Delete the old image to ensure it's replaced
-            Log::info('Overwriting X-ray image for medical record ID: ' . $medicalRecord->id);
-            $medicalRecord->medicalRecordDetail()->update(['chest_xray' => null]);
+            Log::info('Updating X-ray image for medical record detail ID: ' . $medicalRecordDetail->id);
 
-            // Store the new image
-            $medicalRecord->medicalRecordDetail()->update([
-                'chest_xray' => $request->file('chest_xray')->getContent(),
+            // Delete the old X-ray
+            $medicalRecordDetail->update(['chest_xray' => null]);
+
+            // Store the new image as Base64
+            $medicalRecordDetail->update([
+                'chest_xray' => base64_encode(file_get_contents($request->file('chest_xray')->getRealPath())),
             ]);
-        } elseif ($request->filled('chest_xray') && $request->chest_xray !== null) {
-            // Explicitly resetting the X-ray image
-            Log::info('Resetting X-ray image for medical record ID: ' . $medicalRecord->id);
-            $medicalRecord->medicalRecordDetail()->update(['chest_xray' => null]);
+
+            Log::info('New X-ray image stored for medical record detail ID: ' . $medicalRecordDetail->id);
+
+            return redirect()->back()->with('success', 'Chest X-ray updated successfully.');
+        } elseif ($request->filled('chest_xray') && $request->chest_xray === null) {
+            $medicalRecordDetail->update(['chest_xray' => null]);
+            Log::info('X-ray image removed for medical record detail ID: ' . $medicalRecordDetail->id);
+
+            return redirect()->back()->with('success', 'Chest X-ray removed successfully.');
         }
+
+        return redirect()->back()->with('error', 'No valid X-ray image provided.');
     }
 }

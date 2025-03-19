@@ -204,10 +204,28 @@ const MedicalRecordDialog = ({ patient }) => {
     console.log("Submitting Data:", formattedData);
 
     if (selectedRecord) {
+      const formData = new FormData();
+
+      // Append all non-file fields
+      Object.keys(data).forEach((key) => {
+        if (Array.isArray(data[key])) {
+          formData.append(key, JSON.stringify(data[key])); // Convert arrays to JSON
+        } else {
+          formData.append(key, data[key]);
+        }
+      });
+
+      // Append file separately
+      if (data.chest_xray instanceof File) {
+        formData.append("chest_xray", data.chest_xray);
+      }
+
+      console.log("Submitting FormData for update:", formData);
+
       // 🔄 Edit Mode (Update Existing Record)
-      put(route("medical-records.update", selectedRecord.id), {
+      post(route("medical-records.update", selectedRecord.id), {
         data: formattedData,
-        method: "put",
+        method: "post",
         preserveScroll: true,
         onSuccess: () => {
           console.log("Record Updated:", formattedData);
@@ -364,8 +382,6 @@ const MedicalRecordDialog = ({ patient }) => {
       previous_surgeries: record.medical_record_detail?.previous_surgeries || false,
       surgery_reason: record.medical_record_detail?.surgery_reason || "",
 
-      // chest_xray: record.id ? `/medical-records/${record.id}/image` : null, // Use record.id instead
-      chest_xray: "",
       medical_record: record.medical_record_detail?.id,
 
       // ✅ Vaccination Status
@@ -382,6 +398,8 @@ const MedicalRecordDialog = ({ patient }) => {
       // ✅ Final Evaluation & Plan
       final_evaluation: record.final_evaluation || "",
       plan_recommendation: record.plan_recommendation || "",
+
+      chest_xray: record.medical_record_detail?.chest_xray || "",
     });
 
     setIsOpen(true);
@@ -400,6 +418,13 @@ const MedicalRecordDialog = ({ patient }) => {
 
   const nextStep = () => {
     console.log("Data before next step:", data);
+
+    if (selectedRecord.medical_record_detail?.chest_xray instanceof File) {
+      console.log("This is a file:", record.medical_record_detail.chest_xray.name);
+    } else {
+      console.log("This is not a file.");
+    }
+
 
     if (!validateStep(step)) {
       return;

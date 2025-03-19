@@ -1,7 +1,9 @@
+import { useEffect, useState } from "react";
 import { usePhysicianStaff } from "@/Pages/Patients/ProfilePage"; // Import context
 
 const Step6 = ({ formData, setFormData }) => {
   const physicianStaff = usePhysicianStaff();
+  const [imageUrl, setImageUrl] = useState(null);
 
   const labTests = [
     { name: "blood_chemistry", label: "Blood Chemistry" },
@@ -24,12 +26,22 @@ const Step6 = ({ formData, setFormData }) => {
     }
   };
 
-  const imageUrl =
-    formData.medical_record && !formData.chest_xray
-      ? `/medical-records/${formData.medical_record}/image`
-      : typeof formData.chest_xray === "string"
-        ? formData.chest_xray // Treat as image URL
-        : null;
+  useEffect(() => {
+    if (formData.medical_record) {
+      setImageUrl(`/medical-records/${formData.medical_record}/image?timestamp=${new Date().getTime()}`);
+    } else if (formData.chest_xray && typeof formData.chest_xray === "string") {
+      setImageUrl(`${formData.chest_xray}?timestamp=${new Date().getTime()}`); // Avoid caching
+    } else if (formData.chest_xray instanceof File) {
+      const objectUrl = URL.createObjectURL(formData.chest_xray);
+      setImageUrl(objectUrl);
+
+      return () => {
+        URL.revokeObjectURL(objectUrl);
+      };
+    } else {
+      setImageUrl(null);
+    }
+  }, [formData.medical_record, formData.chest_xray]);
 
   return (
     <div className="form-container p-4 space-y-5">
