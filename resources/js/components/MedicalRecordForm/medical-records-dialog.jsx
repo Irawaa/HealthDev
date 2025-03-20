@@ -419,13 +419,6 @@ const MedicalRecordDialog = ({ patient }) => {
   const nextStep = () => {
     console.log("Data before next step:", data);
 
-    if (selectedRecord.medical_record_detail?.chest_xray instanceof File) {
-      console.log("This is a file:", record.medical_record_detail.chest_xray.name);
-    } else {
-      console.log("This is not a file.");
-    }
-
-
     if (!validateStep(step)) {
       return;
     }
