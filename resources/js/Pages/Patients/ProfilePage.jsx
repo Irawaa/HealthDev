@@ -8,6 +8,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { Head, router } from "@inertiajs/react";
 import { motion } from "framer-motion"; // Import Framer Motion
 import MedicalRecordDialog from "@/components/MedicalRecordForm/medical-records-dialog";
+import DentalRecordDialog from "@/components/DentalRecordForm/dental-records-dialog";
 import FDARModal from "@/components/FDAR/fdar-records-dialog";
 import BPModal from "@/components/BP/bp-modal";
 import IncidentModal from "@/components/Incidents/incident-reports-modal";
@@ -206,6 +207,7 @@ const PatientProfile = ({ patient, colleges, departments, commonDiseases, physic
                     className="mt-3"
                   >
                     {activeTab === "medical" && <MedicalRecordDialog activeTab={activeTab} patient={patient} />}
+                    {activeTab === "dental" && <DentalRecordDialog activeTab={activeTab} patient={patient} />}
                     {activeTab === "fdar" && <FDARModal activeTab={activeTab} patient={patient} />}
                     {activeTab === "bp" && <BPModal activeTab={activeTab} patient={patient} />}
                     {activeTab === "incident" && <IncidentModal activeTab={activeTab} patient={patient} />}
