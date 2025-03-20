@@ -28,7 +28,11 @@ const Step6 = ({ formData, setFormData }) => {
 
   useEffect(() => {
     if (formData.medical_record) {
-      setImageUrl(`/medical-records/${formData.medical_record}/image?timestamp=${new Date().getTime()}`);
+      setImageUrl(
+        `/medical-records/${
+          formData.medical_record
+        }/image?timestamp=${new Date().getTime()}`
+      );
     } else if (formData.chest_xray && typeof formData.chest_xray === "string") {
       setImageUrl(`${formData.chest_xray}?timestamp=${new Date().getTime()}`); // Avoid caching
     } else if (formData.chest_xray instanceof File) {
@@ -62,7 +66,9 @@ const Step6 = ({ formData, setFormData }) => {
 
       {/* Chest X-Ray Upload Section */}
       <div>
-        <h3 className="text-xl font-semibold text-green-800 mb-2">Chest X-Ray</h3>
+        <h3 className="text-xl font-semibold text-green-800 mb-2">
+          Chest X-Ray
+        </h3>
         <div className="flex flex-col space-y-3">
           <input
             type="file"
@@ -87,12 +93,17 @@ const Step6 = ({ formData, setFormData }) => {
 
       {/* Laboratory Tests Section */}
       <div>
-        <h3 className="text-xl font-semibold text-green-800 mb-2">Laboratory Tests</h3>
+        <h3 className="text-xl font-semibold text-green-800 mb-2">
+          Laboratory Tests
+        </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {labTests.map(({ name, label }) => (
             <div key={name} className="flex flex-col space-y-2">
-              <label htmlFor={name} className="text-sm font-medium text-gray-800">
-                {label}:
+              <label
+                htmlFor={name}
+                className="text-sm font-medium text-gray-800"
+              >
+                {label}: <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -100,10 +111,18 @@ const Step6 = ({ formData, setFormData }) => {
                 name={name}
                 value={formData[name] || ""}
                 onChange={handleInputChange}
-                className="border border-gray-400 rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500"
+                className={`border border-gray-400 rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 ${
+                  !formData[name] ? "border-red-500" : ""
+                }`}
                 placeholder={`Enter ${label} result`}
                 aria-labelledby={`${name}-label`}
+                required
               />
+              {!formData[name] && (
+                <span className="text-red-500 text-sm">
+                  This field must not be empty.
+                </span>
+              )}
             </div>
           ))}
         </div>
@@ -113,20 +132,31 @@ const Step6 = ({ formData, setFormData }) => {
 
       {/* Vaccination Status Section */}
       <div>
-        <h3 className="text-xl font-semibold text-green-800 mb-2">Vaccination Status</h3>
+        <h3 className="text-xl font-semibold text-green-800 mb-2">
+          Vaccination Status<span className="text-red-600">*</span>
+        </h3>
         <input
           type="text"
           name="vaccination_status"
           value={formData.vaccination_status || ""}
           onChange={handleInputChange}
-          className="border border-gray-400 rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500"
+          className={`border rounded p-2 w-full focus:outline-none focus:ring-2 ${
+            !formData.vaccination_status
+              ? "border-red-500 focus:ring-red-500"
+              : "border-gray-400 focus:ring-green-500"
+          }`}
           placeholder="Enter vaccination details"
         />
+        {!formData.vaccination_status && (
+          <small className="text-red-500">This field must not be empty.</small>
+        )}
       </div>
 
       {/* Final Evaluation Section */}
       <div>
-        <h3 className="text-xl font-semibold text-green-800 mb-2">Final Evaluation</h3>
+        <h3 className="text-xl font-semibold text-green-800 mb-2">
+          Final Evaluation<span className="text-red-600">*</span>
+        </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {["Class A", "Class B", "Pending"].map((option) => (
             <label key={option} className="flex items-center space-x-3">
@@ -144,34 +174,52 @@ const Step6 = ({ formData, setFormData }) => {
                 {option === "Class A"
                   ? "(Physically Fit)"
                   : option === "Class B"
-                    ? "(Physically Fit with Minor Illness)"
-                    : "(Needs Clearance)"}
+                  ? "(Physically Fit with Minor Illness)"
+                  : "(Needs Clearance)"}
               </span>
             </label>
           ))}
         </div>
+        {!formData.final_evaluation && (
+          <small className="text-red-500">This field must not be empty.</small>
+        )}
       </div>
 
       {/* Plan/Recommendation Section */}
       <div>
-        <h3 className="text-xl font-semibold text-green-800 mb-2">Plan/Recommendation</h3>
+        <h3 className="text-xl font-semibold text-green-800 mb-2">
+          Plan/Recommendation<span className="text-red-600">*</span>
+        </h3>
         <textarea
           name="plan_recommendation"
           value={formData.plan_recommendation || ""}
           onChange={handleInputChange}
-          className="border border-gray-400 rounded p-2 w-full h-20 focus:outline-none focus:ring-2 focus:ring-green-500"
+          className={`border rounded p-2 w-full h-20 focus:outline-none focus:ring-2 ${
+            !formData.plan_recommendation
+              ? "border-red-500 focus:ring-red-500"
+              : "border-gray-400 focus:ring-green-500"
+          }`}
           placeholder="Enter plan or recommendation"
         ></textarea>
+        {!formData.plan_recommendation && (
+          <small className="text-red-500">This field must not be empty.</small>
+        )}
       </div>
 
       {/* School Physician Selection Section */}
       <div>
-        <h3 className="text-xl font-semibold text-green-800 mb-2">School Physician</h3>
+        <h3 className="text-xl font-semibold text-green-800 mb-2">
+          School Physician<span className="text-red-600">*</span>
+        </h3>
         <select
           name="school_physician_id"
           value={formData.school_physician_id || ""}
           onChange={handleInputChange}
-          className="border border-gray-400 rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500"
+          className={`border rounded p-2 w-full focus:outline-none focus:ring-2 ${
+            !formData.school_physician_id
+              ? "border-red-500 focus:ring-red-500"
+              : "border-gray-400 focus:ring-green-500"
+          }`}
           required
           aria-labelledby="physician-selection"
         >
@@ -179,13 +227,17 @@ const Step6 = ({ formData, setFormData }) => {
           {physicianStaff && physicianStaff.length > 0 ? (
             physicianStaff.map((physician) => (
               <option key={physician.staff_id} value={physician.staff_id}>
-                {physician.lname}, {physician.fname} {physician.mname || ""} (Lic: {physician.license_no})
+                {physician.lname}, {physician.fname} {physician.mname || ""}{" "}
+                (Lic: {physician.license_no})
               </option>
             ))
           ) : (
             <option disabled>No physicians available</option>
           )}
         </select>
+        {!formData.school_physician_id && (
+          <small className="text-red-500">This field must not be empty.</small>
+        )}
       </div>
     </div>
   );
