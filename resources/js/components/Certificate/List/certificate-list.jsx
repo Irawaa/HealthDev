@@ -160,7 +160,7 @@ const CertificateList = ({ patient }) => {
                     </div>
                 ))
             ) : (
-                <p className="text-gray-500 mt-2">No certificates available.</p>
+                <p className="text-green-600 text-center mt-4">No certificates available.</p>
             )}
 
             {/* ✅ Delete Confirmation Modal */}

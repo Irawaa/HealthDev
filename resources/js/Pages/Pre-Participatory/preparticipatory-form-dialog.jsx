@@ -30,11 +30,11 @@ const PreParticipatoryModal = ({ activeTab, patient }) => {
   };
 
   return (
-    <div className="p-4 bg-blue-50 rounded-lg">
-      <h2 className="text-green-700 font-bold text-lg">Pre-Participatory Medical Evaluations</h2>
+    <div className="p-4 bg-green-50 rounded-lg shadow-md">
+      <h2 className="text-xl font-semibold text-green-800">Pre-Participatory Medical Evaluations</h2>
 
       {/* Create Evaluation Button */}
-      <Button className="bg-blue-600 text-white px-4 py-2 rounded mt-2" onClick={() => setShowForm(true)}>
+      <Button className="mt-4 bg-blue-600 text-white px-4 py-2 rounded shadow-md hover:bg-blue-700 transition" onClick={() => setShowForm(true)}>
         Create New Evaluation
       </Button>
 
@@ -65,7 +65,7 @@ const PreParticipatoryModal = ({ activeTab, patient }) => {
             </div>
           ))
         ) : (
-          <p className="text-gray-500 mt-2">No evaluations available.</p>
+          <p className="text-green-600 text-center mt-4">No evaluations available.</p>
         )}
       </div>
 

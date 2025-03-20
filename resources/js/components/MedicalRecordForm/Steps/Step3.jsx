@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-useEffect
+useEffect;
 
 const Step3 = ({ formData, setFormData, patient }) => {
   const isMale = patient.gender === 1;
@@ -18,10 +18,16 @@ const Step3 = ({ formData, setFormData, patient }) => {
     { name: "Bronchial asthma", label: "Bronchial asthma" },
     { name: "Cardiovascular Disease", label: "Cardiovascular Disease" },
     { name: "Hypertension", label: "Hypertension" },
-    { name: "Pulmonary Tuberculosis (PTB)", label: "Pulmonary Tuberculosis (PTB)" },
+    {
+      name: "Pulmonary Tuberculosis (PTB)",
+      label: "Pulmonary Tuberculosis (PTB)",
+    },
     { name: "Skin disorder", label: "Skin disorder" },
     { name: "Surgery", label: "Surgery" },
-    { name: "Urinary Tract Infection (UTI)", label: "Urinary Tract Infection (UTI)" },
+    {
+      name: "Urinary Tract Infection (UTI)",
+      label: "Urinary Tract Infection (UTI)",
+    },
     { name: "Loss of consciousness", label: "Loss of consciousness" },
     { name: "Others", label: "Others" },
   ];
@@ -45,7 +51,11 @@ const Step3 = ({ formData, setFormData, patient }) => {
       let updatedData = { ...prev };
 
       // Handle past medical history checkboxes
-      if (name !== "obGyneHistory" && name !== "pregnantYes" && name !== "pregnantNo") {
+      if (
+        name !== "obGyneHistory" &&
+        name !== "pregnantYes" &&
+        name !== "pregnantNo"
+      ) {
         updatedData.past_medical_histories = checked
           ? [...(prev.past_medical_histories || []), name] // Add to history
           : prev.past_medical_histories?.filter((item) => item !== name) || []; // Remove if unchecked
@@ -116,7 +126,9 @@ const Step3 = ({ formData, setFormData, patient }) => {
 
   return (
     <div className="p-4">
-      <h3 className="text-xl font-semibold text-green-700 mb-4">Past Medical History</h3>
+      <h3 className="text-xl font-semibold text-green-700 mb-4">
+        Past Medical History
+      </h3>
 
       <CheckboxGroup
         options={medicalHistoryOptions}
@@ -124,17 +136,19 @@ const Step3 = ({ formData, setFormData, patient }) => {
         handleChange={handleCheckboxChange}
       />
 
-      <div className="flex flex-col mb-6">
-        <label className="font-medium text-green-700">Others:</label>
-        <input
-          type="text"
-          name="other_condition"
-          value={formData.other_condition || ""}
-          onChange={handleTextChange}
-          className="border border-gray-300 rounded p-2 w-full focus:ring-green-500 focus:border-green-500"
-          placeholder="Specify other medical history"
-        />
-      </div>
+      {formData.past_medical_histories?.includes("Others") && (
+        <div className="flex flex-col mb-6">
+          <label className="font-medium text-green-700">Others:</label>
+          <input
+            type="text"
+            name="other_condition"
+            value={formData.other_condition || ""}
+            onChange={handleTextChange}
+            className="border border-gray-300 rounded p-2 w-full focus:ring-green-500 focus:border-green-500"
+            placeholder="Specify other medical history"
+          />
+        </div>
+      )}
 
       {!isMale && (
         <>
@@ -184,7 +198,9 @@ const Step3 = ({ formData, setFormData, patient }) => {
               ))}
 
               <div>
-                <label className="font-medium text-green-700">Dysmenorrhea:</label>
+                <label className="font-medium text-green-700">
+                  Dysmenorrhea:
+                </label>
                 <div className="flex space-x-4">
                   <label className="flex items-center space-x-2">
                     <input
@@ -220,7 +236,9 @@ const Step3 = ({ formData, setFormData, patient }) => {
               </div>
 
               <div>
-                <label className="font-medium text-green-700">Pregnant Before:</label>
+                <label className="font-medium text-green-700">
+                  Pregnant Before:
+                </label>
                 <div className="flex space-x-4">
                   <label className="flex items-center space-x-2">
                     <input
@@ -258,7 +276,9 @@ const Step3 = ({ formData, setFormData, patient }) => {
 
               {formData.pregnant_before && (
                 <div>
-                  <label className="font-medium text-green-700">Number of Pregnancies:</label>
+                  <label className="font-medium text-green-700">
+                    Number of Pregnancies:
+                  </label>
                   <input
                     type="number"
                     name="num_of_pregnancies"
@@ -271,7 +291,9 @@ const Step3 = ({ formData, setFormData, patient }) => {
               )}
 
               <div>
-                <label className="font-medium text-green-700">Last Menstrual Period:</label>
+                <label className="font-medium text-green-700">
+                  Last Menstrual Period:
+                </label>
                 <input
                   type="date"
                   name="last_menstrual_period"

@@ -24,11 +24,11 @@ const ReferralModal = ({ activeTab, patient }) => {
   };
 
   return (
-    <div className="p-4 bg-blue-50 rounded-lg">
-      <h2 className="text-green-700 font-bold text-lg">Referrals</h2>
+    <div className="p-4 bg-green-50 rounded-lg shadow-md">
+      <h2 className="text-xl font-semibold text-green-800">Referrals</h2>
 
       {/* Create Referral Button */}
-      <Button className="bg-blue-600 text-white px-4 py-2 rounded mt-2" onClick={() => setShowForm(true)}>
+      <Button className="mt-4 bg-blue-600 text-white px-4 py-2 rounded shadow-md hover:bg-blue-700 transition" onClick={() => setShowForm(true)}>
         Create New Referral
       </Button>
 
@@ -59,7 +59,7 @@ const ReferralModal = ({ activeTab, patient }) => {
             </div>
           ))
         ) : (
-          <p className="text-gray-500 mt-2">No referrals available.</p>
+          <p className="text-green-600 text-center mt-4">No referrals available.</p>
         )}
       </div>
 

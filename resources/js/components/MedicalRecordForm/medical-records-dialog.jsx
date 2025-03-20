@@ -429,9 +429,9 @@ const MedicalRecordDialog = ({ patient }) => {
 
   return (
     <div className="p-4 bg-green-50 rounded-lg shadow-md">
-      <h2 className="text-lg font-semibold text-green-700">Medical Records</h2>
+      <h2 className="text-xl font-semibold text-green-800">Medical Records</h2>
 
-      <Button onClick={handleCreateNew} className="mb-4 bg-blue-500 text-white">
+      <Button onClick={handleCreateNew} className="mt-4 bg-blue-600 text-white px-4 py-2 rounded shadow-md hover:bg-blue-700 transition">
         Create New Medical Record
       </Button>
 
