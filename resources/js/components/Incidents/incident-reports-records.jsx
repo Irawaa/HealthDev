@@ -173,7 +173,7 @@ const IncidentRecords = ({ patient }) => {
 
                 ))
             ) : (
-                <p className="text-gray-500">No incident reports found.</p>
+              <p className="text-green-600 text-center">No incident reports found.</p>
             )}
 
             {editForm.open && (

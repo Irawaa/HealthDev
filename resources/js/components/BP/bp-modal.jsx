@@ -93,7 +93,7 @@ const BPModal = ({ patient }) => {
 
 
   return (
-    <div className="bg-green-50 p-6 rounded-lg border border-green-200">
+    <div className="p-4 bg-green-50 rounded-lg shadow-md">
       <h2 className="text-xl font-semibold text-green-800">BP Records</h2>
 
       {/* ✅ Create New BP Record Button with Animation */}

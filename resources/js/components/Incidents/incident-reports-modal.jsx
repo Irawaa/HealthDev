@@ -22,9 +22,9 @@ const IncidentModal = ({ activeTab, patient }) => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.3 }}
-          className="bg-gray-50 p-6 rounded-lg border border-gray-200"
+          className="p-4 bg-green-50 rounded-lg shadow-md"
         >
-          <h2 className="text-xl font-semibold text-gray-800">Incident Reports</h2>
+          <h2 className="text-xl font-semibold text-green-800">Incident Reports</h2>
 
           {/* ✅ Button to Open Create Form */}
           <Button

@@ -18,7 +18,7 @@ const CertificatesModal = ({ patient }) => {
   };
 
   return (
-    <div className="p-4 bg-green-50 rounded-lg">
+    <div className="p-4 bg-green-50 rounded-lg shadow-md">
       <h2 className="text-green-700 font-bold text-lg">Certificates</h2>
 
       {/* Create Button */}

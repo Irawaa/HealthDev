@@ -73,7 +73,7 @@ const MedicalRecordsList = ({ patient, onEdit }) => {
                     </div>
                 ))
             ) : (
-                <p className="text-gray-700 mt-4">No medical records available.</p>
+              <p className="text-green-600 text-center mt-4">No Medical records available.</p>
             )}
 
             {selectedRecord && (

@@ -94,7 +94,7 @@ const PreParticipatoryForm = ({ open, setOpen, onSave, existingData = null }) =>
   return (
     <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center p-4">
       <div className="bg-white p-6 rounded-lg shadow-lg border border-green-500 w-full max-w-3xl h-[85vh] flex flex-col">
-        
+
         {/* ✅ Step Indicator */}
         <div className="text-center mb-4">
           <h2 className="text-green-700 font-bold text-xl">
