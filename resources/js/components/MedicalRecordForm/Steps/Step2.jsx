@@ -13,7 +13,11 @@ const deformityOptions = [
 const vitalSigns = [
   { name: "rr", label: "RR (cpm):", placeholder: "Respiratory Rate" },
   { name: "hr", label: "HR (bpm):", placeholder: "Heart Rate" },
-  { name: "temperature", label: "Temperature (°C):", placeholder: "Body Temperature" },
+  {
+    name: "temperature",
+    label: "Temperature (°C):",
+    placeholder: "Body Temperature",
+  },
   { name: "weight", label: "Weight (kg):", placeholder: "Enter weight" },
   { name: "height", label: "Height (m):", placeholder: "Enter height" },
 ];
@@ -46,7 +50,6 @@ const Step2 = ({ formData, setFormData }) => {
       deformity: prev.deformities.length > 0,
     }));
   }, [formData.deformities, setFormData]);
-
 
   const handleCheckboxChange = ({ target: { name, checked } }) => {
     setFormData((prev) => {
@@ -81,7 +84,15 @@ const Step2 = ({ formData, setFormData }) => {
 
   const handleInputChange = ({ target: { name, value } }) => {
     setFormData({ ...formData, [name]: value });
+
     if (name === "bp") checkBpWarning(value);
+
+    // Set validation error if empty
+    setFormData((prev) => ({
+      ...prev,
+      [`${name}Error`]:
+        value.trim() === "" ? "This field should not be empty." : "",
+    }));
   };
 
   const checkBpWarning = (value) => {
@@ -120,7 +131,12 @@ const Step2 = ({ formData, setFormData }) => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
         {deformityOptions.map(({ name, label }) => (
-          <label key={name} className={`flex items-center space-x-2 ${!formData.deformity ? "opacity-50" : ""}`}>
+          <label
+            key={name}
+            className={`flex items-center space-x-2 ${
+              !formData.deformity ? "opacity-50" : ""
+            }`}
+          >
             <input
               type="checkbox"
               name={name}
@@ -140,7 +156,9 @@ const Step2 = ({ formData, setFormData }) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* BP Input with Warning */}
         <div className="relative">
-          <label className="font-medium text-green-700">BP (mmHg):</label>
+          <label className="font-medium text-green-700">
+            BP (mmHg): <span className="text-red-500">*</span>
+          </label>
           <div className="relative">
             <input
               type="text"
@@ -151,22 +169,38 @@ const Step2 = ({ formData, setFormData }) => {
               onBlur={() => setIsBpFocused(false)}
               className={`border p-2 w-full rounded focus:ring-green-500 focus:border-green-500 ${bpSeverity}`}
               placeholder="120/80"
+              required
             />
             {bpSeverity && (
-              <ExclamationTriangleIcon className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${bpSeverity}`} />
+              <ExclamationTriangleIcon
+                className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${bpSeverity}`}
+              />
             )}
           </div>
           {bpWarning && isBpFocused && (
-            <div className={`absolute top-full left-0 mt-1 p-2 rounded shadow-lg text-xs ${bpSeverity.includes("red") ? "bg-red-100 text-red-800" : "bg-orange-100 text-orange-800"}`}>
+            <div
+              className={`absolute top-full left-0 mt-1 p-2 rounded shadow-lg text-xs ${
+                bpSeverity.includes("red")
+                  ? "bg-red-100 text-red-800"
+                  : "bg-orange-100 text-orange-800"
+              }`}
+            >
               {bpWarning}
             </div>
+          )}
+          {!formData.bp && (
+            <p className="text-red-500 text-sm">
+              This field should not be empty.
+            </p>
           )}
         </div>
 
         {/* Other Vital Signs */}
         {vitalSigns.map(({ name, label, placeholder }) => (
           <div key={name} className="flex flex-col">
-            <label className="font-medium text-green-700">{label}</label>
+            <label className="font-medium text-green-700">
+              {label} <span className="text-red-500">*</span>
+            </label>
             <input
               type="text"
               name={name}
@@ -174,7 +208,13 @@ const Step2 = ({ formData, setFormData }) => {
               onChange={handleInputChange}
               className="border border-gray-300 rounded p-2 w-full focus:ring-green-500 focus:border-green-500"
               placeholder={placeholder}
+              required
             />
+            {!formData[name] && (
+              <p className="text-red-500 text-sm">
+                This field should not be empty.
+              </p>
+            )}
           </div>
         ))}
 

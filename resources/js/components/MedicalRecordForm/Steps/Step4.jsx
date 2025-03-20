@@ -57,7 +57,13 @@ const Step4 = ({ formData, setFormData }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+      [`${name}_error`]:
+        value.trim() === "" ? "This field cannot be empty." : "",
+    }));
   };
 
   return (
@@ -70,20 +76,30 @@ const Step4 = ({ formData, setFormData }) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Chief Complaint */}
         <div className="flex flex-col">
-          <label className="font-medium text-green-700">Chief Complaint:</label>
+          <label className="font-medium text-green-700">
+            Chief Complaint: <span className="text-red-500">*</span>
+          </label>
           <input
             type="text"
             name="chief_complaint"
             value={formData.chief_complaint || ""}
             onChange={handleInputChange}
-            className="border border-gray-300 rounded p-2 w-full"
+            className="border border-gray-300 rounded p-2 w-full focus:ring-blue-500 focus:border-blue-500"
             placeholder="Enter chief complaint"
+            required
           />
+          {formData.chief_complaint_error && (
+            <span className="text-red-500 text-sm mt-1">
+              {formData.chief_complaint_error}
+            </span>
+          )}
         </div>
 
         {/* Present Illness */}
         <div className="flex flex-col">
-          <label className="font-medium text-green-700">Present Illness:</label>
+          <label className="font-medium text-green-700">
+            Present Illness: <span className="text-red-500">*</span>
+          </label>
           <input
             type="text"
             name="present_illness"
@@ -91,7 +107,13 @@ const Step4 = ({ formData, setFormData }) => {
             onChange={handleInputChange}
             className="border border-gray-300 rounded p-2 w-full"
             placeholder="Describe present illness"
+            required
           />
+          {formData.present_illness_error && (
+            <span className="text-red-500 text-sm mt-1">
+              {formData.present_illness_error}
+            </span>
+          )}
         </div>
 
         {/* Medication */}
@@ -291,20 +313,21 @@ const Step4 = ({ formData, setFormData }) => {
 
         {/* Alcohol Drinker */}
         <div>
-          <label className="font-medium text-green-700">Alcohol Drinker:</label>
+          <label className="font-medium text-green-700">
+            Alcohol Drinker: <span className="text-red-500">*</span>
+          </label>
           <div className="flex space-x-4">
             {["Regular", "Occasional", "No"].map((option, index) => (
               <label key={index} className="flex items-center space-x-2">
                 <input
-                  type="checkbox" // ✅ Change checkbox to radio for single selection
+                  type="checkbox"
                   name="alcoholic_drinker"
                   value={option}
                   checked={formData.alcoholic_drinker === option}
                   onChange={handleInputChange}
                   className="w-5 h-5 text-green-600 border-green-600 rounded focus:ring-green-500"
                 />
-                <span>{option}</span>{" "}
-                {/* ✅ This will now display the correct text */}
+                <span>{option}</span>
               </label>
             ))}
           </div>
@@ -382,7 +405,6 @@ const Step4 = ({ formData, setFormData }) => {
             </label>
           </div>
         </div>
-
       </div>
     </div>
   );
