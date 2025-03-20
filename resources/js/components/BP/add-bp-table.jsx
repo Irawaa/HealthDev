@@ -204,14 +204,23 @@ const AddBPTable = ({ open, setOpen, patient }) => {
 
                     {/* BP Input with Warning */}
                     <div className="col-span-2 relative">
-                      <label className="text-sm font-medium text-gray-800">Blood Pressure</label>
+                      <label className="text-sm font-medium text-gray-800">
+                        Blood Pressure <span className="text-red-500">*</span>
+                      </label>
                       <input
                         type="text"
                         value={record.blood_pressure}
                         onChange={(e) => handleBpChange(index, e.target.value)}
-                        className={`w-full border border-gray-400 rounded-md px-2 py-1 focus:ring-0 focus:border-gray-600 ${record.severity}`}
+                        className={`w-full border border-gray-400 rounded-md px-2 py-1 focus:ring-0 focus:border-gray-600 ${record.severity} ${!record.blood_pressure ? "border-red-500" : ""}`}
                         placeholder="e.g. 120/80"
                       />
+
+                      {/* Error message when field is empty */}
+                      {!record.blood_pressure && (
+                        <div className="text-red-500 text-xs mt-1">
+                          This field must not be empty
+                        </div>
+                      )}
 
                       {/* Warning Icon */}
                       {record.warning && (
@@ -233,6 +242,7 @@ const AddBPTable = ({ open, setOpen, patient }) => {
                       </div>
                     </div>
                   </div>
+
 
                   {/* Remove Button */}
                   <div className="mt-3 flex justify-end">
