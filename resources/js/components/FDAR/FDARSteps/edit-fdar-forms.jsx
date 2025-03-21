@@ -52,6 +52,10 @@ const EditFDARModal = ({ isOpen, onClose, formData }) => {
     let error = "";
     if (!value.trim()) {
       error = "This field is required.";
+    } else if (["weight", "height", "cardiac_rate", "respiratory_rate", "oxygen_saturation"].includes(name)) {
+      if (isNaN(value) || value <= 0) {
+        error = "This field must be a positive number.";
+      }
     } else if (name === "blood_pressure" && !/^\d+\/\d+$/.test(value)) {
       error = "Blood pressure must be in format '120/80'.";
     } else if (name === "temperature" && (isNaN(value) || value < 30 || value > 50)) {
@@ -59,7 +63,7 @@ const EditFDARModal = ({ isOpen, onClose, formData }) => {
     }
     return error;
   };
-
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
     setData(name, value);

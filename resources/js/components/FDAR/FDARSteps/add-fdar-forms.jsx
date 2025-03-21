@@ -93,9 +93,8 @@ const AddFDARForm = ({ formData, handleChange }) => {
               onChange={handleChange}
               onBlur={() => validateField(key, formData[key])}
               rows={3}
-              className={`border px-2 py-1 text-sm rounded focus:ring-1 focus:ring-green-500 transition-all resize-none ${
-                validationErrors[key] ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`border px-2 py-1 text-sm rounded focus:ring-1 focus:ring-green-500 transition-all resize-none ${validationErrors[key] ? "border-red-500" : "border-gray-300"
+                }`}
               placeholder={`Enter ${key}`}
             />
             {validationErrors[key] && <span className="text-red-500 text-xs">{validationErrors[key]}</span>}
@@ -114,15 +113,23 @@ const AddFDARForm = ({ formData, handleChange }) => {
               type={key === "last_menstrual_period" ? "date" : "text"}
               name={key}
               value={formData[key] || ""}
-              onChange={bp ? handleBpChange : handleChange}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (["weight", "height", "cardiac_rate", "respiratory_rate", "temperature", "oxygen_saturation"].includes(key)) {
+                  if (/^\d*\.?\d*$/.test(value) || value === "") handleChange(e);
+                } else if (key === "blood_pressure") {
+                  if (/^\d{0,3}\/?\d{0,3}$/.test(value) || value === "") handleBpChange(e);
+                } else {
+                  handleChange(e);
+                }
+              }}
               onFocus={bp ? () => setIsBpFocused(true) : undefined}
               onBlur={(e) => {
                 if (required) validateField(key, e.target.value);
                 if (bp) setIsBpFocused(false);
               }}
-              className={`border p-2 w-full rounded focus:ring-green-500 focus:border-green-500 ${
-                validationErrors[key] ? "border-red-500" : bp ? bpSeverity : "border-gray-300"
-              }`}
+              className={`border p-2 w-full rounded focus:ring-green-500 focus:border-green-500 ${validationErrors[key] ? "border-red-500" : bp ? bpSeverity : "border-gray-300"
+                }`}
               placeholder={label}
             />
             {validationErrors[key] && <span className="text-red-500 text-xs">{validationErrors[key]}</span>}
@@ -135,9 +142,8 @@ const AddFDARForm = ({ formData, handleChange }) => {
             )}
             {bp && bpWarning && isBpFocused && (
               <div
-                className={`absolute top-full left-0 mt-1 p-2 rounded shadow-lg text-xs ${
-                  bpSeverity.includes("red") ? "bg-red-100 text-red-800" : "bg-orange-100 text-orange-800"
-                }`}
+                className={`absolute top-full left-0 mt-1 p-2 rounded shadow-lg text-xs ${bpSeverity.includes("red") ? "bg-red-100 text-red-800" : "bg-orange-100 text-orange-800"
+                  }`}
               >
                 {bpWarning}
               </div>
