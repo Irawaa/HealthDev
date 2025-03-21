@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Cookies from "js-cookie";
 
 // Constants
 const illnesses = [
@@ -43,6 +44,19 @@ const Step5 = ({ formData, setFormData }) => {
     }
   }, [formData, setFormData]);
 
+  useEffect(() => {
+    const savedData = Cookies.get("medical_form");
+    if (savedData) {
+      setFormData(JSON.parse(savedData));
+    }
+  }, [setFormData]);
+
+  useEffect(() => {
+    if (formData) {
+      Cookies.set("medical_form", JSON.stringify(formData), { expires: 7 });
+    }
+  }, [formData]); // ✅ Runs only when formData updates
+
   // Toggle Section Expansion
   const toggleSection = (condition) => {
     setExpandedSections((prev) => ({
@@ -61,7 +75,9 @@ const Step5 = ({ formData, setFormData }) => {
       } else {
         updatedHistories[index][member] = value;
       }
-      return { ...prev, family_histories: updatedHistories };
+      const updatedData = { ...prev, family_histories: updatedHistories };
+      Cookies.set("medical_form", JSON.stringify(updatedData), { expires: 7 }); // Save to cookies
+      return updatedData;
     });
   };
 
@@ -73,18 +89,24 @@ const Step5 = ({ formData, setFormData }) => {
         exam.name === part ? { ...exam, [field]: value } : exam
       );
 
-      return { ...prev, physical_examinations: updatedExaminations };
+      const updatedData = { ...prev, physical_examinations: updatedExaminations };
+      Cookies.set("medical_form", JSON.stringify(updatedData), { expires: 7 }); // Save to cookies
+      return updatedData;
     });
   };
+
 
   // Add sibling
   const addSibling = (index, member) => {
     setFormData((prev) => {
       const updatedHistories = [...prev.family_histories];
       updatedHistories[index][member].push("");
-      return { ...prev, family_histories: updatedHistories };
+      const updatedData = { ...prev, family_histories: updatedHistories };
+      Cookies.set("medical_form", JSON.stringify(updatedData), { expires: 7 }); // Save to cookies
+      return updatedData;
     });
   };
+
 
   // Delete sibling
   const deleteSibling = () => {
@@ -101,11 +123,15 @@ const Step5 = ({ formData, setFormData }) => {
           }
           return history;
         });
-        return { ...prev, family_histories: updatedHistories };
+
+        const updatedData = { ...prev, family_histories: updatedHistories };
+        Cookies.set("medical_form", JSON.stringify(updatedData), { expires: 7 }); // Save to cookies
+        return updatedData;
       });
       setSiblingToDelete(null);
     }
   };
+
 
   const removeSibling = (index, member, subIndex) => {
     setFormData((prev) => {
@@ -113,9 +139,12 @@ const Step5 = ({ formData, setFormData }) => {
       updatedHistories[index][member] = updatedHistories[index][member].filter(
         (_, i) => i !== subIndex
       );
-      return { ...prev, family_histories: updatedHistories };
+      const updatedData = { ...prev, family_histories: updatedHistories };
+      Cookies.set("medical_form", JSON.stringify(updatedData), { expires: 7 }); // Save to cookies
+      return updatedData;
     });
   };
+
 
   return (
     <div className="p-4">

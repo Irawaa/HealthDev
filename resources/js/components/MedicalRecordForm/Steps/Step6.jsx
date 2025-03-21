@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { usePhysicianStaff } from "@/Pages/Patients/ProfilePage"; // Import context
+import Cookies from "js-cookie";
+
 
 const Step6 = ({ formData, setFormData }) => {
   const physicianStaff = usePhysicianStaff();
@@ -14,23 +16,40 @@ const Step6 = ({ formData, setFormData }) => {
     { name: "creatinine", label: "Creatinine" },
   ];
 
+  useEffect(() => {
+    if (formData) {
+      Cookies.set("medical_form", JSON.stringify(formData), { expires: 7 });
+    }
+  }, [formData]);
+  
+  const [touchedFields, setTouchedFields] = useState({});
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+
     setFormData((prevData) => ({ ...prevData, [name]: value }));
+
+    // Mark the field as touched only if it was previously filled and then emptied
+    setTouchedFields((prevTouched) => ({
+      ...prevTouched,
+      [name]: prevTouched[name] || value === "",
+    }));
   };
+
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setFormData((prevData) => ({ ...prevData, chest_xray: file }));
+      setTouchedFields((prevTouched) => ({ ...prevTouched, chest_xray: true }));
     }
   };
+
 
   useEffect(() => {
     if (formData.medical_record) {
       setImageUrl(
-        `/medical-records/${
-          formData.medical_record
+        `/medical-records/${formData.medical_record
         }/image?timestamp=${new Date().getTime()}`
       );
     } else if (formData.chest_xray && typeof formData.chest_xray === "string") {
@@ -99,10 +118,7 @@ const Step6 = ({ formData, setFormData }) => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {labTests.map(({ name, label }) => (
             <div key={name} className="flex flex-col space-y-2">
-              <label
-                htmlFor={name}
-                className="text-sm font-medium text-gray-800"
-              >
+              <label htmlFor={name} className="text-sm font-medium text-gray-800">
                 {label}: <span className="text-red-500">*</span>
               </label>
               <input
@@ -111,14 +127,15 @@ const Step6 = ({ formData, setFormData }) => {
                 name={name}
                 value={formData[name] || ""}
                 onChange={handleInputChange}
-                className={`border border-gray-400 rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 ${
-                  !formData[name] ? "border-red-500" : ""
-                }`}
+                onBlur={() => setTouchedFields((prev) => ({ ...prev, [name]: true }))}
+                className={`border rounded p-2 w-full focus:outline-none focus:ring-2 
+    ${touchedFields[name] && !formData[name]
+                    ? "border-red-500 focus:ring-red-500"
+                    : "border-gray-400 focus:ring-green-500"}`}
                 placeholder={`Enter ${label} result`}
                 aria-labelledby={`${name}-label`}
-                required
               />
-              {!formData[name] && (
+              {touchedFields[name] && !formData[name] && (
                 <span className="text-red-500 text-sm">
                   This field must not be empty.
                 </span>
@@ -140,14 +157,14 @@ const Step6 = ({ formData, setFormData }) => {
           name="vaccination_status"
           value={formData.vaccination_status || ""}
           onChange={handleInputChange}
-          className={`border rounded p-2 w-full focus:outline-none focus:ring-2 ${
-            !formData.vaccination_status
+          onBlur={() => setTouchedFields((prev) => ({ ...prev, vaccination_status: true }))}
+          className={`border rounded p-2 w-full focus:outline-none focus:ring-2 
+    ${touchedFields.vaccination_status && !formData.vaccination_status
               ? "border-red-500 focus:ring-red-500"
-              : "border-gray-400 focus:ring-green-500"
-          }`}
+              : "border-gray-400 focus:ring-green-500"}`}
           placeholder="Enter vaccination details"
         />
-        {!formData.vaccination_status && (
+        {touchedFields.vaccination_status && !formData.vaccination_status && (
           <small className="text-red-500">This field must not be empty.</small>
         )}
       </div>
@@ -174,13 +191,13 @@ const Step6 = ({ formData, setFormData }) => {
                 {option === "Class A"
                   ? "(Physically Fit)"
                   : option === "Class B"
-                  ? "(Physically Fit with Minor Illness)"
-                  : "(Needs Clearance)"}
+                    ? "(Physically Fit with Minor Illness)"
+                    : "(Needs Clearance)"}
               </span>
             </label>
           ))}
         </div>
-        {!formData.final_evaluation && (
+        {touchedFields.final_evaluation && !formData.final_evaluation && (
           <small className="text-red-500">This field must not be empty.</small>
         )}
       </div>
@@ -194,14 +211,14 @@ const Step6 = ({ formData, setFormData }) => {
           name="plan_recommendation"
           value={formData.plan_recommendation || ""}
           onChange={handleInputChange}
-          className={`border rounded p-2 w-full h-20 focus:outline-none focus:ring-2 ${
-            !formData.plan_recommendation
+          onBlur={() => setTouchedFields((prev) => ({ ...prev, plan_recommendation: true }))}
+          className={`border rounded p-2 w-full h-20 focus:outline-none focus:ring-2 
+    ${touchedFields.plan_recommendation && !formData.plan_recommendation
               ? "border-red-500 focus:ring-red-500"
-              : "border-gray-400 focus:ring-green-500"
-          }`}
+              : "border-gray-400 focus:ring-green-500"}`}
           placeholder="Enter plan or recommendation"
         ></textarea>
-        {!formData.plan_recommendation && (
+        {touchedFields.plan_recommendation && !formData.plan_recommendation && (
           <small className="text-red-500">This field must not be empty.</small>
         )}
       </div>
@@ -215,11 +232,10 @@ const Step6 = ({ formData, setFormData }) => {
           name="school_physician_id"
           value={formData.school_physician_id || ""}
           onChange={handleInputChange}
-          className={`border rounded p-2 w-full focus:outline-none focus:ring-2 ${
-            !formData.school_physician_id
-              ? "border-red-500 focus:ring-red-500"
-              : "border-gray-400 focus:ring-green-500"
-          }`}
+          className={`border rounded p-2 w-full focus:outline-none focus:ring-2 ${!formData.school_physician_id
+            ? "border-red-500 focus:ring-red-500"
+            : "border-gray-400 focus:ring-green-500"
+            }`}
           required
           aria-labelledby="physician-selection"
         >
@@ -235,7 +251,7 @@ const Step6 = ({ formData, setFormData }) => {
             <option disabled>No physicians available</option>
           )}
         </select>
-        {!formData.school_physician_id && (
+        {touchedFields.school_physician_id && !formData.school_physician_id && (
           <small className="text-red-500">This field must not be empty.</small>
         )}
       </div>

@@ -1,3 +1,6 @@
+import Cookies from "js-cookie";
+import { useEffect } from "react";
+
 const Step1 = ({ formData, setFormData }) => {
   const symptoms = [
     { name: "Abdominal pain (pagsakit ng tiyan)", label: "Abdominal Pain" },
@@ -26,6 +29,18 @@ const Step1 = ({ formData, setFormData }) => {
     { name: "Vomiting (pagsusuka)", label: "Vomiting" },
     { name: "Others", label: "Others" }, // Ensure "Others" is in the list
   ];
+
+  useEffect(() => {
+    const savedData = Cookies.get("formData");
+    if (savedData) {
+      setFormData(JSON.parse(savedData));
+    }
+  }, [setFormData]);
+
+  useEffect(() => {
+    Cookies.set("formData", JSON.stringify(formData), { expires: 1 });
+  }, [formData]);
+  
 
   const handleCheckboxChange = (e) => {
     const { value, checked } = e.target;

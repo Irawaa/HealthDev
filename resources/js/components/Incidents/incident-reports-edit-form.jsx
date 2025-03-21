@@ -36,6 +36,13 @@ const EditIncidentForm = ({ open, setOpen, patient, existingData = null }) => {
         }
     };
 
+    const handleBlur = (e) => {
+        if (!e.target.value.trim()) {
+          setData(e.target.name, "");
+          toast.error(`❌ ${e.target.name.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())} should not be empty.`);
+        }
+      };
+
     const handleSubmit = (e) => {
         e.preventDefault();
         setPageLoading(true);
@@ -77,12 +84,15 @@ const EditIncidentForm = ({ open, setOpen, patient, existingData = null }) => {
 
                     {/* History */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">History:</label>
+                        <label className="block text-sm font-medium text-gray-700">
+                            History: <span className="text-red-500">*</span>
+                        </label>
                         <input
                             type="text"
                             name="history"
                             value={data.history || ""}
                             onChange={handleChange}
+                            onBlur={handleBlur}
                             className="border border-gray-300 rounded p-2 w-full"
                             placeholder="Enter history"
                             required
@@ -92,12 +102,15 @@ const EditIncidentForm = ({ open, setOpen, patient, existingData = null }) => {
 
                     {/* Nature of Incident */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Nature of Incident:</label>
+                        <label className="block text-sm font-medium text-gray-700">
+                            Nature of Incident: <span className="text-red-500">*</span>
+                        </label>
                         <input
                             type="text"
                             name="nature_of_incident"
                             value={data.nature_of_incident || ""}
                             onChange={handleChange}
+                            onBlur={handleBlur}
                             className="border border-gray-300 rounded p-2 w-full"
                             required
                         />
@@ -106,12 +119,15 @@ const EditIncidentForm = ({ open, setOpen, patient, existingData = null }) => {
 
                     {/* Place of Incident */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Place of Incident:</label>
+                        <label className="block text-sm font-medium text-gray-700">
+                            Place of Incident: <span className="text-red-500">*</span>
+                        </label>
                         <input
                             type="text"
                             name="place_of_incident"
                             value={data.place_of_incident || ""}
                             onChange={handleChange}
+                            onBlur={handleBlur}
                             className="border border-gray-300 rounded p-2 w-full"
                             required
                         />
@@ -120,12 +136,15 @@ const EditIncidentForm = ({ open, setOpen, patient, existingData = null }) => {
 
                     {/* Date of Incident */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Date of Incident:</label>
+                        <label className="block text-sm font-medium text-gray-700">
+                            Date of Incident: <span className="text-red-500">*</span>
+                        </label>
                         <input
                             type="date"
                             name="date_of_incident"
                             value={data.date_of_incident || ""}
                             onChange={handleChange}
+                            onBlur={handleBlur}
                             className="border border-gray-300 rounded p-2 w-full"
                             required
                         />
@@ -134,12 +153,15 @@ const EditIncidentForm = ({ open, setOpen, patient, existingData = null }) => {
 
                     {/* Time of Incident */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Time of Incident:</label>
+                        <label className="block text-sm font-medium text-gray-700">
+                            Time of Incident: <span className="text-red-500">*</span>
+                        </label>
                         <input
                             type="time"
                             name="time_of_incident"
                             value={data.time_of_incident || ""}
-                            onChange={(e) => setData("time_of_incident", e.target.value.slice(0, 5))}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
                             className="border border-gray-300 rounded p-2 w-full"
                             required
                         />
@@ -148,13 +170,17 @@ const EditIncidentForm = ({ open, setOpen, patient, existingData = null }) => {
 
                     {/* Description of Injury */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Description of Injury:</label>
+                        <label className="block text-sm font-medium text-gray-700">
+                            Description of Injury: <span className="text-red-500">*</span>
+                        </label>
                         <textarea
                             name="description_of_injury"
                             value={data.description_of_injury || ""}
                             onChange={handleChange}
+                            onBlur={handleBlur}
                             className="border border-gray-300 rounded p-2 w-full"
                             rows="3"
+                            required
                         ></textarea>
                         {errors.description_of_injury && <p className="text-red-500 text-xs mt-1">{errors.description_of_injury}</p>}
                     </div>
@@ -188,8 +214,10 @@ const EditIncidentForm = ({ open, setOpen, patient, existingData = null }) => {
                                 name="hospital_specification"
                                 value={data.hospital_specification || ""}
                                 onChange={handleChange}
+                                onBlur={handleBlur}
                                 className="border border-gray-300 rounded p-2 w-full mt-2"
                                 placeholder="Enter hospital name"
+                                required
                             />
                         )}
                         {errors.hospital_specification && <p className="text-red-500 text-xs mt-1">{errors.hospital_specification}</p>}
@@ -197,11 +225,14 @@ const EditIncidentForm = ({ open, setOpen, patient, existingData = null }) => {
 
                     {/* School Physician Selection */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">School Physician:</label>
+                        <label className="block text-sm font-medium text-gray-700">
+                            School Physician: <span className="text-red-500">*</span>
+                        </label>
                         <select
                             name="school_physician_id"
                             value={data.school_physician_id || ""}
                             onChange={handleChange}
+                            onBlur={handleBlur}
                             className="border border-gray-300 rounded p-2 w-full"
                             required
                         >
