@@ -1,3 +1,6 @@
+import Cookies from "js-cookie";
+import { useEffect } from "react";
+
 // components/PatientForm/FormStep4.jsx
 const Step4 = ({ formData, setFormData }) => {
   const handleCheckboxChange = (e) => {
@@ -54,6 +57,18 @@ const Step4 = ({ formData, setFormData }) => {
       return updatedData;
     });
   };
+
+  useEffect(() => {
+    const savedData = Cookies.get("patientFormData");
+    if (savedData) {
+      setFormData(JSON.parse(savedData));
+    }
+  }, []);
+
+  useEffect(() => {
+    Cookies.set("patientFormData", JSON.stringify(formData), { expires: 1 }); // Expires in 1 day
+  }, [formData]);
+  
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

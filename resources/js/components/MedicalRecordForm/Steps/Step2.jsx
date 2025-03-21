@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/solid";
+import Cookies from "js-cookie";
+
 
 const deformityOptions = [
   { name: "Cleft Lip (Bingot)", label: "Cleft Lip" },
@@ -51,6 +53,18 @@ const Step2 = ({ formData, setFormData }) => {
     }));
   }, [formData.deformities, setFormData]);
 
+  useEffect(() => {
+    const savedData = Cookies.get("formData");
+    if (savedData) {
+      setFormData(JSON.parse(savedData));
+    }
+  }, [setFormData]);
+
+  useEffect(() => {
+    Cookies.set("formData", JSON.stringify(formData), { expires: 1 });
+  }, [formData]);
+  
+
   const handleCheckboxChange = ({ target: { name, checked } }) => {
     setFormData((prev) => {
       if (name === "deformity") {
@@ -82,18 +96,22 @@ const Step2 = ({ formData, setFormData }) => {
     });
   };
 
+  const [touchedFields, setTouchedFields] = useState({});
+
   const handleInputChange = ({ target: { name, value } }) => {
     setFormData({ ...formData, [name]: value });
 
     if (name === "bp") checkBpWarning(value);
 
-    // Set validation error if empty
-    setFormData((prev) => ({
-      ...prev,
-      [`${name}Error`]:
-        value.trim() === "" ? "This field should not be empty." : "",
-    }));
+    // Mark field as touched when the user starts typing
+    setTouchedFields((prev) => ({ ...prev, [name]: true }));
   };
+
+  const handleBlur = ({ target: { name } }) => {
+    // Mark field as touched only when the user leaves it
+    setTouchedFields((prev) => ({ ...prev, [name]: true }));
+  };
+
 
   const checkBpWarning = (value) => {
     const [systolic, diastolic] = value.split("/").map(Number);
@@ -133,9 +151,8 @@ const Step2 = ({ formData, setFormData }) => {
         {deformityOptions.map(({ name, label }) => (
           <label
             key={name}
-            className={`flex items-center space-x-2 ${
-              !formData.deformity ? "opacity-50" : ""
-            }`}
+            className={`flex items-center space-x-2 ${!formData.deformity ? "opacity-50" : ""
+              }`}
           >
             <input
               type="checkbox"
@@ -166,7 +183,10 @@ const Step2 = ({ formData, setFormData }) => {
               value={formData.bp || ""}
               onChange={handleInputChange}
               onFocus={() => setIsBpFocused(true)}
-              onBlur={() => setIsBpFocused(false)}
+              onBlur={(e) => {
+                setIsBpFocused(false);
+                handleBlur(e);
+              }}
               className={`border p-2 w-full rounded focus:ring-green-500 focus:border-green-500 ${bpSeverity}`}
               placeholder="120/80"
               required
@@ -179,19 +199,14 @@ const Step2 = ({ formData, setFormData }) => {
           </div>
           {bpWarning && isBpFocused && (
             <div
-              className={`absolute top-full left-0 mt-1 p-2 rounded shadow-lg text-xs ${
-                bpSeverity.includes("red")
-                  ? "bg-red-100 text-red-800"
-                  : "bg-orange-100 text-orange-800"
-              }`}
+              className={`absolute top-full left-0 mt-1 p-2 rounded shadow-lg text-xs ${bpSeverity.includes("red") ? "bg-red-100 text-red-800" : "bg-orange-100 text-orange-800"
+                }`}
             >
               {bpWarning}
             </div>
           )}
-          {!formData.bp && (
-            <p className="text-red-500 text-sm">
-              This field should not be empty.
-            </p>
+          {touchedFields.bp && !formData.bp && (
+            <p className="text-red-500 text-sm">This field should not be empty.</p>
           )}
         </div>
 
@@ -206,14 +221,13 @@ const Step2 = ({ formData, setFormData }) => {
               name={name}
               value={formData[name] || ""}
               onChange={handleInputChange}
+              onBlur={handleBlur}
               className="border border-gray-300 rounded p-2 w-full focus:ring-green-500 focus:border-green-500"
               placeholder={placeholder}
               required
             />
-            {!formData[name] && (
-              <p className="text-red-500 text-sm">
-                This field should not be empty.
-              </p>
+            {touchedFields[name] && !formData[name] && (
+              <p className="text-red-500 text-sm">This field should not be empty.</p>
             )}
           </div>
         ))}

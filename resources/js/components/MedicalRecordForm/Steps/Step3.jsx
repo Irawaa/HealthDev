@@ -1,9 +1,23 @@
 import { useEffect } from "react";
+import Cookies from "js-cookie";
+
 
 useEffect;
 
 const Step3 = ({ formData, setFormData, patient }) => {
   const isMale = patient.gender === 1;
+  
+
+  useEffect(() => {
+    const savedData = Cookies.get("step3FormData");
+    if (savedData) {
+      setFormData(JSON.parse(savedData));
+    }
+  }, []);
+
+  useEffect(() => {
+    Cookies.set("step3FormData", JSON.stringify(formData), { expires: 7 });
+  }, [formData]);
 
   useEffect(() => {
     setFormData((prev) => ({
@@ -11,6 +25,7 @@ const Step3 = ({ formData, setFormData, patient }) => {
       obGyneHistory: prev.obGyneHistory ?? true, // ✅ Default to true if not set
     }));
   }, []);
+
 
   const medicalHistoryOptions = [
     { name: "Allergy", label: "Allergy" },
