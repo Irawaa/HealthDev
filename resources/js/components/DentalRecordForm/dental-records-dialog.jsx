@@ -6,110 +6,174 @@ import { Button } from "@/components/ui/button";
 import Step1 from "./Steps/Step1";
 import Step2 from "./Steps/Step2";
 import Step3 from "./Steps/Step3";
+import DentalRecordList from "./List/dental-records-list";
 
 const DentalRecordDialog = ({ patient }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [records, setRecords] = useState(patient?.dental_records || []);
     const [selectedRecord, setSelectedRecord] = useState(null);
+    const [isEditMode, setIsEditMode] = useState(false);
     const [step, setStep] = useState(1);
 
-    const { data, setData, post, processing, reset, errors } = useForm({
+    const { data, setData, post, put, processing, reset, errors } = useForm({
         patient_id: patient?.patient_id || null,
-        dentist_id: 1,
-        dentalRecordChart: {},
+        school_dentist_id: 1,
+        school_nurse_id: "",
+        dental_record_chart: {},
 
         // Step 2: Initial Periodontal Examination
-        gingival_status: "", // Normal, Gingivitis, Periodontitis
-        plaque_deposit: "", // Light, Moderate, Heavy
-        other_treatments: "", // Existing dentures, orthodontic, other treatments
+        gingival_status: "",  // Normal, Gingivitis, Periodontitis
+        periodontitis_severity: "", // Early, Moderate, Severe (only if Periodontitis)
+        plaque_deposit: "",    // Light, Moderate, Heavy
+        other_treatments: "",  // Existing dentures, orthodontic, other treatments
 
         // Step 3: Recommended Treatment
-        recommended_treatment: ""
+        recommended_treatment: "",
     });
 
     const handleSave = async () => {
-        if (!data.chief_complaint || !data.present_condition) {
+        if (!data.gingival_status || !data.plaque_deposit) {
             toast.error("Please complete required fields.");
             return;
         }
 
+        if (data.gingival_status === "Periodontitis" && !data.periodontitis_severity) {
+            toast.error("Please specify the severity for Periodontitis.");
+            return;
+        }
+
+        let dentalRecordChartString;
+        try {
+            dentalRecordChartString = JSON.stringify(data.dental_record_chart);
+            JSON.parse(dentalRecordChartString);  // Validate JSON
+        } catch (error) {
+            toast.error("Invalid dental record chart.");
+            return;
+        }
+
+        const preparedData = { ...data, dental_record_chart: dentalRecordChartString };
         const confirmed = window.confirm(
-            selectedRecord
-                ? "Are you sure you want to update this Dental Record?"
-                : "Are you sure you want to create this Dental Record?"
+            isEditMode ? "Update this Dental Record?" : "Create this Dental Record?"
         );
+
         if (!confirmed) return;
 
-        if (selectedRecord) {
-            post(route("dental-records.update", selectedRecord.id), {
-                data,
-                method: "post",
-                preserveScroll: true,
-                onSuccess: () => {
-                    toast.success("✅ Dental record updated successfully!");
-                    setRecords((prev) =>
-                        prev.map((record) =>
-                            record.id === selectedRecord.id ? { ...data, id: record.id } : record
-                        )
-                    );
-                    reset();
-                    setSelectedRecord(null);
-                    setIsOpen(false);
-                },
-            });
-        } else {
-            post(route("dental-records.store"), {
-                data,
-                method: "post",
-                preserveScroll: true,
-                onSuccess: () => {
-                    toast.success("✅ Dental record created successfully!");
-                    setRecords([{ id: Date.now(), ...data }, ...records]);
-                    reset();
-                    setIsOpen(false);
-                },
-            });
+        try {
+            if (isEditMode && selectedRecord) {
+                // Update existing record
+                await put(route("dental-records.update", selectedRecord.id), {
+                    data: preparedData,
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        toast.success("Dental record updated successfully!");
+                        clearForm();
+                    },
+                    onError: () => toast.error("Failed to update dental record."),
+                });
+            } else {
+                // Create new record
+                await post(route("dental-records.store"), {
+                    data: preparedData,
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        toast.success("Dental record created successfully!");
+                        clearForm();
+                    },
+                    onError: () => toast.error("Failed to create dental record."),
+                });
+            }
+        } catch (error) {
+            console.error("Error during submission:", error);
+            toast.error("Something went wrong. Please try again.");
         }
+    };
+
+    const clearForm = () => {
+        reset();  // Reset the form using Inertia's reset function
+        setIsEditMode(false);
+        setSelectedRecord(null);
+        setStep(1);
+
+        // Explicitly reset data to initial state
+        setData({
+            patient_id: patient?.patient_id || null,
+            school_dentist_id: 1,
+            school_nurse_id: "",
+            dental_record_chart: {},
+            gingival_status: "",
+            periodontitis_severity: "",
+            plaque_deposit: "",
+            other_treatments: "",
+            recommended_treatment: "",
+        });
+
+        setIsOpen(false);
+    };
+
+    const handleEdit = (record) => {
+        clearForm();  // Ensure there's no previous state residue
+        setSelectedRecord(record);
+        setIsEditMode(true);
+        setIsOpen(true);
+
+        // Load existing data for the selected record
+        setData("dental_record_chart", record.dental_record_chart || "{}");
+        setData("gingival_status", record.gingival_status);
+        setData("periodontitis_severity", record.periodontitis_severity);
+        setData("plaque_deposit", record.plaque_deposit);
+        setData("other_treatments", record.other_treatments);
+        setData("recommended_treatment", record.recommended_treatment);
     };
 
     return (
         <div>
-            <Button onClick={() => setIsOpen(true)}>New Dental Record</Button>
+            <Button onClick={() => {
+                clearForm();
+                setIsOpen(true);
+            }}>
+                New Dental Record
+            </Button>
+
+            <DentalRecordList
+                records={records}
+                patient={patient}
+                onEdit={handleEdit}
+            />
 
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogContent className="w-full max-w-5xl p-8 mx-auto bg-white rounded-lg shadow-lg flex flex-col items-center">
                     <DialogHeader className="w-full">
                         <DialogTitle className="text-2xl text-green-700 text-center">
-                            {selectedRecord ? "Edit Dental Record" : "New Dental Record"}
+                            {isEditMode ? "Edit Dental Record" : "New Dental Record"}
                         </DialogTitle>
                     </DialogHeader>
 
-                    {/* Centered Step Navigation */}
+                    {/* Step Components */}
                     <div className="flex flex-col items-center justify-center w-full">
-                        {step === 1 && <Step1 data={data} setData={setData} errors={errors} />}
+                        {step === 1 && (
+                            <Step1
+                                data={data}
+                                setData={setData}
+                                errors={errors}
+                                selectedRecord={selectedRecord}
+                                isEditMode={isEditMode}
+                                setIsEditMode={setIsEditMode}
+                            />
+                        )}
                         {step === 2 && <Step2 data={data} setData={setData} errors={errors} />}
                         {step === 3 && <Step3 data={data} setData={setData} errors={errors} />}
                     </div>
 
-                    {/* Navigation Buttons - Centered */}
+                    {/* Navigation Buttons */}
                     <DialogFooter className="w-full flex justify-center mt-4 gap-4">
                         {step > 1 && (
-                            <Button variant="outline" onClick={() => setStep((prev) => prev - 1)}>
-                                Back
-                            </Button>
+                            <Button variant="outline" onClick={() => setStep(step - 1)}>Back</Button>
                         )}
                         {step < 3 ? (
-                            <Button
-                                onClick={() => {
-                                    console.log("Current data:", data);
-                                    setStep((prev) => prev + 1);
-                                }}
-                            >
-                                Next
-                            </Button>
+                            <Button onClick={() => setStep(step + 1)}>Next</Button>
                         ) : (
                             <Button onClick={handleSave} disabled={processing}>
-                                {selectedRecord ? "Update" : "Save"}
+                                {isEditMode ? "Update" : "Save"}
                             </Button>
                         )}
                     </DialogFooter>

@@ -1,8 +1,12 @@
 import React, { useEffect, useState, useRef } from "react";
 import { FabricJSCanvas, useFabricJSEditor } from "fabricjs-react";
+import LZString from "lz-string";
 import { RefreshCw, X } from "lucide-react";
+import { toast } from "react-hot-toast";
+import { motion, AnimatePresence } from "framer-motion";
 
-const Step1 = ({ data, setData }) => {
+const Step1 = ({ data, setData, isEditMode, selectedRecord }) => {
+  console.log(selectedRecord);
   const [selectedTooth, setSelectedTooth] = useState(null);
   const { editor, onReady } = useFabricJSEditor();
   const [suggestionText, setSuggestionText] = useState("");
@@ -25,7 +29,7 @@ const Step1 = ({ data, setData }) => {
   const handleToothClick = (tooth) => {
     setSelectedTooth(tooth);
     setSuggestionText("");
-    const existingData = data.dentalRecordChart[tooth] || {};
+    const existingData = data.dental_record_chart[tooth] || {};
     setSymbol(existingData.symbol || "");
     setTeethCondition(existingData.teeth_conditions || "");
     setNotes(existingData.notes || "");
@@ -47,13 +51,43 @@ const Step1 = ({ data, setData }) => {
       canvas.renderAll(); // Re-render to reflect changes
     }
   };
+  const resetAll = () => {
+    // Clear state data
+    setSelectedTooth(null);
+    setSymbol("");
+    setTeethCondition("");
+    setNotes("");
+
+    // Clear all saved markers
+    savedToothMarkers.current = {};
+
+    // Clear dental_record_chart
+    setData("dental_record_chart", {});
+
+    // Check if editor and its canvas are ready
+    if (editor && editor.canvas) {
+      const canvas = editor.canvas;
+
+      // Ensure canvas context is ready
+      if (canvas.getContext && canvas.getContext("2d")) {
+        canvas.clear();           // Clear all objects from the canvas
+        canvas.renderAll();       // Re-render to reflect changes
+      }
+    } else {
+      console.warn("Canvas not ready yet!");
+    }
+
+    setSuggestionText("");
+    toast.success("All data has been reset successfully!"); // Optional toast notification
+  };
 
   useEffect(() => {
     if (selectedTooth && editor?.canvas) {
       const canvas = editor.canvas;
 
-      if (!canvas || !canvas.getContext || !canvas.getContext("2d")) {
-        console.warn("Canvas not ready yet!");
+      if (!canvas.getContext || !canvas.getContext("2d")) {
+        // console.warn("Canvas not ready yet! Waiting for initialization...");
+        setTimeout(() => setSelectedTooth(selectedTooth), 100); // Retry initialization
         return;
       }
 
@@ -218,12 +252,19 @@ const Step1 = ({ data, setData }) => {
       canvas.sendToBack(line2Part2);
 
       // Load saved state if available
-      const savedState = data.dentalRecordChart[selectedTooth]?.drawing_data;
+      // const savedState = data.dental_record_chart[selectedTooth]?.drawing_data;
+
+      const targetData = selectedRecord
+        ? selectedRecord.dental_record_chart || "{}"
+        : data.dental_record_chart;
+
+      const savedState = targetData[selectedTooth]?.drawing_data;
 
       if (savedState) {
-        console.log("Loaded drawing data for selected tooth:", savedState);
-
-        canvas.loadFromJSON(savedState, () => {
+        // console.log("Loaded drawing data for selected tooth:", savedState);
+        // const decompressedState = LZString.decompressFromBase64(savedState);
+        const decompressedState = LZString.decompressFromUTF16(savedState);
+        canvas.loadFromJSON(decompressedState, () => {
           canvas.getObjects().forEach((obj) => {
             // Make ALL objects non-interactive
             obj.set({
@@ -342,20 +383,20 @@ const Step1 = ({ data, setData }) => {
       const saveState = () => {
         if (selectedTooth && editor?.canvas) {
           const currentState = JSON.stringify(editor.canvas.toJSON());
+          // const compressedState = LZString.compressToBase64(currentState);
+          const compressedState = LZString.compressToUTF16(currentState);
+          savedToothMarkers.current[selectedTooth] = compressedState;
 
-          // Update saved markers
-          savedToothMarkers.current[selectedTooth] = currentState;
-
-          // Ensure `data.dentalRecordChart.drawing_data` exists
-          setData("dentalRecordChart", {
-            ...data.dentalRecordChart,
+          // Ensure `data.dental_record_chart.drawing_data` exists
+          setData("dental_record_chart", {
+            ...data.dental_record_chart,
             [selectedTooth]: {
-              ...data.dentalRecordChart[selectedTooth],
-              drawing_data: currentState, // Save per tooth
+              ...data.dental_record_chart[selectedTooth],
+              drawing_data: compressedState, // Save per tooth
             },
           });
 
-          console.log(`Saved Drawing Data for Tooth #${selectedTooth}:`, currentState);
+          console.log(`Saved Drawing Data for Tooth #${selectedTooth}:`, compressedState);
         }
       };
 
@@ -376,7 +417,12 @@ const Step1 = ({ data, setData }) => {
 
   return (
     <>
-      <div className="bg-white p-6 w-full max-w-4xl rounded-lg relative z-50">
+      <motion.div
+        className="bg-white p-6 w-full max-w-4xl rounded-lg relative z-50"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
         <div className="flex flex-col items-center">
           <h2 className="text-xl font-semibold text-green-700 mb-2 text-center">
             II. Dental Record
@@ -385,20 +431,50 @@ const Step1 = ({ data, setData }) => {
             Dental Record Chart
           </p>
 
+          {/* Reset All Button - Only visible if no selectedRecord */}
+          {!selectedRecord && (
+            <motion.button
+              onClick={resetAll}
+              className="px-4 py-2 bg-red-500 text-white rounded-lg mb-4 hover:bg-red-600 transition duration-200"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              Reset All
+            </motion.button>
+          )}
+
           {/* Primary Teeth - Top */}
           <div className="flex flex-col items-center justify-center mb-4 w-full">
             <div className="w-full max-w-lg mx-auto flex flex-wrap justify-center gap-2">
               {primaryTeeth.map(({ numbers }) => (
                 <div key={numbers.join(",")} className="flex justify-center items-center space-x-2 md:space-x-4 w-auto mb-2">
-                  {numbers.map((num) => (
-                    <div
-                      key={num}
-                      className="w-10 h-10 border border-gray-400 flex items-center justify-center cursor-pointer"
-                      onClick={() => handleToothClick(num)}
-                    >
-                      {num}
-                    </div>
-                  ))}
+                  {numbers.map((num) => {
+                    const toothData =
+                      data.dental_record_chart?.[num] ||
+                      (selectedRecord?.dental_record_chart ? selectedRecord.dental_record_chart?.[num] : {}) ||
+                      {};
+
+                    const hasDrawing = toothData.drawing_data;
+                    const hasNotesOrSymbol = toothData.notes || toothData.symbol;
+                    const hasAll = hasDrawing && toothData.notes && toothData.symbol;
+
+                    // Determine background color based on conditions
+                    let bgColor = "bg-white"; // Default
+                    if (hasAll) bgColor = "bg-blue-200";
+                    else if (hasDrawing) bgColor = "bg-green-200";
+                    else if (hasNotesOrSymbol) bgColor = "bg-yellow-200";
+
+                    return (
+                      <motion.div
+                        key={num}
+                        className={`w-10 h-10 border border-gray-400 flex items-center justify-center cursor-pointer ${bgColor}`}
+                        whileHover={{ scale: 1.1 }}
+                        onClick={() => handleToothClick(num)}
+                      >
+                        {num}
+                      </motion.div>
+                    );
+                  })}
                 </div>
               ))}
             </div>
@@ -409,163 +485,195 @@ const Step1 = ({ data, setData }) => {
             <div className="w-full max-w-lg mx-auto flex flex-wrap justify-center gap-2">
               {permanentTeeth.map(({ numbers }) => (
                 <div key={numbers.join(",")} className="flex justify-center items-center space-x-2 md:space-x-4 w-auto mb-2">
-                  {numbers.map((num) => (
-                    <div
-                      key={num}
-                      className="w-10 h-10 border border-gray-400 flex items-center justify-center cursor-pointer"
-                      onClick={() => handleToothClick(num)}
-                    >
-                      {num}
-                    </div>
-                  ))}
+                  {numbers.map((num) => {
+                    const toothData =
+                      data.dental_record_chart?.[num] ||
+                      (selectedRecord?.dental_record_chart ? selectedRecord.dental_record_chart?.[num] : {}) ||
+                      {};
+
+                    const hasDrawing = toothData.drawing_data;
+                    const hasNotesOrSymbol = toothData.notes || toothData.symbol;
+                    const hasAll = hasDrawing && toothData.notes && toothData.symbol;
+
+                    // Determine background color based on conditions
+                    let bgColor = "bg-white"; // Default
+                    if (hasAll) bgColor = "bg-blue-200";
+                    else if (hasDrawing) bgColor = "bg-green-200";
+                    else if (hasNotesOrSymbol) bgColor = "bg-yellow-200";
+
+                    return (
+                      <motion.div
+                        key={num}
+                        className={`w-10 h-10 border border-gray-400 flex items-center justify-center cursor-pointer ${bgColor}`}
+                        whileHover={{ scale: 1.1 }}
+                        onClick={() => handleToothClick(num)}
+                      >
+                        {num}
+                      </motion.div>
+                    );
+                  })}
                 </div>
               ))}
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Drawing Modal above the tooth grid */}
-      {selectedTooth && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50">
-          <div className="bg-white p-4 rounded-lg relative z-1 flex space-x-4">
-            {/* Suggestion Note on the Left */}
-            <div className="w-48 p-3 border-r border-gray-300 bg-gray-100 shadow-lg text-left text-gray-800">
-              <strong className="block mb-2">Suggestion:</strong>
-              <p className="text-sm leading-tight">
-                {suggestionText ? suggestionText : "None"}
-              </p>
-            </div>
-
-            {/* Main Drawing Area - Center */}
-            <div className="relative flex flex-col items-center">
-              <button
-                onClick={() => setSelectedTooth(null)}
-                className="absolute top-2 right-2 text-red-500"
-              >
-                <X size={24} />
-              </button>
-              <h3 className="text-lg font-semibold mb-2">Tooth #{selectedTooth}</h3>
-              <FabricJSCanvas
-                className="border border-gray-300"
-                onReady={(canvas) => {
-                  onReady(canvas);
-                  canvasRef.current = canvas;
-                  canvas.setWidth(360);
-                  canvas.setHeight(360);
-                }}
-                style={{ width: "360px", height: "360px" }}
-              />
-
-              {/* Reset Button */}
-              <div className="mt-4 flex space-x-4 items-center justify-center">
-                <button onClick={reset} className="px-3 py-1 bg-gray-200 rounded-full">
-                  <RefreshCw size={20} />
-                </button>
+      <AnimatePresence>
+        {selectedTooth && (
+          <motion.div
+            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <motion.div
+              className="bg-white p-4 rounded-lg relative z-1 flex space-x-4"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              {/* Suggestion Note on the Left */}
+              <div className="w-48 p-3 border-r border-gray-300 bg-gray-100 shadow-lg text-left text-gray-800">
+                <strong className="block mb-2">Suggestion:</strong>
+                <p className="text-sm leading-tight">
+                  {suggestionText ? suggestionText : "None"}
+                </p>
               </div>
-            </div>
 
-            {/* Right Side Inputs */}
-            <div className="w-56 p-3 border-l border-gray-300 bg-gray-100 shadow-lg text-left text-gray-800">
-              <strong className="block mb-2">Tooth Details</strong>
-
-              {/* Symbol Field */}
-              {/* Symbol Selection Dropdown */}
-              <div className="mt-3">
-                <label className="block text-sm font-medium text-gray-700">Symbol</label>
-                <select
-                  className="w-full border border-gray-300 rounded p-2"
-                  value={symbol}
-                  onChange={(e) => {
-                    setSymbol(e.target.value);
-                    setData("dentalRecordChart", {
-                      ...data.dentalRecordChart,
-                      [selectedTooth]: {
-                        ...data.dentalRecordChart[selectedTooth],
-                        symbol: e.target.value,
-                      },
-                    });
-                  }}
+              {/* Main Drawing Area - Center */}
+              <div className="relative flex flex-col items-center">
+                <button
+                  onClick={() => setSelectedTooth(null)}
+                  className="absolute top-2 right-2 text-red-500"
                 >
-                  <option value="">Select a Symbol</option>
-
-                  {/* SYMBOLS FOR MOUTH EXAMINATION */}
-                  <optgroup label="Symbols for Mouth Examination">
-                    <option value="X">X - Carious tooth indicated for extraction</option>
-                    <option value="C">C - Carious tooth indicated for filling</option>
-                    <option value="RF">RF - Root fragment</option>
-                    <option value="M">M - Missing</option>
-                    <option value="F2">F2 - Permanently filled tooth with recurrence of decay</option>
-                    <option value="Heavy shade">Heavy shade - Permanent filling</option>
-                    <option value="Outline of filling">Outline of filling - Tooth with temporary filling</option>
-                  </optgroup>
-
-                  {/* ARTIFICIAL RESTORATION */}
-                  <optgroup label="Artificial Restoration">
-                    <option value="JC">JC - Jacket Crown</option>
-                    <option value="AB">AB - Abutment</option>
-                    <option value="P">P - Pontic</option>
-                    <option value="I">I - Inlay</option>
-                    <option value="RPD">RPD - Removable Partial Denture</option>
-                    <option value="FB">FB - Fixed Bridge</option>
-                    <option value="CD">CD - Complete Denture</option>
-                  </optgroup>
-
-                  {/* SYMBOLS FOR ACCOMPLISHMENT */}
-                  <optgroup label="Symbols for Accomplishment">
-                    <option value="OP">OP - Oral Prophylaxis</option>
-                    <option value="Xt">Xt - Extracted Permanent Tooth</option>
-                    <option value="Ag F">Ag F - Amalgam Filling</option>
-                    <option value="Sy F">Sy F - Synthetic Porcelain</option>
-                    <option value="GIC">GIC - Glass Ionomer Cement</option>
-                    <option value="ZnO F">ZnO F - Zinc Oxide Filling</option>
-                    <option value="R">R - Referred to Private Dentist</option>
-                  </optgroup>
-                </select>
-              </div>
-
-              {/* Teeth Condition Field */}
-              <div className="mt-3">
-                <label className="block text-sm font-medium text-gray-700">Teeth Condition</label>
-                <input
-                  type="text"
-                  className="w-full border border-gray-300 rounded p-2"
-                  value={teethCondition}
-                  onChange={(e) => {
-                    setTeethCondition(e.target.value);
-                    setData("dentalRecordChart", {
-                      ...data.dentalRecordChart,
-                      [selectedTooth]: {
-                        ...data.dentalRecordChart[selectedTooth],
-                        teeth_conditions: e.target.value,
-                      },
-                    });
+                  <X size={24} />
+                </button>
+                <h3 className="text-lg font-semibold mb-2">Tooth #{selectedTooth}</h3>
+                <FabricJSCanvas
+                  className="border border-gray-300"
+                  onReady={(canvas) => {
+                    onReady(canvas);
+                    canvasRef.current = canvas;
+                    canvas.setWidth(360);
+                    canvas.setHeight(360);
                   }}
+                  style={{ width: "360px", height: "360px" }}
                 />
+
+                {/* Reset Button */}
+                <div className="mt-4 flex space-x-4 items-center justify-center">
+                  <button onClick={reset} className="px-3 py-1 bg-gray-200 rounded-full">
+                    <RefreshCw size={20} />
+                  </button>
+                </div>
               </div>
 
-              {/* Notes Field */}
-              <div className="mt-3">
-                <label className="block text-sm font-medium text-gray-700">Notes</label>
-                <textarea
-                  className="w-full border border-gray-300 rounded p-2"
-                  value={notes}
-                  onChange={(e) => {
-                    setNotes(e.target.value);
-                    setData("dentalRecordChart", {
-                      ...data.dentalRecordChart,
-                      [selectedTooth]: {
-                        ...data.dentalRecordChart[selectedTooth],
-                        notes: e.target.value,
-                      },
-                    });
-                  }}
-                />
+              {/* Right Side Inputs */}
+              <div className="w-56 p-3 border-l border-gray-300 bg-gray-100 shadow-lg text-left text-gray-800">
+                <strong className="block mb-2">Tooth Details</strong>
+
+                {/* Symbol Field */}
+                {/* Symbol Selection Dropdown */}
+                <div className="mt-3">
+                  <label className="block text-sm font-medium text-gray-700">Symbol</label>
+                  <select
+                    className="w-full border border-gray-300 rounded p-2"
+                    value={symbol}
+                    onChange={(e) => {
+                      setSymbol(e.target.value);
+                      setData("dental_record_chart", {
+                        ...data.dental_record_chart,
+                        [selectedTooth]: {
+                          ...data.dental_record_chart[selectedTooth],
+                          symbol: e.target.value,
+                        },
+                      });
+                    }}
+                  >
+                    <option value="">Select a Symbol</option>
+
+                    {/* SYMBOLS FOR MOUTH EXAMINATION */}
+                    <optgroup label="Symbols for Mouth Examination">
+                      <option value="X">X - Carious tooth indicated for extraction</option>
+                      <option value="C">C - Carious tooth indicated for filling</option>
+                      <option value="RF">RF - Root fragment</option>
+                      <option value="M">M - Missing</option>
+                      <option value="F2">F2 - Permanently filled tooth with recurrence of decay</option>
+                      <option value="Heavy shade">Heavy shade - Permanent filling</option>
+                      <option value="Outline of filling">Outline of filling - Tooth with temporary filling</option>
+                    </optgroup>
+
+                    {/* ARTIFICIAL RESTORATION */}
+                    <optgroup label="Artificial Restoration">
+                      <option value="JC">JC - Jacket Crown</option>
+                      <option value="AB">AB - Abutment</option>
+                      <option value="P">P - Pontic</option>
+                      <option value="I">I - Inlay</option>
+                      <option value="RPD">RPD - Removable Partial Denture</option>
+                      <option value="FB">FB - Fixed Bridge</option>
+                      <option value="CD">CD - Complete Denture</option>
+                    </optgroup>
+
+                    {/* SYMBOLS FOR ACCOMPLISHMENT */}
+                    <optgroup label="Symbols for Accomplishment">
+                      <option value="OP">OP - Oral Prophylaxis</option>
+                      <option value="Xt">Xt - Extracted Permanent Tooth</option>
+                      <option value="Ag F">Ag F - Amalgam Filling</option>
+                      <option value="Sy F">Sy F - Synthetic Porcelain</option>
+                      <option value="GIC">GIC - Glass Ionomer Cement</option>
+                      <option value="ZnO F">ZnO F - Zinc Oxide Filling</option>
+                      <option value="R">R - Referred to Private Dentist</option>
+                    </optgroup>
+                  </select>
+                </div>
+
+                {/* Teeth Condition Field */}
+                <div className="mt-3">
+                  <label className="block text-sm font-medium text-gray-700">Teeth Condition</label>
+                  <input
+                    type="text"
+                    className="w-full border border-gray-300 rounded p-2"
+                    value={teethCondition}
+                    onChange={(e) => {
+                      setTeethCondition(e.target.value);
+                      setData("dental_record_chart", {
+                        ...data.dental_record_chart,
+                        [selectedTooth]: {
+                          ...data.dental_record_chart[selectedTooth],
+                          teeth_conditions: e.target.value,
+                        },
+                      });
+                    }}
+                  />
+                </div>
+
+                {/* Notes Field */}
+                <div className="mt-3">
+                  <label className="block text-sm font-medium text-gray-700">Notes</label>
+                  <textarea
+                    className="w-full border border-gray-300 rounded p-2"
+                    value={notes}
+                    onChange={(e) => {
+                      setNotes(e.target.value);
+                      setData("dental_record_chart", {
+                        ...data.dental_record_chart,
+                        [selectedTooth]: {
+                          ...data.dental_record_chart[selectedTooth],
+                          notes: e.target.value,
+                        },
+                      });
+                    }}
+                  />
+                </div>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };

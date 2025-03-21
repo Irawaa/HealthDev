@@ -8,6 +8,7 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\NonPersonnelController;
 use App\Http\Controllers\MedicalRecordController;
+use App\Http\Controllers\DentalRecordController;
 use App\Http\Controllers\FDARFormController;
 use App\Http\Controllers\BPFormController;
 use App\Http\Controllers\IncidentReportController;
@@ -70,7 +71,12 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::delete('/medical-records/{id}', [MedicalRecordController::class, 'destroy'])->name('medical-records.destroy');
     Route::get('/medical-records/{id}/image', [MedicalRecordController::class, 'showXrayImage'])->name('medical-records-image.show');
     Route::post('/medical-records/{id}/update-xray', [MedicalRecordController::class, 'updateChestXray'])
-    ->name('medical-records.update-xray');
+        ->name('medical-records.update-xray');
+
+    // Dental Records //
+    Route::post('/dental-records/store', [DentalRecordController::class, 'store'])->name('dental-records.store');
+    Route::put('/dental-records/{dentalRecord}', [DentalRecordController::class, 'update'])->name('dental-records.update');
+    Route::delete('/dental-records/{dentalRecord}', [DentalRecordController::class, 'destroy'])->name('dental-records.destroy');
 
     // FDAR Forms //
     Route::post('/fdar-forms', [FDARFormController::class, 'store'])->name('fdar-forms.store');

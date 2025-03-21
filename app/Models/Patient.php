@@ -51,6 +51,11 @@ class Patient extends Model
         return $this->hasMany(MedicalRecord::class, 'patient_id', 'patient_id');
     }
 
+    public function dentalRecords()
+    {
+        return $this->hasMany(DentalRecord::class, 'patient_id', 'patient_id');
+    }
+
     public function bpForms()
     {
         return $this->hasMany(BPForm::class, 'patient_id', 'patient_id');

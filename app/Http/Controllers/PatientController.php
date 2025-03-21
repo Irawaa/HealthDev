@@ -147,6 +147,27 @@ class PatientController extends Controller
                 ]);
             },
 
+            'dentalRecords' => function ($query) {
+                $query->select(
+                    'id',
+                    'patient_id',
+                    'school_dentist_id',
+                    'school_nurse_id',
+                    'dental_record_chart',  // No need to use DB::raw here
+                    'gingival_status',
+                    'periodontitis_severity',
+                    'plaque_deposit',
+                    'other_treatments',
+                    'recommended_treatment',
+                    'recorded_by',
+                    'updated_by',
+                    'created_at'
+                )->with([
+                    'dentist:staff_id,fname,lname,mname', // Load dentist details
+                    'nurse:staff_id,fname,lname,mname',   // Load nurse details
+                ])->latest();
+            },
+
             'bpForms' => function ($query) {
                 $query->with(['readings'])->latest();
             },
