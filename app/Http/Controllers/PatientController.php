@@ -79,52 +79,70 @@ class PatientController extends Controller
         ]);
     }
 
-    public function show(Patient $patient)
+    private function determinePatientType(Patient $patient)
     {
-        $patient->load([
-            'student' => function ($query) {
-                $query->select(
-                    'patient_id',
-                    'stud_id',
-                    'address_house',
-                    'address_brgy',
-                    'address_citytown',
-                    'address_province',
-                    'address_zipcode',
-                    'program_id',
-                    'college_id'
-                );
-            },
+        if ($patient->student()->exists()) {
+            return 'student';
+        } elseif ($patient->personnel()->exists()) {
+            return 'personnel';
+        } elseif ($patient->nonpersonnel()->exists()) {
+            return 'nonpersonnel';
+        }
 
-            'personnel' => function ($query) {
-                $query->select(
-                    'patient_id',
-                    'employee_id',
-                    'res_brgy',
-                    'res_city',
-                    'res_prov',
-                    'res_region',
-                    'res_zipcode',
-                    'dept_id',
-                    'college_id'
-                );
-            },
+        return null; // If no type is found
+    }
 
-            'nonpersonnel' => function ($query) {
-                $query->select(
-                    'patient_id',
-                    'affiliation',
-                    'res_brgy',
-                    'res_city',
-                    'res_prov',
-                    'res_region',
-                    'res_zipcode'
-                );
-            },
 
-            // Load medical records for the specific patient
-            'medicalRecords' => function ($query) {
-                $query->select(
+    public function show(Request $request, Patient $patient)
+    {
+        $activeTab = $request->query('activeTab', 'medical');
+        // Determine patient type
+        $patientType = $this->determinePatientType($patient);
+
+        // Initialize relations array
+        $relations = [];
+
+        // Load only the necessary role based on the determined type
+        if ($patientType === 'student') {
+            $relations['student'] = fn($query) => $query->select(
+                'patient_id',
+                'stud_id',
+                'address_house',
+                'address_brgy',
+                'address_citytown',
+                'address_province',
+                'address_zipcode',
+                'program_id',
+                'college_id'
+            );
+        } elseif ($patientType === 'personnel') {
+            $relations['personnel'] = fn($query) => $query->select(
+                'patient_id',
+                'employee_id',
+                'res_brgy',
+                'res_city',
+                'res_prov',
+                'res_region',
+                'res_zipcode',
+                'dept_id',
+                'college_id'
+            );
+        } elseif ($patientType === 'nonpersonnel') {
+            $relations['nonpersonnel'] = fn($query) => $query->select(
+                'patient_id',
+                'affiliation',
+                'res_brgy',
+                'res_city',
+                'res_prov',
+                'res_region',
+                'res_zipcode'
+            );
+        }
+
+        // Dynamically load data based on activeTab
+        switch ($activeTab) {
+            case 'medical':
+                $relations['medicalRecords'] = fn($query) => $query->select(
                     'id',
                     'patient_id',
                     'school_nurse_id',
@@ -143,17 +161,17 @@ class PatientController extends Controller
                     'personalSocialHistory',
                     'familyHistories',
                     'physicalExaminations',
-                    'medicalRecordDetail',
-                ]);
-            },
+                    'medicalRecordDetail'
+                ])->latest();
+                break;
 
-            'dentalRecords' => function ($query) {
-                $query->select(
+            case 'dental':
+                $relations['dentalRecords'] = fn($query) => $query->select(
                     'id',
                     'patient_id',
                     'school_dentist_id',
                     'school_nurse_id',
-                    'dental_record_chart',  // No need to use DB::raw here
+                    'dental_record_chart',
                     'gingival_status',
                     'periodontitis_severity',
                     'plaque_deposit',
@@ -163,53 +181,64 @@ class PatientController extends Controller
                     'updated_by',
                     'created_at'
                 )->with([
-                    'dentist:staff_id,fname,lname,mname', // Load dentist details
-                    'nurse:staff_id,fname,lname,mname',   // Load nurse details
+                    'dentist:staff_id,fname,lname,mname',
+                    'nurse:staff_id,fname,lname,mname'
                 ])->latest();
-            },
+                break;
 
-            'bpForms' => function ($query) {
-                $query->with(['readings'])->latest();
-            },
-
-            'fdarForms' => function ($query) {
-                $query->with([
-                    'allDiseases' => function ($query) {
-                        $query->select(
-                            'fdar_form_common_disease.fdar_form_id',
-                            'fdar_form_common_disease.common_disease_id',
-                            'fdar_form_common_disease.custom_disease',
-                            'common_diseases.name as disease_name'
-                        )
-                            ->leftJoin('common_diseases', 'fdar_form_common_disease.common_disease_id', '=', 'common_diseases.id');
-                    }
+            case 'fdar':
+                $relations['fdarForms'] = fn($query) => $query->with([
+                    'allDiseases' => fn($query) => $query->select(
+                        'fdar_form_common_disease.fdar_form_id',
+                        'fdar_form_common_disease.common_disease_id',
+                        'fdar_form_common_disease.custom_disease',
+                        'common_diseases.name as disease_name'
+                    )->leftJoin('common_diseases', 'fdar_form_common_disease.common_disease_id', '=', 'common_diseases.id')
                 ])->latest();
-            },
+                break;
 
-            'incidentReports' => function ($query) {
-                $query->with([
+            case 'bp':
+                $relations['bpForms'] = fn($query) => $query->with(['readings'])->latest();
+                break;
+
+            case 'incident':
+                $relations['incidentReports'] = fn($query) => $query->with([
                     'schoolNurse',
                     'schoolPhysician',
                     'recordedBy',
                     'updatedBy'
                 ])->latest();
-            },
+                break;
 
-            'prescriptions' => function ($query) {
-                $query->select(
+            case 'prescription':
+                $relations['prescriptions'] = fn($query) => $query->select(
                     'patient_id',
-                    'prescription_number',
+                    'prescription_number'
                 )->latest();
-            },
+                break;
 
-            'medicalCertificates' => function ($query) {
-                $query->with([
-                    'schoolPhysician:staff_id,fname,lname,mname,license_no', // ✅ Fix staff_id reference
-                    'schoolNurse:staff_id,fname,lname,mname', // ✅ Load Nurse Details
+            case 'certificates':
+                $relations['medicalCertificates'] = fn($query) => $query->with([
+                    'schoolPhysician:staff_id,fname,lname,mname,license_no',
+                    'schoolNurse:staff_id,fname,lname,mname'
                 ])->latest();
-            },
-        ]);
+                $relations['dentalCertificates'] = fn($query) => $query->with([
+                    'schoolDentist:staff_id,fname,lname,mname,license_no',
+                    'schoolNurse:staff_id,fname,lname,mname'
+                ])->latest();
+                break;
 
+                // case 'referrals':
+                //     $relations['referrals'] = fn($query) => $query->latest();
+                //     break;
+
+                // case 'pre-participatory':
+                //     $relations['preParticipatoryForms'] = fn($query) => $query->latest();
+                //     break;
+        }
+
+        // Load patient data with determined relations
+        $patient->load($relations);
 
         // Fetch supporting data
         $colleges = College::where('is_active', 1)
@@ -236,12 +265,19 @@ class PatientController extends Controller
             ->select('staff_id', 'lname', 'fname', 'mname', 'ext', 'license_no', 'ptr_no')
             ->get();
 
+        $dentistStaff = ClinicStaff::whereIn('role', ['Clinic Dentist'])
+            ->orderBy('lname')
+            ->select('staff_id', 'lname', 'fname', 'mname', 'ext', 'license_no', 'ptr_no')
+            ->get();
+
         return Inertia::render('Patients/ProfilePage', [
             'patient' => $patient,
             'colleges' => $colleges,
             'departments' => $departments,
             'commonDiseases' => $commonDiseases,
-            'physicianStaff' => $physicianStaff
+            'physicianStaff' => $physicianStaff,
+            'dentistStaff' => $dentistStaff,
+            'activeTab' => $activeTab
         ]);
     }
 

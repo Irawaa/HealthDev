@@ -86,6 +86,48 @@ class MedicalCertificateController extends Controller
     }
 
     /**
+     * Update a medical certificate.
+     */
+    public function update(Request $request, $id)
+    {
+        Log::info('Medical certificate update request received', ['medical_certificate_id' => $id]);
+
+        try {
+            $medicalCertificate = MedicalCertificate::findOrFail($id);
+
+            $validated = $request->validate([
+                'patient_id' => 'required|exists:patients,patient_id',
+                'diagnosis' => 'required|string',
+                'advised_medication_rest_required' => 'boolean',
+                'advised_medication_rest' => 'nullable|date|required_if:advised_medication_rest_required,true',
+                'purpose' => 'required|in:Excuse Slip,Off School Duty,OJT,Sports,ROTC,Others',
+                'purpose_other' => 'nullable|string|max:255',
+                'recommendation' => 'required|integer|between:0,2',
+                'clearance_status' => 'required|integer|between:0,2',
+                'further_evaluation' => 'nullable|string|max:255',
+                'not_cleared_for' => 'nullable|in:All sports,Certain sports,Activity',
+                'activity_specification' => 'nullable|string|max:255',
+                'school_physician_id' => 'required|exists:clinic_staffs,staff_id',
+            ]);
+
+            $medicalCertificate->update($validated);
+
+            Log::info('Medical certificate updated successfully', [
+                'medical_certificate_id' => $medicalCertificate->id,
+            ]);
+
+            return redirect()->back()->with('success', 'Medical certificate updated successfully');
+        } catch (\Exception $e) {
+            Log::error('Error updating medical certificate', [
+                'medical_certificate_id' => $id,
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return back()->withErrors('Failed to update medical certificate. Please try again.');
+        }
+    }
+
+    /**
      * Delete a medical certificate.
      */
     public function destroy($id)

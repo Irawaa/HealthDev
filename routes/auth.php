@@ -15,6 +15,8 @@ use App\Http\Controllers\IncidentReportController;
 use App\Http\Controllers\PrescriptionController;
 
 use App\Http\Controllers\MedicalCertificateController;
+use App\Http\Controllers\DentalCertificateController;
+
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -109,10 +111,15 @@ Route::middleware(['web', 'auth'])->group(function () {
 
     // Medical Certificates //
     Route::post('/medical-certificates', [MedicalCertificateController::class, 'store'])->name('medical-certificates.store');
-    // Route::put('/medical-certificates/{id}', [MedicalCertificateController::class, 'update'])->name('medical-certificates.update');
+    Route::put('/medical-certificates/{id}', [MedicalCertificateController::class, 'update'])->name('medical-certificates.update');
     Route::delete('/medical-certificates/{id}', [MedicalCertificateController::class, 'destroy'])->name('medical-certificates.destroy');
     Route::get('/medical-certificates/{id}/pdf', [MedicalCertificateController::class, 'viewPDF'])->name('medical-certificates.pdf');
     Route::get('/medical-certificates/preview/{id}', [MedicalCertificateController::class, 'preview'])->name('medical-certificates.preview');
+
+    // Dental Certificates //
+    Route::post('/dental-certificates', [DentalCertificateController::class, 'store'])->name('dental-certificates.store');
+    Route::put('/dental-certificates/{id}', [DentalCertificateController::class, 'update'])->name('dental-certificates.update');
+    Route::delete('/dental-certificates/{id}', [DentalCertificateController::class, 'destroy'])->name('dental-certificates.destroy');
 
     // --- Logout ---
     Route::post('/logout', [AuthenticateController::class, 'destroy'])->name('logout');

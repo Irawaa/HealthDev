@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp } from "lucide-react"; // Lucide Icons
+import { ChevronDown, ChevronUp } from "lucide-react";
 import PrescriptionForm from "./prescription-form";
 
 const PrescriptionModal = ({ activeTab, patient }) => {
@@ -30,7 +30,8 @@ const PrescriptionModal = ({ activeTab, patient }) => {
         </Button>
 
         <div className="mt-4 space-y-4">
-          {patient.prescriptions.length > 0 ? (
+          {/* ✅ Safe Check for patient.prescriptions */}
+          {Array.isArray(patient.prescriptions) && patient.prescriptions.length > 0 ? (
             patient.prescriptions.map((prescription, index) => (
               <div
                 key={index}
@@ -49,7 +50,7 @@ const PrescriptionModal = ({ activeTab, patient }) => {
                   )}
                 </div>
 
-                {/* Expandable Content with Framer Motion */}
+                {/* Expandable Content */}
                 <motion.div
                   initial={{ height: 0, opacity: 0 }}
                   animate={{

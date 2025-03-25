@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "@inertiajs/react";
 import { toast } from "react-hot-toast";
 import { Input } from "@/components/ui/input";
@@ -10,12 +10,12 @@ import { usePhysicianStaff } from "@/Pages/Patients/ProfilePage";
 import { AnimatePresence, motion } from "framer-motion";
 
 
-const MedicalForm = ({ setOpen, patient }) => {
+const MedicalForm = ({ setOpen, patient, certificate }) => {
     const physicianStaff = usePhysicianStaff();
     const [pageLoading, setPageLoading] = useState(false);
 
     // ✅ useForm Hook with Laravel-validated fields
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, put, processing, errors } = useForm({
         patient_id: patient?.patient_id || null,
         diagnosis: "",
         advised_medication_rest_required: false, // Boolean
@@ -29,6 +29,26 @@ const MedicalForm = ({ setOpen, patient }) => {
         activity_specification: "",
         school_physician_id: "", // Foreign Key (Integer)
     });
+
+    useEffect(() => {
+        if (certificate) {
+            setData({
+                patient_id: certificate.patient_id,
+                diagnosis: certificate.diagnosis || "",
+                advised_medication_rest_required: certificate.advised_medication_rest_required || false,
+                advised_medication_rest: certificate.advised_medication_rest || "",
+                purpose: certificate.purpose || "",
+                purpose_other: certificate.purpose_other || "",
+                recommendation: certificate.recommendation || "",
+                clearance_status: certificate.clearance_status || "",
+                further_evaluation: certificate.further_evaluation || "",
+                not_cleared_for: certificate.not_cleared_for || "",
+                activity_specification: certificate.activity_specification || "",
+                school_physician_id: certificate.school_physician_id?.toString() || "",
+            });
+        }
+    }, [certificate]);
+
 
     // ✅ Input Change Handler
     const handleInputChange = (e) => {
@@ -93,8 +113,14 @@ const MedicalForm = ({ setOpen, patient }) => {
             return;
         }
 
+        const routeName = certificate
+            ? "medical-certificates.update"
+            : "medical-certificates.store";
+
+        const requestMethod = certificate ? put : post;
+
         // ✅ Proceed with form submission if no errors
-        post(route("medical-certificates.store"), {
+        requestMethod(route(routeName, certificate?.id), {
             onSuccess: () => {
                 toast.success("✅ Medical certificate created successfully!");
                 setOpen(false);

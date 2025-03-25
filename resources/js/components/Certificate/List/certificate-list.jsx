@@ -1,63 +1,70 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Eye, Printer, Trash2, ChevronDown, ChevronUp } from "lucide-react";
+import { Eye, Printer, Trash2, Edit3, ChevronDown, ChevronUp } from "lucide-react";
 import { router } from "@inertiajs/react";
 import { toast } from "react-hot-toast";
 import ConfirmationModal from "@/components/confirmation-modal";
+import CertificateForm from "@/components/Certificate/Form/certificate-form"; // ✅ Import the CertificateForm
 
 const CertificateList = ({ patient }) => {
-    const [filterType, setFilterType] = useState("medical"); // Default: Medical Certificates
+    const [filterType, setFilterType] = useState("medical");
     const [expanded, setExpanded] = useState(null);
     const [pageLoading, setPageLoading] = useState(false);
     const [confirmOpen, setConfirmOpen] = useState(false);
-    const [selectedMedCertId, setSelectedMedCertId] = useState(null);
+    const [selectedCertId, setSelectedCertId] = useState(null);
+    const [editMode, setEditMode] = useState(false);
+    const [editingCertificate, setEditingCertificate] = useState(null);
 
-    // ✅ Ensure patient & medical_certificates exist before accessing
     const filteredCertificates =
         filterType === "medical"
-            ? patient?.medical_certificates ?? [] // Use default empty array if undefined
-            : []; // Replace [] with dental_certificates when available
+            ? patient?.medical_certificates ?? []
+            : patient?.dental_certificates ?? [];
 
     const toggleExpand = (id) => {
         setExpanded(expanded === id ? null : id);
     };
 
     const onView = (id) => {
-        window.open(`/medical-certificates/${id}/pdf`, "_blank");
+        window.open(`/${filterType}-certificates/${id}/pdf`, "_blank");
     };
 
     const onPreview = (id) => {
-        const printWindow = window.open(`/medical-certificates/preview/${id}`, "_blank");
+        const printWindow = window.open(`/${filterType}-certificates/preview/${id}`, "_blank");
         if (printWindow) {
             printWindow.onload = () => {
-                printWindow.focus(); // Ensure it's in focus
-                printWindow.print(); // Auto-trigger print dialog
+                printWindow.focus();
+                printWindow.print();
             };
         }
     };
+
+    const onEdit = (certificate) => {
+        setEditingCertificate(certificate); // Prefill the data
+        setEditMode(true); // Open the form in edit mode
+    };
+
     const handleDeleteClick = (id) => {
-        setSelectedMedCertId(id);
+        setSelectedCertId(id);
         setConfirmOpen(true);
     };
 
     const handleDeleteConfirm = () => {
-        if (!selectedMedCertId) return;
+        if (!selectedCertId) return;
 
         setPageLoading(true);
 
-        router.delete(route("medical-certificates.destroy", selectedMedCertId), {
+        router.delete(route(`${filterType}-certificates.destroy`, selectedCertId), {
             preserveScroll: true,
             onSuccess: () => {
-                toast.success("Medical certificate deleted successfully!");
-                setExpanded(null); // Close any open details
+                toast.success(`${filterType.charAt(0).toUpperCase() + filterType.slice(1)} certificate deleted successfully!`);
+                setExpanded(null);
             },
-            onError: (errors) => {
-                toast.error("Failed to delete the medical certificate.");
-                console.error("Delete Error:", errors);
+            onError: () => {
+                toast.error(`Failed to delete the ${filterType} certificate.`);
             },
             onFinish: () => {
                 setConfirmOpen(false);
-                setSelectedMedCertId(null);
+                setSelectedCertId(null);
                 setPageLoading(false);
             },
         });
@@ -82,77 +89,79 @@ const CertificateList = ({ patient }) => {
             {filteredCertificates.length > 0 ? (
                 filteredCertificates.map((cert, index) => (
                     <div key={cert.id} className="bg-white p-4 rounded-lg shadow my-2">
-                        {/* 🔽 Clickable Header */}
+                        {/* Clickable Header */}
                         <div
                             className="flex justify-between items-center cursor-pointer p-2 border-b border-gray-300"
                             onClick={() => toggleExpand(cert.id)}
                         >
                             <p className="font-semibold text-gray-800">
-                                <span className="text-green-700">Medical Certificate #{index + 1}</span>
+                                <span className="text-green-700">
+                                    {filterType.charAt(0).toUpperCase() + filterType.slice(1)} Certificate #{index + 1}
+                                </span>
                             </p>
-                            {expanded === cert.id ? (
-                                <ChevronUp className="w-5 h-5 text-gray-600" />
-                            ) : (
-                                <ChevronDown className="w-5 h-5 text-gray-600" />
-                            )}
+                            {expanded === cert.id ? <ChevronUp /> : <ChevronDown />}
                         </div>
 
-                        {/* ✅ Expandable Details */}
+                        {/* Expandable Details */}
                         <AnimatePresence>
                             {expanded === cert.id && (
                                 <motion.div
-                                    initial={{ opacity: 0, maxHeight: 0, y: -10 }}
-                                    animate={{ opacity: 1, maxHeight: "500px", y: 0 }}
-                                    exit={{ opacity: 0, maxHeight: 0, y: -10 }}
-                                    transition={{ duration: 0.3, ease: "easeOut" }}
+                                    initial={{ opacity: 0, maxHeight: 0 }}
+                                    animate={{ opacity: 1, maxHeight: "500px" }}
+                                    exit={{ opacity: 0, maxHeight: 0 }}
+                                    transition={{ duration: 0.3 }}
                                     className="p-4 bg-gray-50 rounded overflow-hidden"
                                 >
-                                    <p className="text-gray-700"><strong>Diagnosis:</strong> {cert.diagnosis}</p>
-                                    <p className="text-gray-700"><strong>Date:</strong> {cert.advised_medication_rest}</p>
-                                    <p className="text-gray-700"><strong>Purpose:</strong> {cert.purpose}</p>
-                                    <p className="text-gray-700"><strong>Recommendation:</strong>
-                                        {cert.recommendation === 0 ? "Return to Class"
-                                            : cert.recommendation === 1 ? "Sent Home"
-                                                : "Hospitalized"}
-                                    </p>
-                                    <p className="text-gray-700"><strong>Clearance Status:</strong>
-                                        {cert.clearance_status === 1 ? "Needs Further Evaluation" : "Cleared"}
-                                    </p>
-                                    <p className="text-gray-700"><strong>Physician:</strong>
-                                        {cert.school_physician?.fname} {cert.school_physician?.lname} (Lic: {cert.school_physician?.license_no})
-                                    </p>
+                                    {filterType === "medical" ? (
+                                        <>
+                                            <p><strong>Diagnosis:</strong> {cert.diagnosis}</p>
+                                            <p><strong>Purpose:</strong> {cert.purpose}</p>
+                                            <p><strong>Recommendation:</strong> 
+                                                {["Return to Class", "Sent Home", "Hospitalized"][cert.recommendation]}
+                                            </p>
+                                            <p><strong>Physician:</strong> {cert.school_physician?.fname} {cert.school_physician?.lname}</p>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <p><strong>Procedures:</strong> 
+                                                {["Mouth Examination", "Gum Treatment", "Oral Prophylaxis", "Extraction"]
+                                                    .filter((_, i) => cert[Object.keys(cert)[i + 2]])
+                                                    .join(", ")}
+                                            </p>
+                                            <p><strong>Remarks:</strong> {cert.remarks}</p>
+                                            <p><strong>Dentist:</strong> {cert.school_dentist?.fname} {cert.school_dentist?.lname}</p>
+                                        </>
+                                    )}
 
-                                    {/* 📌 Action Buttons - Aligned to the Right */}
+                                    {/* 📌 Action Buttons */}
                                     <div className="flex justify-end gap-2 mt-4">
-                                        <motion.button
-                                            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition"
+                                        <button
                                             onClick={() => onView(cert.id)}
-                                            whileHover={{ scale: 1.05 }}
-                                            transition={{ type: "spring", stiffness: 300 }}
+                                            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition"
                                         >
-                                            <Eye size={18} />
-                                            View
-                                        </motion.button>
+                                            <Eye size={18} /> View
+                                        </button>
 
-                                        <motion.button
-                                            className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-lg shadow hover:bg-yellow-600 transition"
+                                        <button
                                             onClick={() => onPreview(cert.id)}
-                                            whileHover={{ scale: 1.05 }}
-                                            transition={{ type: "spring", stiffness: 300 }}
+                                            className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-lg shadow hover:bg-yellow-600 transition"
                                         >
-                                            <Printer size={18} />
-                                            Print
-                                        </motion.button>
+                                            <Printer size={18} /> Print
+                                        </button>
 
-                                        <motion.button
-                                            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 transition"
-                                            onClick={() => handleDeleteClick(cert.id)}
-                                            whileHover={{ scale: 1.05 }}
-                                            transition={{ type: "spring", stiffness: 300 }}
+                                        <button
+                                            onClick={() => onEdit(cert)}
+                                            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition"
                                         >
-                                            <Trash2 size={18} />
-                                            Delete
-                                        </motion.button>
+                                            <Edit3 size={18} /> Edit
+                                        </button>
+
+                                        <button
+                                            onClick={() => handleDeleteClick(cert.id)}
+                                            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 transition"
+                                        >
+                                            <Trash2 size={18} /> Delete
+                                        </button>
                                     </div>
                                 </motion.div>
                             )}
@@ -163,32 +172,25 @@ const CertificateList = ({ patient }) => {
                 <p className="text-green-600 text-center mt-4">No certificates available.</p>
             )}
 
-            {/* ✅ Delete Confirmation Modal */}
+            {/* Edit Form Modal */}
+            {editMode && (
+                <CertificateForm
+                    open={editMode}
+                    setOpen={setEditMode}
+                    patient={patient}
+                    certificate={editingCertificate} // Pass prefilled data
+                />
+            )}
+
+            {/* Confirmation Modal */}
             <ConfirmationModal
                 open={confirmOpen}
                 onClose={() => setConfirmOpen(false)}
                 onConfirm={handleDeleteConfirm}
-                title="Delete Medical Certificate"
-                message="Are you sure you want to delete this medical certificate? This action cannot be undone."
+                title={`Delete ${filterType.charAt(0).toUpperCase() + filterType.slice(1)} Certificate`}
+                message={`Are you sure you want to delete this ${filterType} certificate? This action cannot be undone.`}
                 actionType="Remove"
             />
-
-            {/* ✅ Page Loading Indicator */}
-            {pageLoading && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[9999]">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.3, ease: "easeInOut" }}
-                        className="relative flex flex-col items-center"
-                    >
-                        <div className="animate-spin rounded-full h-16 w-16 border-4 border-transparent border-t-red-500 border-l-red-400 border-r-red-300 border-b-red-200"></div>
-                        <p className="mt-4 text-red-300 text-lg font-semibold animate-pulse">
-                            Deleting, please wait...
-                        </p>
-                    </motion.div>
-                </div>
-            )}
         </div>
     );
 };
