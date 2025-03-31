@@ -14,7 +14,6 @@ import { usePhysicianStaff } from "@/Pages/Patients/ProfilePage";
 
 const PrescriptionForm = ({ open, setOpen, patient }) => {
   const physicianStaff = usePhysicianStaff();
-  console.log(physicianStaff);
   const [preview, setPreview] = useState(null);
   const [pageLoading, setPageLoading] = useState(false); // ✅ Add loading state
 

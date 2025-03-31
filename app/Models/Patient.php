@@ -85,4 +85,14 @@ class Patient extends Model
     {
         return $this->hasMany(DentalCertificate::class, 'patient_id', 'patient_id');
     }
+
+    public function laboratoryExamReferrals()
+    {
+        return $this->hasMany(LaboratoryExamReferral::class, 'patient_id', 'patient_id');
+    }
+
+    public function generalReferrals()
+    {
+        return $this->hasMany(GeneralReferral::class, 'patient_id', 'patient_id');
+    }
 }

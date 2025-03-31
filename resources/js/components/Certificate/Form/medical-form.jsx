@@ -13,6 +13,9 @@ import { AnimatePresence, motion } from "framer-motion";
 const MedicalForm = ({ setOpen, patient, certificate }) => {
     const physicianStaff = usePhysicianStaff();
     const [pageLoading, setPageLoading] = useState(false);
+    const [originalDate, setOriginalDate] = useState(null);
+    const [dateModified, setDateModified] = useState(false);
+
 
     // ✅ useForm Hook with Laravel-validated fields
     const { data, setData, post, put, processing, errors } = useForm({
@@ -32,6 +35,7 @@ const MedicalForm = ({ setOpen, patient, certificate }) => {
 
     useEffect(() => {
         if (certificate) {
+            setOriginalDate(certificate.advised_medication_rest || "")
             setData({
                 patient_id: certificate.patient_id,
                 diagnosis: certificate.diagnosis || "",
@@ -39,8 +43,8 @@ const MedicalForm = ({ setOpen, patient, certificate }) => {
                 advised_medication_rest: certificate.advised_medication_rest || "",
                 purpose: certificate.purpose || "",
                 purpose_other: certificate.purpose_other || "",
-                recommendation: certificate.recommendation || "",
-                clearance_status: certificate.clearance_status || "",
+                recommendation: certificate.recommendation ?? 0,
+                clearance_status: certificate.clearance_status ?? 0,
                 further_evaluation: certificate.further_evaluation || "",
                 not_cleared_for: certificate.not_cleared_for || "",
                 activity_specification: certificate.activity_specification || "",
@@ -53,6 +57,15 @@ const MedicalForm = ({ setOpen, patient, certificate }) => {
     // ✅ Input Change Handler
     const handleInputChange = (e) => {
         const { name, value } = e.target;
+
+        if (name === "advised_medication_rest") {
+            if (value !== originalDate) {
+                setDateModified(true); // Mark as changed
+            } else {
+                setDateModified(false); // Reset if reverted
+            }
+        }
+
         setData(name, value);
     };
 
@@ -98,7 +111,7 @@ const MedicalForm = ({ setOpen, patient, certificate }) => {
         }
 
         // ✅ Prevent past dates for advised medication rest
-        if (data.advised_medication_rest) {
+        if (data.advised_medication_rest && dateModified) {
             const selectedDate = new Date(data.advised_medication_rest);
             const todayDate = new Date(today);
 
@@ -356,7 +369,7 @@ const MedicalForm = ({ setOpen, patient, certificate }) => {
                         disabled={processing}
                         className="w-full bg-green-600 hover:bg-green-700 text-white"
                     >
-                        {processing ? "Saving..." : "Save & Print"}
+                        {processing ? "Saving..." : certificate ? "Update" : "Save & Print"}
                     </Button>
                 </motion.div>
             </div>
@@ -381,58 +394,4 @@ const MedicalForm = ({ setOpen, patient, certificate }) => {
     );
 };
 export default MedicalForm;
-
-// const handleUseCurrentAddressChange = (checked) => {
-//     console.log("Checkbox toggled:", checked);
-
-//     if (checked) {
-//         let address = "";
-//         if (patient?.type === "student") {
-//             address = `${patient.student.address_house}, ${patient.student.address_brgy}, ${patient.student.address_citytown}, ${patient.student.address_province}, ${patient.student.address_zipcode}`;
-//         } else if (patient?.type === "employee") {
-//             address = `${patient.employee.address_house}, ${patient.employee.address_brgy}, ${patient.employee.address_citytown}, ${patient.employee.address_province}, ${patient.employee.address_zipcode}`;
-//         }
-//         console.log("Setting address:", address);
-
-//         setFormData((prev) => ({ ...prev, address, useCurrentAddress: true }));
-//     } else {
-//         console.log("Clearing address and unchecking checkbox");
-
-//         setFormData((prev) => ({ ...prev, address: "", useCurrentAddress: false }));
-//     }
-// };
-
-
-{/* <div className="flex flex-col space-y-2">
-                    <Input
-                        name="address"
-                        value={formData.address}
-                        onChange={handleInputChange}
-                        placeholder="Address"
-                        disabled={formData.useCurrentAddress}
-                        className="w-full border border-green-500 rounded-md p-2 bg-white focus:ring-2 focus:ring-green-600 transition"
-                    />
-                    <label className="flex items-center space-x-2 cursor-pointer">
-                        <Checkbox
-                            checked={formData.useCurrentAddress}
-                            onCheckedChange={handleUseCurrentAddressChange}
-                        />
-                        <span className="text-green-700">Use Current Address</span>
-                    </label>
-                </div> */}
-
-
-
-{/* <hr className="border-green-300" />
-                <label className="font-bold text-green-700">School Nurse:</label>
-                <Select onValueChange={(value) => handleSelectChange("schoolNurse", value)}>
-                    <SelectTrigger className="w-full border border-green-500 bg-white p-2 rounded-md focus:ring-2 focus:ring-green-600 transition">
-                        <SelectValue placeholder="Select School Nurse" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="Nurse A">Nurse A</SelectItem>
-                        <SelectItem value="Nurse B">Nurse B</SelectItem>
-                    </SelectContent>
-                </Select> */}
-
 

@@ -228,9 +228,16 @@ class PatientController extends Controller
                 ])->latest();
                 break;
 
-                // case 'referrals':
-                //     $relations['referrals'] = fn($query) => $query->latest();
-                //     break;
+            case 'referrals':
+                $relations['laboratoryExamReferrals'] = fn($query) => $query->with([
+                    'schoolPhysician:staff_id,fname,lname,mname,license_no',
+                    'schoolNurse:staff_id,fname,lname,mname'
+                ])->latest();
+                $relations['generalReferrals'] = fn($query) => $query->with([
+                    'schoolPhysician:staff_id,fname,lname,mname,license_no',
+                    'schoolNurse:staff_id,fname,lname,mname'
+                ])->latest();
+                break;
 
                 // case 'pre-participatory':
                 //     $relations['preParticipatoryForms'] = fn($query) => $query->latest();

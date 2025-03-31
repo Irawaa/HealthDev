@@ -16,6 +16,8 @@ use App\Http\Controllers\PrescriptionController;
 
 use App\Http\Controllers\MedicalCertificateController;
 use App\Http\Controllers\DentalCertificateController;
+use App\Http\Controllers\GeneralReferralController;
+use App\Http\Controllers\LaboratoryExamReferralController;
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -120,6 +122,16 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/dental-certificates', [DentalCertificateController::class, 'store'])->name('dental-certificates.store');
     Route::put('/dental-certificates/{id}', [DentalCertificateController::class, 'update'])->name('dental-certificates.update');
     Route::delete('/dental-certificates/{id}', [DentalCertificateController::class, 'destroy'])->name('dental-certificates.destroy');
+
+    // General Referrals //
+    Route::post('/general-referrals', [GeneralReferralController::class, 'store'])->name('general-referrals.store');
+    Route::put('/general-referrals/{id}', [GeneralReferralController::class, 'update'])->name('general-referrals.update');
+    Route::delete('/general-referrals/{id}', [GeneralReferralController::class, 'destroy'])->name('general-referrals.destroy');
+
+    // Laboratory Exam Referrals //
+    Route::post('/laboratory-exam-referrals', [LaboratoryExamReferralController::class, 'store'])->name('laboratory-exam-referrals.store');
+    Route::put('/laboratory-exam-referrals/{id}', [LaboratoryExamReferralController::class, 'update'])->name('laboratory-exam-referrals.update');
+    Route::delete('/laboratory-exam-referrals/{id}', [LaboratoryExamReferralController::class, 'destroy'])->name('laboratory-exam-referrals.destroy');
 
     // --- Logout ---
     Route::post('/logout', [AuthenticateController::class, 'destroy'])->name('logout');
