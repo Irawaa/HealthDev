@@ -95,4 +95,9 @@ class Patient extends Model
     {
         return $this->hasMany(GeneralReferral::class, 'patient_id', 'patient_id');
     }
+
+    public function preParticipatories()
+    {
+        return $this->hasMany(PreParticipatory::class, 'patient_id', 'patient_id');
+    }
 }

@@ -2,17 +2,17 @@ import { useState, useEffect } from "react";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 
 const medicalHistoryOptions = [
-  "Allergy",
-  "Bleeding Disorder",
-  "Bronchial Asthma",
-  "Cardiovascular Disease",
-  "Hypertension",
-  "PTB",
-  "Skin Disorder",
-  "Surgery",
-  "UTI",
-  "Loss of Consciousness",
-  "Others",
+  { name: "Allergy", label: "Allergy" },
+  { name: "Bleeding disorder", label: "Bleeding disorder" },
+  { name: "Bronchial asthma", label: "Bronchial asthma" },
+  { name: "Cardiovascular Disease", label: "Cardiovascular Disease" },
+  { name: "Hypertension", label: "Hypertension" },
+  { name: "Pulmonary Tuberculosis (PTB)", label: "Pulmonary Tuberculosis (PTB)" },
+  { name: "Skin disorder", label: "Skin disorder" },
+  { name: "Surgery", label: "Surgery" },
+  { name: "Urinary Tract Infection (UTI)", label: "Urinary Tract Infection (UTI)" },
+  { name: "Loss of consciousness", label: "Loss of consciousness" },
+  { name: "Others", label: "Others" },
 ];
 
 const Step1 = ({ formData, setFormData }) => {
@@ -67,16 +67,16 @@ const Step1 = ({ formData, setFormData }) => {
   };
 
   const handleBpChange = (e) => {
-    setFormData({ ...formData, blood_pressure: e.target.value });
+    setFormData({ ...formData, bp: e.target.value });
     checkBpWarning(e.target.value);
   };
 
   const handleMedicalHistoryChange = (option) => {
-    const updatedHistory = formData.medicalHistory.includes(option)
-      ? formData.medicalHistory.filter((item) => item !== option)
-      : [...formData.medicalHistory, option];
+    const updatedHistory = formData.past_medical_histories.includes(option)
+      ? formData.past_medical_histories.filter((item) => item !== option)
+      : [...formData.past_medical_histories, option];
 
-    setFormData({ ...formData, medicalHistory: updatedHistory });
+    setFormData({ ...formData, past_medical_histories: updatedHistory });
 
     if (option === "Others") {
       setShowOtherInput(!showOtherInput);
@@ -92,11 +92,10 @@ const Step1 = ({ formData, setFormData }) => {
         {[ 
           { key: "weight", label: "Weight (kg)" },
           { key: "height", label: "Height (cm)" },
-          { key: "blood_pressure", label: "Blood Pressure (BP)", bp: true },
-          { key: "cardiac_rate", label: "Cardiac Rate (CR)" },
-          { key: "respiratory_rate", label: "Respiratory Rate (RR)" },
+          { key: "bp", label: "Blood Pressure (BP)", bp: true },
+          { key: "hr", label: "Cardiac Rate (HR)" },
+          { key: "rr", label: "Respiratory Rate (RR)" },
           { key: "temperature", label: "Temperature (°C)" },
-          { key: "oxygen_saturation", label: "O₂ Saturation (%)" },
         ].map(({ key, label, bp }) => (
           <div key={key} className="flex flex-col">
             <label className="text-sm font-medium text-gray-700">{label}</label>
@@ -135,31 +134,35 @@ const Step1 = ({ formData, setFormData }) => {
       {/* Medical History */}
       <div>
         <label className="font-semibold text-green-800">Past Medical History:</label>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
+        <div className="grid grid-cols-2 gap-2">
           {medicalHistoryOptions.map((option) => (
-            <label key={option} className="flex items-center">
+            <label key={option.name} className="flex items-center space-x-2">
               <input
                 type="checkbox"
-                className="mr-2"
-                checked={formData.medicalHistory.includes(option)}
-                onChange={() => handleMedicalHistoryChange(option)}
+                name="past_medical_histories"
+                value={option.name}
+                checked={formData.past_medical_histories.includes(option.name)}
+                onChange={() => handleMedicalHistoryChange(option.name)}
+                className="h-4 w-4 border-gray-300"
               />
-              {option}
+              <span className="text-sm text-gray-700">{option.label}</span>
             </label>
           ))}
         </div>
+        {showOtherInput && (
+          <div className="mt-2">
+            <label className="text-sm font-medium text-gray-700">Other Condition</label>
+            <input
+              type="text"
+              name="other_condition"
+              value={formData.other_condition || ""}
+              onChange={handleChange}
+              className="border p-2 rounded w-full"
+              placeholder="Specify other condition"
+            />
+          </div>
+        )}
       </div>
-
-      {/* Other Medical History Input */}
-      {showOtherInput && (
-        <input
-          type="text"
-          className="mt-2 p-2 border border-gray-300 rounded w-full"
-          placeholder="Specify other medical history..."
-          value={formData.otherMedicalHistory}
-          onChange={(e) => setFormData({ ...formData, otherMedicalHistory: e.target.value })}
-        />
-      )}
     </div>
   );
 };

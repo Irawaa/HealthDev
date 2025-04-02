@@ -7,6 +7,7 @@ use App\Models\College;
 use App\Models\Department;
 use App\Models\CommonDisease;
 use App\Models\ClinicStaff;
+use App\Models\PreParticipatoryQuestion;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -153,16 +154,16 @@ class PatientController extends Controller
                     'plan_recommendation',
                     'created_at'
                 )->with([
-                    'reviewOfSystems',
-                    'deformities',
-                    'vitalSigns',
-                    'pastMedicalHistories',
-                    'obGyneHistory',
-                    'personalSocialHistory',
-                    'familyHistories',
-                    'physicalExaminations',
-                    'medicalRecordDetail'
-                ])->latest();
+                            'reviewOfSystems',
+                            'deformities',
+                            'vitalSigns',
+                            'pastMedicalHistories',
+                            'obGyneHistory',
+                            'personalSocialHistory',
+                            'familyHistories',
+                            'physicalExaminations',
+                            'medicalRecordDetail'
+                        ])->latest();
                 break;
 
             case 'dental':
@@ -181,9 +182,9 @@ class PatientController extends Controller
                     'updated_by',
                     'created_at'
                 )->with([
-                    'dentist:staff_id,fname,lname,mname',
-                    'nurse:staff_id,fname,lname,mname'
-                ])->latest();
+                            'dentist:staff_id,fname,lname,mname',
+                            'nurse:staff_id,fname,lname,mname'
+                        ])->latest();
                 break;
 
             case 'fdar':
@@ -239,9 +240,32 @@ class PatientController extends Controller
                 ])->latest();
                 break;
 
-                // case 'pre-participatory':
-                //     $relations['preParticipatoryForms'] = fn($query) => $query->latest();
-                //     break;
+            case 'pre-participatory':
+                $relations['preParticipatories'] = fn($query) => $query->select(
+                    'id',
+                    'patient_id',
+                    'school_nurse_id',
+                    'school_physician_id',
+                    'recorded_by',
+                    'updated_by',
+                    'final_evaluation',
+                    'further_evaluation',
+                    'not_cleared_for',
+                    'activity_specification',
+                    'created_at'
+                )->with([
+                            'patient:patient_id,fname,lname,mname',
+                            'nurse:staff_id,fname,lname,mname',
+                            'physician:staff_id,fname,lname,mname,license_no',
+                            'pastMedicalHistories',
+                            'vitalSigns',
+                            'physicalExaminations',
+                            'interview' => function ($query) {
+                                $query->select('id', 'pre_participatory_id', 'question_id', 'response', 'remarks')
+                                    ->with('question:id,question'); // Include any related data for the questions
+                            }
+                        ])->latest();
+                break;
         }
 
         // Load patient data with determined relations
@@ -262,6 +286,8 @@ class PatientController extends Controller
             ->get();
 
         $departments = Department::select('dept_id', 'name', 'acronym')->get();
+
+        $interviewQuestions = PreParticipatoryQuestion::select('id', 'question')->get();
 
         $commonDiseases = CommonDisease::orderBy('name')
             ->select('id', 'name')
@@ -284,7 +310,8 @@ class PatientController extends Controller
             'commonDiseases' => $commonDiseases,
             'physicianStaff' => $physicianStaff,
             'dentistStaff' => $dentistStaff,
-            'activeTab' => $activeTab
+            'activeTab' => $activeTab,
+            'interviewQuestions' => $interviewQuestions,
         ]);
     }
 

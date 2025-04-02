@@ -13,7 +13,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import PrescriptionModal from "@/components/Prescription/prescription-modal";
 import CertificatesModal from "@/components/Certificate/certificate-dialog";
 import ReferralModal from "@/components/Referral/referral-dialog";
-import PreParticipatoryModal from "../Pre-Participatory/preparticipatory-form-dialog";
+import PreParticipatoryModal from "../../components/Pre-Participatory/preparticipatory-form-dialog";
 
 const InfoField = ({ label, value, name, type = "text", options = [], isEditing, handleChange }) => (
   <div className="flex flex-col w-full space-y-1">

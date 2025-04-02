@@ -24,7 +24,14 @@ class PastMedicalHistory extends Model
     public function medicalRecords()
     {
         return $this->belongsToMany(MedicalRecord::class, 'medical_record_past_medical_history')
-                    ->withPivot('custom_condition') // For 'Others' input
-                    ->withTimestamps();
+            ->withPivot('custom_condition') // For 'Others' input
+            ->withTimestamps();
+    }
+
+    public function preParticipatories()
+    {
+        return $this->belongsToMany(PreParticipatory::class, 'pre_participatory_past_medical_history')
+            ->withPivot('custom_condition')
+            ->withTimestamps();
     }
 }

@@ -13,7 +13,7 @@ use App\Http\Controllers\FDARFormController;
 use App\Http\Controllers\BPFormController;
 use App\Http\Controllers\IncidentReportController;
 use App\Http\Controllers\PrescriptionController;
-
+use App\Http\Controllers\PreParticipatoryController;
 use App\Http\Controllers\MedicalCertificateController;
 use App\Http\Controllers\DentalCertificateController;
 use App\Http\Controllers\GeneralReferralController;
@@ -110,6 +110,9 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::delete('/prescriptions/{id}', [PrescriptionController::class, 'destroy'])->name('prescriptions.destroy');
     Route::get('/prescriptions/{id}/image', [PrescriptionController::class, 'showImage'])->name('prescriptions.show');
 
+    // Pre-Participatory Form //
+    Route::post('/pre-participatory', [PreParticipatoryController::class, 'store'])->name('pre-participatory.store');
+    Route::delete('/pre-participatory/{id}', [PreParticipatoryController::class, 'destroy'])->name('pre-participatory.destroy');
 
     // Medical Certificates //
     Route::post('/medical-certificates', [MedicalCertificateController::class, 'store'])->name('medical-certificates.store');

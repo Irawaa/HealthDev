@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { usePhysicianStaff } from "@/Pages/Patients/ProfilePage"; // Import context
 
 // ✅ Lists for Physical Examination
 const bodyParts = [
@@ -7,12 +8,11 @@ const bodyParts = [
     "Heart", "Lungs", "Abdomen", "Skin", "Extremities",
 ];
 
-// ✅ Lists for School Staff
-const schoolNurses = ["Nurse Alice", "Nurse Bob", "Nurse Charlie"];
 const schoolPhysicians = ["Dr. Smith", "Dr. Johnson", "Dr. Lee"];
 
-const Step3 = ({ formData = {}, setFormData = () => { } }) => {
+const Step3 = ({ formData, setFormData }) => {
     const [expandedSections, setExpandedSections] = useState({ PhysicalExam: true });
+    const physicianStaff = usePhysicianStaff();
 
     const toggleSection = () => {
         setExpandedSections((prev) => ({ ...prev, PhysicalExam: !prev.PhysicalExam }));
@@ -21,14 +21,9 @@ const Step3 = ({ formData = {}, setFormData = () => { } }) => {
     // ✅ Handle updates for physical examinations (Fixed Overwriting Issue)
     const handleExamChange = (part, field, value) => {
         setFormData((prev) => {
-            const updatedExams = prev.physical_examinations ? [...prev.physical_examinations] : [];
-            const index = updatedExams.findIndex((exam) => exam.name === part);
-
-            if (index === -1) {
-                updatedExams.push({ name: part, [field]: value });
-            } else {
-                updatedExams[index] = { ...updatedExams[index], [field]: value };
-            }
+            const updatedExams = prev.physical_examinations.map((exam) =>
+                exam.name === part ? { ...exam, [field]: value } : exam
+            );
 
             return { ...prev, physical_examinations: updatedExams };
         });
@@ -36,31 +31,42 @@ const Step3 = ({ formData = {}, setFormData = () => { } }) => {
 
     // ✅ Handle updates for final evaluation
     const handleFinalEvalChange = (field, value) => {
-        setFormData((prev) => ({
-            ...prev,
-            final_evaluation: {
-                ...(prev.final_evaluation || {}),
-                [field]: value,
-            },
-        }));
+        setFormData((prev) => {
+            const updatedFormData = { ...prev, [field]: value };
+
+            // Automatically set 'further_evaluation' when 'final_evaluation' is 1 (Cleared, with recommendations)
+            if (field === "final_evaluation" && value === "1") {
+                updatedFormData.further_evaluation = prev.further_evaluation || ""; // Ensure it's not null
+            }
+
+            // If 'final_evaluation' is 2 (Not Cleared), ensure 'not_cleared_for' is updated as well
+            if (field === "final_evaluation" && value === "2") {
+                updatedFormData.not_cleared_for = prev.not_cleared_for || ""; // Set a default value if necessary
+                updatedFormData.activity_specification = ""; // Set default
+            }
+
+            // Handle "Activity, please specify:" - store 'Activity' in the database and handle activity_specification separately
+            if (field === "not_cleared_for" && value === "Activity, please specify:") {
+                updatedFormData.not_cleared_for = "Activity"; // Store 'Activity' for the enum field
+                updatedFormData.activity_specification = "";
+            }
+
+            // If 'not_cleared_for' is 'Activity', make sure 'activity_specification' is filled out
+            if (field === "not_cleared_for" && value === "Activity") {
+                updatedFormData.activity_specification = prev.activity_specification || ""; // Ensure activity_specification has a value
+            }
+
+            return updatedFormData;
+        });
     };
 
     // ✅ Handle checkbox changes
     const handleCheckboxChange = (field) => {
-        handleFinalEvalChange(field, !formData.final_evaluation?.[field]);
+        setFormData((prev) => ({
+            ...prev,
+            [field]: !prev[field], // Toggle the field's boolean value
+        }));
     };
-
-    // ✅ Ensure formData structure is always defined
-    const {
-        cleared,
-        requires_evaluation,
-        evaluation_details,
-        not_cleared,
-        specified_activity,
-        "Activity, please specify:": activitySpecifyChecked,
-        nurse = "",
-        physician = "",
-    } = formData.final_evaluation || {};
 
     return (
         <div className="p-4 space-y-6">
@@ -87,8 +93,7 @@ const Step3 = ({ formData = {}, setFormData = () => { } }) => {
                             </thead>
                             <tbody>
                                 {bodyParts.map((part) => {
-                                    const exam = formData.physical_examinations?.find((exam) => exam.name === part) || {};
-
+                                    const exam = formData.physical_examinations?.find((exam) => exam.name === part) || { result: "", remarks: "" };
                                     return (
                                         <tr key={part} className="border-t border-green-300">
                                             <td className="border border-green-300 px-4 py-2 font-semibold text-green-800">{part}</td>
@@ -134,43 +139,74 @@ const Step3 = ({ formData = {}, setFormData = () => { } }) => {
             <div className="border border-green-400 rounded-lg shadow-sm bg-green-50 p-4">
                 <h4 className="text-lg font-semibold text-green-800">Final Evaluation</h4>
 
+                {/* Final Evaluation Options */}
                 <label className="flex items-center space-x-2">
-                    <input type="checkbox" checked={cleared || false} onChange={() => handleCheckboxChange("cleared")} />
+                    <input
+                        type="radio"
+                        name="final_evaluation"
+                        value="0"
+                        checked={formData.final_evaluation === "0"}
+                        onChange={(e) => handleFinalEvalChange("final_evaluation", e.target.value)}
+                    />
                     <span>Physically fit / Cleared without restrictions</span>
                 </label>
 
                 <label className="flex items-center space-x-2 mt-2">
-                    <input type="checkbox" checked={requires_evaluation || false} onChange={() => handleCheckboxChange("requires_evaluation")} />
+                    <input
+                        type="radio"
+                        name="final_evaluation"
+                        value="1"
+                        checked={formData.final_evaluation === "1"}
+                        onChange={(e) => handleFinalEvalChange("final_evaluation", e.target.value)}
+                    />
                     <span>Cleared, with recommendations for further evaluation or treatment for:</span>
                 </label>
-                {requires_evaluation && (
-                    <input type="text" value={evaluation_details || ""} onChange={(e) => handleFinalEvalChange("evaluation_details", e.target.value)} className="border border-green-400 rounded p-2 w-full focus:ring-green-500 mt-2" />
+                {formData.final_evaluation === "1" && (
+                    <input
+                        type="text"
+                        value={formData.further_evaluation || ""}
+                        onChange={(e) => handleFinalEvalChange("further_evaluation", e.target.value)}
+                        className="border border-green-400 rounded p-2 w-full focus:ring-green-500 mt-2"
+                    />
                 )}
 
                 <label className="flex items-center space-x-2 mt-2">
-                    <input type="checkbox" checked={not_cleared || false} onChange={() => handleCheckboxChange("not_cleared")} />
-                    <span>Not Cleared:</span>
+                    <input
+                        type="radio"
+                        name="final_evaluation"
+                        value="2"
+                        checked={formData.final_evaluation === "2"}
+                        onChange={(e) => handleFinalEvalChange("final_evaluation", e.target.value)}
+                    />
+                    <span>Not Cleared</span>
                 </label>
 
-                {not_cleared && (
+                {formData.final_evaluation === "2" && (
                     <div className="ml-6 space-y-2 mt-2">
-                        {["All Sports", "Certain Sports", "Activity, please specify:"].map((option) => (
-                            <label key={option} className="flex items-center space-x-2">
-                                <input
-                                    type="checkbox"
-                                    checked={formData.final_evaluation?.[option] || false}
-                                    onChange={() => handleCheckboxChange(option)}
-                                />
-                                <span>{option}</span>
-                            </label>
-                        ))}
+                        {/* Not Cleared For: Options */}
+                        {["All sports", "Certain sports", "Activity, please specify:"].map((option, index) => {
+                            const value = option === "Activity, please specify:" ? "Activity" : option; // Change value to 'Activity' for 'Activity, please specify:'
 
-                        {/* ✅ Activity Input (Restored) */}
-                        {formData.final_evaluation?.["Activity, please specify:"] && (
+                            return (
+                                <label key={option} className="flex items-center space-x-2">
+                                    <input
+                                        type="radio"
+                                        name="not_cleared_for"
+                                        value={value} // Use 'Activity' as the value for 'Activity, please specify:'
+                                        checked={formData.not_cleared_for === value}
+                                        onChange={(e) => handleFinalEvalChange("not_cleared_for", e.target.value)}
+                                    />
+                                    <span>{option}</span> {/* Display the original text */}
+                                </label>
+                            );
+                        })}
+
+                        {/* Activity Specification */}
+                        {formData.not_cleared_for === "Activity" && (
                             <input
                                 type="text"
-                                value={specified_activity || ""}
-                                onChange={(e) => handleFinalEvalChange("specified_activity", e.target.value)}
+                                value={formData.activity_specification || ""}
+                                onChange={(e) => handleFinalEvalChange("activity_specification", e.target.value)}
                                 placeholder="Specify the restricted activity"
                                 className="border border-green-400 rounded p-2 w-full focus:ring-green-500 mt-2"
                             />
@@ -179,36 +215,35 @@ const Step3 = ({ formData = {}, setFormData = () => { } }) => {
                 )}
             </div>
 
-
-            {/* ✅ Nurse & Physician Dropdowns (Fixed Undefined Values) */}
-            <div className="space-y-4">
-                <div>
-                    <label className="block font-semibold text-green-800 mb-1">School Nurse:</label>
-                    <Select value={nurse} onValueChange={(value) => handleFinalEvalChange("nurse", value)}>
-                        <SelectTrigger className="border border-gray-300 rounded p-2 w-full bg-white">
-                            <SelectValue placeholder="Select Nurse" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {schoolNurses.map((nurse) => (
-                                <SelectItem key={nurse} value={nurse}>{nurse}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                <div>
-                    <label className="block font-semibold text-green-800 mb-1">School Physician:</label>
-                    <Select value={physician} onValueChange={(value) => handleFinalEvalChange("physician", value)}>
-                        <SelectTrigger className="border border-gray-300 rounded p-2 w-full bg-white">
-                            <SelectValue placeholder="Select Physician" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {schoolPhysicians.map((physician) => (
-                                <SelectItem key={physician} value={physician}>{physician}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
+            {/* ✅ School Physician Selection - Dynamic from useContext */}
+            <div className="mb-4">
+                <label className="font-bold text-green-700">
+                    School Physician: <span className="text-red-500">*</span>
+                </label>
+                <Select
+                    value={formData.school_physician_id || ""}
+                    onValueChange={(value) => handleFinalEvalChange("school_physician_id", value)}
+                    required
+                    className="mt-2"
+                >
+                    <SelectTrigger className="w-full border border-green-500 bg-white p-2 rounded-md focus:ring-2 focus:ring-green-600 transition">
+                        <SelectValue>
+                            {physicianStaff.find((physician) => physician.staff_id == formData.school_physician_id)
+                                ? `${physicianStaff.find((physician) => physician.staff_id == formData.school_physician_id)?.lname}, 
+                       ${physicianStaff.find((physician) => physician.staff_id == formData.school_physician_id)?.fname} 
+                       ${physicianStaff.find((physician) => physician.staff_id == formData.school_physician_id)?.mname || ""} 
+                       (Lic: ${physicianStaff.find((physician) => physician.staff_id == formData.school_physician_id)?.license_no})`
+                                : "Select School Physician"}
+                        </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                        {physicianStaff.map((physician) => (
+                            <SelectItem key={physician.staff_id} value={physician.staff_id}>
+                                {physician.lname}, {physician.fname} {physician.mname || ""} (Lic: {physician.license_no})
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
             </div>
         </div>
     );

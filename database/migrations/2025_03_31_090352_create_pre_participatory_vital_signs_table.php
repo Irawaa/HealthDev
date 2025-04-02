@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -19,8 +18,8 @@ return new class extends Migration
             $table->smallInteger('hr'); // Heart Rate
             $table->decimal('temperature', 4, 1); // Body Temperature
             $table->decimal('weight', 5, 2); // Weight in kg
-            $table->decimal('height', 4, 2); // Height in meters
-            $table->decimal('bmi', 5, 2)->storedAs('weight / (height * height)'); // Auto-calculated BMI
+            $table->integer('height'); // Height in centimeters
+            $table->decimal('bmi', 5, 2)->storedAs('weight / ((height / 100) * (height / 100))'); // BMI calculation using height in cm
             $table->timestamps();
 
             // Foreign Key

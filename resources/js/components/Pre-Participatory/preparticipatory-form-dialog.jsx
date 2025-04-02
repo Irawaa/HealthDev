@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import PreParticipatoryForm from "@/components/Pre-Participatory/pre-participatory-form"; // Ensure this is correctly imported
+import PreParticipatoryForm from "@/components/Pre-Participatory/Form/pre-participatory-form"; // Ensure this is correctly imported
+import PreParticipatoryList from "@/components/Pre-Participatory/List/pre-participatory-list"; // Import the new List component
 
 const PreParticipatoryModal = ({ activeTab, patient }) => {
   const [evaluations, setEvaluations] = useState([]); // Stores evaluations
@@ -29,45 +30,27 @@ const PreParticipatoryModal = ({ activeTab, patient }) => {
     setEvaluations(evaluations.filter((evalItem) => evalItem.id !== id));
   };
 
+  const handleSelectEvaluation = (evaluation) => {
+    setSelectedEvaluation(evaluation);
+  };
+
   return (
     <div className="p-4 bg-green-50 rounded-lg shadow-md">
       <h2 className="text-xl font-semibold text-green-800">Pre-Participatory Medical Evaluations</h2>
 
       {/* Create Evaluation Button */}
-      <Button className="mt-4 bg-blue-600 text-white px-4 py-2 rounded shadow-md hover:bg-blue-700 transition" onClick={() => setShowForm(true)}>
+      <Button
+        className="mt-4 bg-blue-600 text-white px-4 py-2 rounded shadow-md hover:bg-blue-700 transition"
+        onClick={() => setShowForm(true)}
+      >
         Create New Evaluation
       </Button>
 
       {/* Show Form Component When Needed */}
-      {showForm && <PreParticipatoryForm open={showForm} setOpen={setShowForm} onSave={handleCreate} />}
+      {showForm && <PreParticipatoryForm open={showForm} setOpen={setShowForm} onSave={handleCreate} patient={patient} />}
 
       {/* List of Evaluations */}
-      <div className="mt-4">
-        {evaluations.length > 0 ? (
-          evaluations.map((evalItem) => (
-            <div key={evalItem.id} className="bg-white p-4 rounded-lg shadow my-2 flex justify-between items-center">
-              <div>
-                <p className="text-gray-800">
-                  <strong>Participant:</strong> {evalItem.participant} | <strong>Sport:</strong> {evalItem.sport}
-                </p>
-                <p className="text-sm text-gray-500">
-                  <strong>Status:</strong> {evalItem.status || "Pending"}
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <Button className="bg-gray-600 text-white px-3 py-1 rounded" onClick={() => setSelectedEvaluation(evalItem)}>
-                  View
-                </Button>
-                <Button className="bg-red-600 text-white px-3 py-1 rounded" onClick={() => handleDelete(evalItem.id)}>
-                  Delete
-                </Button>
-              </div>
-            </div>
-          ))
-        ) : (
-          <p className="text-green-600 text-center mt-4">No evaluations available.</p>
-        )}
-      </div>
+      <PreParticipatoryList evaluations={evaluations} onDelete={handleDelete} onSelect={handleSelectEvaluation} patient={patient} />
 
       {/* View Evaluation Modal */}
       {selectedEvaluation && (

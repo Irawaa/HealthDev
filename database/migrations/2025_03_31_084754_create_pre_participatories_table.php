@@ -25,10 +25,13 @@ return new class extends Migration {
             $table->unsignedSmallInteger('school_physician_id');
             $table->unsignedInteger('recorded_by');
 
-
             // 🏅 Final Evaluation
-            $table->enum('final_evaluation', ['Class A', 'Class B', 'Pending'])
-                ->nullable();
+            $table->tinyInteger('final_evaluation')->nullable()
+                ->comment('0: Physically fit, 1: Cleared with evaluation needed, 2: Not Cleared');
+
+            $table->string('further_evaluation', 255)->nullable();
+            $table->enum('not_cleared_for', ['All sports', 'Certain sports', 'Activity'])->nullable();
+            $table->string('activity_specification', 255)->nullable();
 
             // 📅 Timestamps
             $table->timestamps();
