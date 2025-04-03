@@ -221,17 +221,16 @@ class DentalCertificateController extends Controller
     /**
      * Preview the generated PDF.
      */
-    public function preview($id)
-    {
-        try {
-            $dentalCertificate = DentalCertificate::findOrFail($id);
-            return DentalCertificateDocxService::previewPDF($dentalCertificate);
-        } catch (\Exception $e) {
-            Log::error("❌ Error previewing Dental Certificate PDF: " . $e->getMessage());
-            return back()->withErrors('Failed to preview dental certificate.');
-        }
-    }
-
+    // public function preview($id)
+    // {
+    //     try {
+    //         $dentalCertificate = DentalCertificate::findOrFail($id);
+    //         return DentalCertificateDocxService::previewPDF($dentalCertificate);
+    //     } catch (\Exception $e) {
+    //         Log::error("❌ Error previewing Dental Certificate PDF: " . $e->getMessage());
+    //         return back()->withErrors('Failed to preview dental certificate.');
+    //     }
+    // }
 }
 
 

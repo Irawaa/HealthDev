@@ -50,16 +50,23 @@ const PatientProfile = ({ patient, colleges, departments, commonDiseases, physic
   const [age, setAge] = useState("0");
 
   const handleTabChange = (newTab) => {
+    // Get current URL query parameters
+    const params = new URLSearchParams(window.location.search);
+  
     console.log("Patient ID:", patient?.patient_id);
     console.log("Active Tab:", newTab);
-
+  
+    // Add or update the activeTab parameter
+    params.set("activeTab", newTab);
+  
+    // Preserve the current search params and add the activeTab to the query string
     if (patient?.patient_id && newTab) {
-      router.visit(`/patients/${patient.patient_id}?activeTab=${newTab}`, {
+      router.visit(`/patients/${patient.patient_id}?${params.toString()}`, {
         preserveState: true,
         preserveScroll: true,
       });
     }
-  };
+  };  
 
   const onTabChange = (newTab) => {
     setActiveTab(newTab);

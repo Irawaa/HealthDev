@@ -53,9 +53,9 @@ const data = {
       icon: Stethoscope,
       isActive: true,
       items: [
-        { title: "Search Patients", url: "/patients" },
-        { title: "Medical History", url: "#" },
-        { title: "Dental Records", url: "#" },
+        { title: "Search Patients", url: "/patients", icon: Bot },
+        { title: "Medical History", url: "/medical-history", icon: BookOpen },
+        { title: "Dental Records", url: "#", icon: Frame },
       ],
     },
     {
@@ -63,9 +63,9 @@ const data = {
       url: "#",
       icon: FileText,
       items: [
-        { title: "Consultation Records", url: "#" },
-        { title: "Incident Reports", url: "#" },
-        { title: "Medical & Dental Exams", url: "#" },
+        { title: "Consultation Records", url: "#", icon: Command },
+        { title: "Incident Reports", url: "#", icon: PieChart },
+        { title: "Medical & Dental Exams", url: "#", icon: Map },
       ],
     },
     {
@@ -73,9 +73,9 @@ const data = {
       url: "#",
       icon: BarChart,
       items: [
-        { title: "Monthly Reports", url: "#" },
-        { title: "Activity Logs", url: "#" },
-        { title: "Clinic Staff", url: "/clinic-staff" },
+        { title: "Monthly Reports", url: "#", icon: AudioWaveform },
+        { title: "Activity Logs", url: "#", icon: Settings2 },
+        { title: "Clinic Staff", url: "/clinic-staff", icon: SquareTerminal },
       ],
     },
   ],

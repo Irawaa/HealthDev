@@ -10,8 +10,8 @@ import {
 } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { GraduationCap, Briefcase, Users } from "lucide-react";
-import AddStudentDialog from "@/components/StudentPatients/add-student-dialog";
-import AddEmployeeDialog from "./EmployeePatients/add-employee-dialog";
+// import AddStudentDialog from "@/components/StudentPatients/add-student-dialog";
+// import AddEmployeeDialog from "./EmployeePatients/add-employee-dialog";
 
 export default function PatientRoleDialog({ open, onClose, colleges, onSelect }) {
     const [internalOpen, setInternalOpen] = useState(false);
@@ -27,16 +27,16 @@ export default function PatientRoleDialog({ open, onClose, colleges, onSelect })
         onSelect?.(role);
 
         // Directly set the dialog based on the role
-        if (role === "student") {
-            setShowDialog("student");
-        }
+        // if (role === "student") {
+        //     setShowDialog("student");
+        // }
 
-        if (role === "employee") {
-            setTimeout(() => {
-                setShowDialog("employee");
-                setIsTransitioning(false);
-            }, 300); // Smooth delay transition for next dialog
-        }
+        // if (role === "employee") {
+        //     setTimeout(() => {
+        //         setShowDialog("employee");
+        //         setIsTransitioning(false);
+        //     }, 300); // Smooth delay transition for next dialog
+        // }
 
         // Close PatientRoleDialog after a short delay
         setTimeout(() => {
@@ -78,8 +78,8 @@ export default function PatientRoleDialog({ open, onClose, colleges, onSelect })
                     </DialogHeader>
 
                     {/* ✅ Responsive Grid for Role Selection */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-                        {/* 🎓 Student Card */}
+                    <div className="grid grid-cols-2 md:grid-cols-1 gap-4 mt-6">
+                        {/* 🎓 Student Card
                         <Card
                             className="cursor-pointer bg-green-50 hover:bg-green-200 shadow-md transition-transform transform hover:scale-105 border border-green-500"
                             onClick={() => handleSelect("student")}
@@ -88,10 +88,10 @@ export default function PatientRoleDialog({ open, onClose, colleges, onSelect })
                                 <GraduationCap className="text-green-700 w-12 h-12" />
                                 <span className="text-base font-semibold text-green-700">Student</span>
                             </CardContent>
-                        </Card>
+                        </Card> */}
 
                         {/* 👔 Personnel Card */}
-                        <Card
+                        {/* <Card
                             className="cursor-pointer bg-green-50 hover:bg-green-200 shadow-md transition-transform transform hover:scale-105 border border-green-500"
                             onClick={() => handleSelect("employee")}
                         >
@@ -99,7 +99,7 @@ export default function PatientRoleDialog({ open, onClose, colleges, onSelect })
                                 <Briefcase className="text-green-700 w-12 h-12" />
                                 <span className="text-base font-semibold text-green-700">Personnel</span>
                             </CardContent>
-                        </Card>
+                        </Card> */}
 
                         {/* 🏢 Non-Personnel Card */}
                         <Card
@@ -113,7 +113,7 @@ export default function PatientRoleDialog({ open, onClose, colleges, onSelect })
                         </Card>
 
                         {/* 📂 Old Records Card */}
-                        <Card
+                        {/* <Card
                             className="cursor-pointer bg-green-50 hover:bg-green-200 shadow-md transition-transform transform hover:scale-105 border border-green-500"
                             onClick={() => handleSelect("old_records")}
                         >
@@ -121,7 +121,7 @@ export default function PatientRoleDialog({ open, onClose, colleges, onSelect })
                                 <Users className="text-green-700 w-12 h-12" />
                                 <span className="text-base font-semibold text-green-700">Old Records</span>
                             </CardContent>
-                        </Card>
+                        </Card> */}
                     </div>
                 </DialogContent>
             </Dialog>

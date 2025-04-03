@@ -309,10 +309,10 @@ const Index = () => {
                 {/* {selectedPatient && <PatientProfile patient={selectedPatient} onClose={() => setSelectedPatient(null)} colleges={colleges} departments={departments} />} */}
 
                 {/* Add Student Dialog */}
-                <AddStudentDialog key={`add-student-${openStudent}`} open={openStudent} onClose={handleCloseDialog} colleges={colleges} />
+                {/* <AddStudentDialog key={`add-student-${openStudent}`} open={openStudent} onClose={handleCloseDialog} colleges={colleges} /> */}
 
                 {/* Add Employee Dialog */}
-                <AddEmployeeDialog key={`add-employee-${openEmployee}`} open={openEmployee} onClose={handleCloseDialog} colleges={colleges} />
+                {/* <AddEmployeeDialog key={`add-employee-${openEmployee}`} open={openEmployee} onClose={handleCloseDialog} colleges={colleges} /> */}
 
                 {/* Add Non-Personnel Dialog */}
                 <AddNonPersonnelDialog open={openNonPersonnel} onClose={handleCloseDialog} />

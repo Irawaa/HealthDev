@@ -19,6 +19,8 @@ use App\Http\Controllers\DentalCertificateController;
 use App\Http\Controllers\GeneralReferralController;
 use App\Http\Controllers\LaboratoryExamReferralController;
 
+use App\Http\Controllers\MedicalHistoryController;
+
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -52,6 +54,8 @@ Route::middleware(['web', 'auth'])->group(function () {
     })->name('dashboard');
 
     Route::get('/medical', [MedicalRecordController::class, 'index'])->name('medical');
+
+    Route::get('/medical-history', [MedicalHistoryController::class, 'showMedicalHistory'])->name('medical-history.index');
 
     // --- Patients --- //
     Route::get('/patients', [PatientController::class, 'index'])->name('patients.index');
