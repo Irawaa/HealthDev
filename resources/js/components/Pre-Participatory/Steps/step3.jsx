@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { usePhysicianStaff } from "@/Pages/Patients/ProfilePage"; // Import context
 
@@ -17,6 +17,21 @@ const Step3 = ({ formData, setFormData }) => {
     const toggleSection = () => {
         setExpandedSections((prev) => ({ ...prev, PhysicalExam: !prev.PhysicalExam }));
     };
+
+    useEffect(() => {
+        if (formData.school_physician_id && physicianStaff.length > 0) {
+            console.log("Real", formData.school_physician_id);
+            const existingPhysician = physicianStaff.find(
+                (physician) => physician.staff_id == formData.school_physician_id
+            );
+            if (!existingPhysician) {
+                setFormData((prev) => ({
+                    ...prev,
+                    school_physician_id: "", // Reset if invalid ID
+                }));
+            }
+        }
+    }, [formData.school_physician_id, physicianStaff]);
 
     // ✅ Handle updates for physical examinations (Fixed Overwriting Issue)
     const handleExamChange = (part, field, value) => {
@@ -220,30 +235,24 @@ const Step3 = ({ formData, setFormData }) => {
                 <label className="font-bold text-green-700">
                     School Physician: <span className="text-red-500">*</span>
                 </label>
-                <Select
-                    value={formData.school_physician_id || ""}
-                    onValueChange={(value) => handleFinalEvalChange("school_physician_id", value)}
-                    required
-                    className="mt-2"
-                >
-                    <SelectTrigger className="w-full border border-green-500 bg-white p-2 rounded-md focus:ring-2 focus:ring-green-600 transition">
-                        <SelectValue>
-                            {physicianStaff.find((physician) => physician.staff_id == formData.school_physician_id)
-                                ? `${physicianStaff.find((physician) => physician.staff_id == formData.school_physician_id)?.lname}, 
-                       ${physicianStaff.find((physician) => physician.staff_id == formData.school_physician_id)?.fname} 
-                       ${physicianStaff.find((physician) => physician.staff_id == formData.school_physician_id)?.mname || ""} 
-                       (Lic: ${physicianStaff.find((physician) => physician.staff_id == formData.school_physician_id)?.license_no})`
-                                : "Select School Physician"}
-                        </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
+                <div className="mt-2">
+                    <select
+                        name="school_physician_id"
+                        value={formData.school_physician_id || ""}
+                        onChange={(e) => handleFinalEvalChange("school_physician_id", e.target.value)}
+                        required
+                        className="w-full border border-green-500 bg-white p-2 rounded-md focus:ring-2 focus:ring-green-600 transition"
+                    >
                         {physicianStaff.map((physician) => (
-                            <SelectItem key={physician.staff_id} value={physician.staff_id}>
+                            <option
+                                key={physician.staff_id}
+                                value={String(physician.staff_id)}
+                            >
                                 {physician.lname}, {physician.fname} {physician.mname || ""} (Lic: {physician.license_no})
-                            </SelectItem>
+                            </option>
                         ))}
-                    </SelectContent>
-                </Select>
+                    </select>
+                </div>
             </div>
         </div>
     );

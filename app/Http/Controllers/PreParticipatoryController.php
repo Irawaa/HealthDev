@@ -174,6 +174,151 @@ class PreParticipatoryController extends Controller
             return back()->withErrors('Failed to create pre-participatory record. Please try again.');
         }
     }
+    
+    /**
+     * Update the specified resource from storage.
+     */
+
+    public function update(Request $request, $id)
+    {
+        Log::info('Update request received', ['pre_participatory_id' => $id, 'request' => $request->all()]);
+
+        // Find the Pre-Participatory record
+        $preParticipatory = PreParticipatory::findOrFail($id);
+
+        // Get the authenticated clinic staff (nurse or physician)
+        $clinicStaffId = Auth::user()->clinicStaff->staff_id ?? null;
+        if (!$clinicStaffId) {
+            Log::warning('Unauthorized clinic staff attempt.');
+            return back()->withErrors('You are not authorized to update this pre-participatory record.');
+        }
+
+        try {
+            // Validate the incoming request
+            $validated = $request->validate([
+                'final_evaluation' => 'nullable|integer|between:0,2', // 0: Fit, 1: Evaluation Needed, 2: Not Cleared
+                'further_evaluation' => 'nullable|string|max:255',
+                'not_cleared_for' => 'nullable|in:All sports,Certain sports,Activity',
+                'activity_specification' => 'nullable|string|max:255',
+
+                // Vital Signs Validation
+                'bp' => 'required|string|max:10',
+                'rr' => 'required|integer|min:0',
+                'hr' => 'required|integer|min:0',
+                'temperature' => 'required|numeric|min:30|max:45',
+                'weight' => 'required|numeric|min:1|max:300',
+                'height' => 'required|integer|min:50|max:500',
+
+                // Past Medical History Validation
+                'past_medical_histories' => 'array',
+                'past_medical_histories.*' => 'string',
+                'other_condition' => 'nullable|string',
+
+                // Interview Responses Validation
+                'interview_questions' => 'array',
+                'interview_questions.*.response' => 'required|in:Yes,No',
+                'interview_questions.*.remarks' => 'nullable|string|max:255',
+                'interview_questions.*.question_id' => 'required|exists:pre_participatory_questions,id',
+
+                // Physical Examination Validation
+                'physical_examinations' => 'array',
+                'physical_examinations.*.name' => 'required|string|exists:physical_examinations,name',
+                'physical_examinations.*.result' => 'nullable|in:Normal,Abnormal',
+                'physical_examinations.*.remarks' => 'nullable|string',
+            ]);
+
+            Log::info('Validation passed', ['validated' => $validated]);
+
+            // Update the Pre-Participatory record
+            $preParticipatory->update([
+                'final_evaluation' => $validated['final_evaluation'] ?? $preParticipatory->final_evaluation,
+                'further_evaluation' => $validated['further_evaluation'] ?? $preParticipatory->further_evaluation,
+                'not_cleared_for' => $validated['not_cleared_for'] ?? $preParticipatory->not_cleared_for,
+                'activity_specification' => $validated['activity_specification'] ?? $preParticipatory->activity_specification,
+                'school_physician_id' => $validated['school_physician_id'] ?? $preParticipatory->school_physician_id,
+            ]);
+
+            Log::info('Pre-Participatory record updated', ['pre_participatory' => $preParticipatory]);
+
+            // Update Vital Signs
+            $preParticipatory->vitalSigns()->update([
+                'bp' => $validated['bp'],
+                'rr' => $validated['rr'],
+                'hr' => $validated['hr'],
+                'temperature' => $validated['temperature'],
+                'weight' => $validated['weight'],
+                'height' => $validated['height'],
+            ]);
+
+            Log::info('Vital signs successfully updated', ['vital_signs' => $validated]);
+
+            // Handle Past Medical Histories
+            if (!empty($validated['past_medical_histories'])) {
+                Log::info('Updating Past Medical Histories', ['past_medical_histories' => $validated['past_medical_histories']]);
+
+                $pastMedicalHistories = PastMedicalHistory::whereIn('condition_name', $validated['past_medical_histories'])->get();
+                $pastHistorySyncData = [];
+                foreach ($pastMedicalHistories as $history) {
+                    $pastHistorySyncData[$history->id] = ['custom_condition' => null];
+                }
+
+                if (!empty($validated['other_condition'])) {
+                    $customHistory = PastMedicalHistory::firstOrCreate(['condition_name' => 'Others']);
+                    $pastHistorySyncData[$customHistory->id] = ['custom_condition' => $validated['other_condition']];
+                }
+
+                $preParticipatory->pastMedicalHistories()->sync($pastHistorySyncData);
+
+                Log::info('Past Medical Histories updated for Pre-Participatory record');
+            }
+
+            // Update Interview Responses
+            if (!empty($validated['interview_questions'])) {
+                Log::info('Updating Interview Responses', ['interview_questions' => $validated['interview_questions']]);
+
+                foreach ($validated['interview_questions'] as $interviewData) {
+                    PreParticipatoryInterview::updateOrCreate(
+                        [
+                            'pre_participatory_id' => $preParticipatory->id,
+                            'question_id' => $interviewData['question_id']
+                        ],
+                        [
+                            'response' => $interviewData['response'],
+                            'remarks' => $interviewData['remarks'] ?? null
+                        ]
+                    );
+                }
+
+                Log::info('Interview responses successfully updated.');
+            }
+
+            // Update Physical Examinations
+            if (!empty($validated['physical_examinations'])) {
+                Log::info('Updating Physical Examinations', ['physical_examinations' => $validated['physical_examinations']]);
+
+                $syncData = [];
+                foreach ($validated['physical_examinations'] as $exam) {
+                    $physicalExam = PhysicalExamination::where('name', $exam['name'])->first();
+
+                    if ($physicalExam) {
+                        $syncData[$physicalExam->id] = [
+                            'result' => $exam['result'] ?? 'Normal',
+                            'remarks' => $exam['remarks'] ?? null,
+                        ];
+                    }
+                }
+
+                $preParticipatory->physicalExaminations()->sync($syncData);
+
+                Log::info('Physical examinations updated.');
+            }
+
+            return redirect()->back()->with('success', 'Pre-Participatory record updated successfully.');
+        } catch (\Exception $e) {
+            Log::error('Error updating Pre-Participatory record', ['message' => $e->getMessage()]);
+            return back()->withErrors('Failed to update pre-participatory record. Please try again.');
+        }
+    }
 
     /**
      * Remove the specified resource from storage.

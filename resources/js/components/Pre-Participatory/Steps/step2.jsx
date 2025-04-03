@@ -7,7 +7,8 @@ const Step2 = ({ formData, setFormData }) => {
 
   // Ensure all interview questions exist in formData
   useEffect(() => {
-    if (!formData.interview_questions || formData.interview_questions.length === 0) {
+    // Check if interviewQuestions is loaded and formData doesn't have interview_questions set
+    if (interviewQuestions && interviewQuestions.length > 0 && (!formData.interview_questions || formData.interview_questions.length === 0)) {
       setFormData((prevFormData) => ({
         ...prevFormData,
         interview_questions: interviewQuestions.map((q) => ({
@@ -17,7 +18,7 @@ const Step2 = ({ formData, setFormData }) => {
         })),
       }));
     }
-  }, [interviewQuestions, setFormData]); // Ensure it updates when `setFormData` is triggered  
+  }, [interviewQuestions, formData, setFormData]); // Ensure it updates when `interviewQuestions` or `formData` changes
 
   const handleChange = (questionId, value) => {
     const updatedAnswers = formData.interview_questions.map((answer) =>
@@ -34,6 +35,11 @@ const Step2 = ({ formData, setFormData }) => {
 
     setFormData({ ...formData, interview_questions: updatedAnswers });
   };
+
+  // Conditional rendering to avoid errors when interviewQuestions is not available
+  if (!interviewQuestions || interviewQuestions.length === 0) {
+    return <div>Loading interview questions...</div>; // Or any other loading indicator
+  }
 
   return (
     <div className="p-4">

@@ -15,7 +15,7 @@ const medicalHistoryOptions = [
   { name: "Others", label: "Others" },
 ];
 
-const Step1 = ({ formData, setFormData }) => {
+const Step1 = ({ formData, setFormData, errors }) => {
   const [bpWarning, setBpWarning] = useState("");
   const [bpSeverity, setBpSeverity] = useState("");
   const [showOtherInput, setShowOtherInput] = useState(false);
@@ -78,10 +78,27 @@ const Step1 = ({ formData, setFormData }) => {
 
     setFormData({ ...formData, past_medical_histories: updatedHistory });
 
+    // If "Others" is deselected, reset 'other_condition'
+    if (option === "Others" && !updatedHistory.includes("Others")) {
+      setFormData((prevData) => ({
+        ...prevData,
+        other_condition: "", // Reset the 'Other Condition' input if 'Others' is unchecked
+      }));
+    }
+
+    // Toggle visibility of "Other Condition" input field based on "Others" checkbox
     if (option === "Others") {
       setShowOtherInput(!showOtherInput);
     }
   };
+
+  useEffect(() => {
+    if (formData.past_medical_histories.includes("Others")) {
+      setShowOtherInput(true);
+    } else {
+      setShowOtherInput(false);
+    }
+  }, [formData.past_medical_histories]);
 
   return (
     <div className="space-y-6 p-4">
@@ -89,7 +106,7 @@ const Step1 = ({ formData, setFormData }) => {
 
       {/* Patient Vitals */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {[ 
+        {[
           { key: "weight", label: "Weight (kg)" },
           { key: "height", label: "Height (cm)" },
           { key: "bp", label: "Blood Pressure (BP)", bp: true },

@@ -23,6 +23,7 @@ const PreParticipatoryModal = ({ activeTab, patient }) => {
 
   const handleCreate = (newEvaluation) => {
     setEvaluations([...evaluations, { ...newEvaluation, id: Date.now() }]);
+    setSelectedEvaluation(null);
     setShowForm(false);
   };
 
@@ -34,6 +35,14 @@ const PreParticipatoryModal = ({ activeTab, patient }) => {
     setSelectedEvaluation(evaluation);
   };
 
+  // Handle edit evaluation
+  const handleEditClick = (evaluation) => {
+    // Set the evaluation to edit
+    setSelectedEvaluation(evaluation);
+    setShowForm(true); // Show the form for editing
+    console.log(evaluation);
+  };
+
   return (
     <div className="p-4 bg-green-50 rounded-lg shadow-md">
       <h2 className="text-xl font-semibold text-green-800">Pre-Participatory Medical Evaluations</h2>
@@ -41,39 +50,26 @@ const PreParticipatoryModal = ({ activeTab, patient }) => {
       {/* Create Evaluation Button */}
       <Button
         className="mt-4 bg-blue-600 text-white px-4 py-2 rounded shadow-md hover:bg-blue-700 transition"
-        onClick={() => setShowForm(true)}
+        onClick={() => {
+          // When creating a new evaluation, reset selectedEvaluation
+          setSelectedEvaluation(null);
+          setShowForm(true);
+        }}
       >
         Create New Evaluation
       </Button>
 
       {/* Show Form Component When Needed */}
-      {showForm && <PreParticipatoryForm open={showForm} setOpen={setShowForm} onSave={handleCreate} patient={patient} />}
+      {showForm && <PreParticipatoryForm open={showForm} setOpen={setShowForm} onSave={handleCreate} patient={patient} selectedEvaluation={selectedEvaluation} />}
 
       {/* List of Evaluations */}
-      <PreParticipatoryList evaluations={evaluations} onDelete={handleDelete} onSelect={handleSelectEvaluation} patient={patient} />
-
-      {/* View Evaluation Modal */}
-      {selectedEvaluation && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center p-4">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-            <h2 className="text-green-700 font-bold text-lg mb-4">Evaluation Details</h2>
-            <p className="text-gray-800">
-              <strong>Participant:</strong> {selectedEvaluation.participant}
-            </p>
-            <p className="text-gray-800">
-              <strong>Sport:</strong> {selectedEvaluation.sport}
-            </p>
-            <p className="text-gray-800">
-              <strong>Status:</strong> {selectedEvaluation.status || "Pending"}
-            </p>
-            <div className="flex justify-end mt-4">
-              <Button className="bg-gray-500 text-white px-4 py-2 rounded" onClick={() => setSelectedEvaluation(null)}>
-                Close
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <PreParticipatoryList
+        evaluations={evaluations}
+        onDelete={handleDelete}
+        onSelect={handleSelectEvaluation}
+        patient={patient}
+        onEdit={handleEditClick}
+      />
     </div>
   );
 };

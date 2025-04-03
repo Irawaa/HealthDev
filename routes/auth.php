@@ -112,6 +112,7 @@ Route::middleware(['web', 'auth'])->group(function () {
 
     // Pre-Participatory Form //
     Route::post('/pre-participatory', [PreParticipatoryController::class, 'store'])->name('pre-participatory.store');
+    Route::put('/pre-participatory/{id}', [PreParticipatoryController::class, 'update'])->name('pre-participatory.update');
     Route::delete('/pre-participatory/{id}', [PreParticipatoryController::class, 'destroy'])->name('pre-participatory.destroy');
 
     // Medical Certificates //

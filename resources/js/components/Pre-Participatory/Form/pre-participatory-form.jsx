@@ -1,19 +1,20 @@
 import { useState, useEffect } from "react";
-import { useForm } from "@inertiajs/react";
+import { useForm, router } from "@inertiajs/react";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-hot-toast";
 import Step1 from "../Steps/Step1";
 import Step2 from "../Steps/Step2";
 import Step3 from "../Steps/Step3";
 
-const PreParticipatoryForm = ({ open, setOpen, onSave, existingData = null, patient, interviewQuestions }) => {
+const PreParticipatoryForm = ({ open, setOpen, onSave, selectedEvaluation, patient, interviewQuestions }) => {
   const [step, setStep] = useState(1);
   const totalSteps = 3;
+  console.log(selectedEvaluation);
 
   // Initialize form with default values
-  const { data, setData, post, processing, reset } = useForm({
+  const { data, setData, put, post, processing, reset } = useForm({
     patient_id: patient?.patient_id || "",
-    school_physician_id: 1, // Required
+    school_physician_id: "",
 
     // New Fields: Final Evaluation, Further Evaluation, etc.
     final_evaluation: "", // 0: Fit, 1: Evaluation Needed, 2: Not Cleared
@@ -56,10 +57,51 @@ const PreParticipatoryForm = ({ open, setOpen, onSave, existingData = null, pati
 
   // Load existing data if provided
   useEffect(() => {
-    if (existingData) {
-      setData(existingData);
+    if (selectedEvaluation) {
+      const record = selectedEvaluation; // Get the first record
+
+      console.log("Loading school_physician_id:", record.school_physician_id);
+
+      setData({
+        // ✅ Patient & Physician
+        patient_id: record.patient_id || "",
+        school_physician_id: record.school_physician_id || "",
+
+        // ✅ Final Evaluation Fields
+        final_evaluation: String(record.final_evaluation ?? "0"),
+        further_evaluation: record.further_evaluation ?? "",
+        not_cleared_for: record.not_cleared_for ?? "",
+        activity_specification: record.activity_specification ?? "",
+
+        // ✅ Vital Signs
+        bp: record.vital_signs?.bp || "",
+        rr: record.vital_signs?.rr || "",
+        hr: record.vital_signs?.hr || "",
+        temperature: record.vital_signs?.temperature || "",
+        weight: record.vital_signs?.weight || "",
+        height: record.vital_signs?.height || "",
+
+        // ✅ Past Medical Histories
+        past_medical_histories: record.past_medical_histories?.map((history) => history.condition_name) || [],
+        other_condition: record.past_medical_histories?.find(history => history.condition_name === "Others")?.pivot?.custom_condition || "",
+
+        // ✅ Physical Examinations
+        physical_examinations: record.physical_examinations?.map((exam) => ({
+          id: exam.id,
+          name: exam.name,
+          result: exam.pivot?.result ?? "Normal",
+          remarks: exam.pivot?.remarks ?? "",
+        })) || [],
+
+        // ✅ Interview Answers
+        interview_questions: record.interview?.map((answer) => ({
+          question_id: answer.question_id,
+          response: answer.response,
+          remarks: answer.remarks,
+        })) || [],
+      });
     }
-  }, [existingData]);
+  }, [selectedEvaluation]);
 
   // Validate each step before proceeding
   const validateStep = () => {
@@ -111,40 +153,62 @@ const PreParticipatoryForm = ({ open, setOpen, onSave, existingData = null, pati
 
   // Handle Form Submission
   const handleSave = () => {
-    if (!validateStep()) return;
+    if (!validateStep()) return; // Step validation before saving
 
-    // Format the interviewAnswers data before submission
-    const interviewData = data.interview_questions.map((answer) => ({
-      question_id: answer.question_id,
-      response: answer.response,
-      remarks: answer.remarks,
+    // Ensure interview_questions exists before mapping
+    const interviewData = (data.interview_questions || []).map((answer) => ({
+      question_id: answer?.question_id,
+      response: answer?.response,
+      remarks: answer?.remarks,
     }));
 
-    // Submit data
-    post(route("pre-participatory.store"), {
-      data: {
-        ...data,
-        interview_questions: interviewData,
-      },
-      onSuccess: () => {
-        toast.success("Form saved successfully!");
-        setOpen(false);
-      },
-      onError: () => {
-        toast.error("Failed to save the form. Please try again.");
-      },
-    });
+    // Determine whether to create or update based on selectedEvaluation
+    const isUpdating = !!selectedEvaluation;
+
+    // Data payload to send in the request
+    const payload = {
+      ...data,
+      interview_questions: interviewData, // Make sure interview data is included
+    };
+
+    // If updating, use `put`, otherwise `post`
+    if (isUpdating) {
+      // Perform update (PUT)
+      put(route("pre-participatory.update", { id: selectedEvaluation.id }), {
+        data: payload,
+        onSuccess: () => {
+          toast.success("Form updated successfully!");
+          setOpen(false);
+        },
+        onError: () => {
+          toast.error("Failed to update the form. Please try again.");
+        },
+      });
+    } else {
+      // Perform create (POST)
+      post(route("pre-participatory.store"), {
+        data: payload,
+        onSuccess: () => {
+          toast.success("Form saved successfully!");
+          setOpen(false);
+        },
+        onError: () => {
+          toast.error("Failed to save the form. Please try again.");
+        },
+      });
+    }
   };
 
   // Prevent rendering if modal is closed
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center p-4">
-      <div className="bg-white p-6 rounded-lg shadow-lg border border-green-500 w-full max-w-3xl h-[85vh] flex flex-col">
-        {/* Step Indicator */}
-        <div className="text-center mb-4">
-          <h2 className="text-green-700 font-bold text-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="bg-white w-full max-w-3xl h-[85vh] p-6 rounded-lg shadow-lg flex flex-col overflow-y-auto">
+
+        {/* Modal Header */}
+        <div className="flex justify-between items-center border-b pb-4">
+          <h2 className="text-lg font-semibold text-green-700">
             Step {step} of {totalSteps}
           </h2>
         </div>
