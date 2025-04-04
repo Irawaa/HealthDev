@@ -155,7 +155,7 @@ class DentalCertificateController extends Controller
             return back()->withErrors('Failed to delete dental certificate. Please try again.');
         }
     }
-        /**
+    /**
      * Generate and return the PDF for a Dental Certificate.
      */
     public function viewPDF($id)
@@ -169,12 +169,35 @@ class DentalCertificateController extends Controller
             'patient' => function ($query) {
                 $query->with([
                     'student' => function ($q) {
-                        $q->select('patient_id', 'stud_id', 'address_house', 'address_brgy', 'address_citytown', 'address_province', 'address_zipcode', 'emergency_contact_name', 'emergency_contact_no', 'guardian_relation', 'program_id', 'college_id')
-                            ->with(['program', 'college']);
+                        $q->select(
+                            'patient_id',
+                            'stud_id',
+                            'address_house',
+                            'address_brgy',
+                            'address_citytown',
+                            'address_province',
+                            'address_zipcode',
+                            'emergency_contact_name',
+                            'emergency_contact_no',
+                            'guardian_relation',
+                            'program_id',
+                            'college_id'
+                        )->with(['program', 'college']);
                     },
                     'personnel' => function ($q) {
-                        $q->select('patient_id', 'employee_id', 'res_brgy', 'res_city', 'res_prov', 'res_region', 'res_zipcode', 'dept_id', 'college_id')
-                            ->with(['department', 'college']);
+                        $q->select(
+                            'patient_id',
+                            'employee_id',
+                            'res_brgy',
+                            'res_city',
+                            'res_prov',
+                            'res_region',
+                            'res_zipcode',
+                            'dept_id',
+                            'college_id',
+                            'emergency_contact_person',
+                            'emergency_contact_number',
+                        )->with(['department', 'college']);
                     },
                     'nonpersonnel' => function ($q) {
                         $q->select('patient_id', 'affiliation');
@@ -183,6 +206,9 @@ class DentalCertificateController extends Controller
             },
             'recordedBy',
             'schoolDentist' => function ($query) {
+                $query->select('staff_id', 'fname', 'lname', 'role', 'ext', 'license_no', 'ptr_no', 'email', 'contact_no');
+            },
+            'schoolNurse' => function ($query) {
                 $query->select('staff_id', 'fname', 'lname', 'role', 'ext', 'license_no', 'ptr_no', 'email', 'contact_no');
             }
         ])->findOrFail($id);
@@ -208,29 +234,40 @@ class DentalCertificateController extends Controller
 
         Log::info("🦷 School Dentist Data", ['school_dentist' => $schoolDentist]);
 
+        // ✅ Extract school nurse details
+        $schoolNurse = $dentalCertificate->schoolNurse ? [
+            'name' => "{$dentalCertificate->schoolNurse->fname} {$dentalCertificate->schoolNurse->lname}",
+            'ext' => $dentalCertificate->schoolNurse->ext,
+            'role' => $dentalCertificate->schoolNurse->role,
+            'license_no' => $dentalCertificate->schoolNurse->license_no,
+            'ptr_no' => $dentalCertificate->schoolNurse->ptr_no,
+            'email' => $dentalCertificate->schoolNurse->email,
+            'contact_no' => $dentalCertificate->schoolNurse->contact_no
+        ] : [];
+
+        Log::info("👩‍⚕️ School Nurse Data", ['school_nurse' => $schoolNurse]);
+
         // ✅ Log before passing data to the service
         Log::info("📄 Passing data to generate Dental Certificate PDF", ['dental_certificate_id' => $id]);
 
         return DentalCertificateDocxService::generatePDF(
-            $dentalCertificate->toArray(),
-            $schoolDentist,
-            "Dental_Certificate_{$id}.pdf"
+            data: $dentalCertificate->toArray(),
+            schoolDentist: $schoolDentist,
+            schoolNurse: $schoolNurse,
         );
     }
 
     /**
      * Preview the generated PDF.
      */
-    // public function preview($id)
-    // {
-    //     try {
-    //         $dentalCertificate = DentalCertificate::findOrFail($id);
-    //         return DentalCertificateDocxService::previewPDF($dentalCertificate);
-    //     } catch (\Exception $e) {
-    //         Log::error("❌ Error previewing Dental Certificate PDF: " . $e->getMessage());
-    //         return back()->withErrors('Failed to preview dental certificate.');
-    //     }
-    // }
+    public function preview($id)
+    {
+        try {
+            $dentalCertificate = DentalCertificate::findOrFail($id);
+            return DentalCertificateDocxService::previewPDF($dentalCertificate);
+        } catch (\Exception $e) {
+            Log::error("❌ Error previewing Dental Certificate PDF: " . $e->getMessage());
+            return back()->withErrors('Failed to preview dental certificate.');
+        }
+    }
 }
-
-

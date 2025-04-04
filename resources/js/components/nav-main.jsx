@@ -32,7 +32,7 @@ export function NavMain({ items }) {
             className="group/collapsible"
           >
             <SidebarMenuItem>
-              <Link href={item.url}>
+              {/* <Link href={item.url}> */}
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton tooltip={item.title} className="flex items-center justify-between w-full">
                     {item.icon && <item.icon />}
@@ -40,7 +40,7 @@ export function NavMain({ items }) {
                     <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
-              </Link>
+              {/* </Link> */}
 
               <CollapsibleContent>
                 <SidebarMenuSub>

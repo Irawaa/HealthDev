@@ -130,6 +130,8 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/dental-certificates', [DentalCertificateController::class, 'store'])->name('dental-certificates.store');
     Route::put('/dental-certificates/{id}', [DentalCertificateController::class, 'update'])->name('dental-certificates.update');
     Route::delete('/dental-certificates/{id}', [DentalCertificateController::class, 'destroy'])->name('dental-certificates.destroy');
+    Route::get('/dental-certificates/{id}/pdf', [DentalCertificateController::class, 'viewPDF'])->name('dental-certificates.pdf');
+    Route::get('/dental-certificates/preview/{id}', [DentalCertificateController::class, 'preview'])->name('dental-certificates.preview');
 
     // General Referrals //
     Route::post('/general-referrals', [GeneralReferralController::class, 'store'])->name('general-referrals.store');

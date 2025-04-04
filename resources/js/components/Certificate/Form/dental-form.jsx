@@ -123,10 +123,10 @@ const DentalForm = ({ setOpen, patient, certificate = null }) => {
                     <SelectTrigger className="w-full border border-green-400 p-2 rounded-md bg-white text-green-800 hover:bg-green-100">
                         <SelectValue>
                             {data.school_dentist_id
-                                ? `${certificate?.school_dentist?.lname || ''}, 
-                   ${certificate?.school_dentist?.fname || ''} 
-                   ${certificate?.school_dentist?.mname || ''} 
-                   (Lic: ${certificate?.school_dentist?.license_no || ''})`
+                                ? `${dentistStaff.find(dentist => dentist.staff_id.toString() === data.school_dentist_id)?.lname || ''}, 
+           ${dentistStaff.find(dentist => dentist.staff_id.toString() === data.school_dentist_id)?.fname || ''} 
+           ${dentistStaff.find(dentist => dentist.staff_id.toString() === data.school_dentist_id)?.mname || ''} 
+           (Lic: ${dentistStaff.find(dentist => dentist.staff_id.toString() === data.school_dentist_id)?.license_no || ''})`
                                 : "Select School Dentist"}
                         </SelectValue>
                     </SelectTrigger>

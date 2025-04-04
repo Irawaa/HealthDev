@@ -5,6 +5,7 @@ import { router } from "@inertiajs/react";
 import { toast } from "react-hot-toast";
 import ConfirmationModal from "@/components/confirmation-modal";
 import CertificateForm from "@/components/Certificate/Form/certificate-form"; // ✅ Import the CertificateForm
+import PdfModal from "@/components/react-pdf";
 
 const CertificateList = ({ patient }) => {
     const [filterType, setFilterType] = useState("medical");
@@ -14,6 +15,7 @@ const CertificateList = ({ patient }) => {
     const [selectedCertId, setSelectedCertId] = useState(null);
     const [editMode, setEditMode] = useState(false);
     const [editingCertificate, setEditingCertificate] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
 
     const filteredCertificates =
         filterType === "medical"
@@ -25,7 +27,7 @@ const CertificateList = ({ patient }) => {
     };
 
     const onView = (id) => {
-        window.open(`/${filterType}-certificates/${id}/pdf`, "_blank");
+        setPreviewUrl(`/${filterType}-certificates/${id}/pdf`);  // Set the URL for the PDF
     };
 
     const onPreview = (id) => {
@@ -116,14 +118,14 @@ const CertificateList = ({ patient }) => {
                                         <>
                                             <p><strong>Diagnosis:</strong> {cert.diagnosis}</p>
                                             <p><strong>Purpose:</strong> {cert.purpose}</p>
-                                            <p><strong>Recommendation:</strong> 
+                                            <p><strong>Recommendation:</strong>
                                                 {["Return to Class", "Sent Home", "Hospitalized"][cert.recommendation]}
                                             </p>
                                             <p><strong>Physician:</strong> {cert.school_physician?.fname} {cert.school_physician?.lname}</p>
                                         </>
                                     ) : (
                                         <>
-                                            <p><strong>Procedures:</strong> 
+                                            <p><strong>Procedures:</strong>
                                                 {["Mouth Examination", "Gum Treatment", "Oral Prophylaxis", "Extraction"]
                                                     .filter((_, i) => cert[Object.keys(cert)[i + 2]])
                                                     .join(", ")}
@@ -171,6 +173,12 @@ const CertificateList = ({ patient }) => {
             ) : (
                 <p className="text-green-600 text-center mt-4">No certificates available.</p>
             )}
+
+            <PdfModal
+                isOpen={previewUrl !== null}
+                onClose={() => setPreviewUrl(null)}
+                pdfUrl={previewUrl}
+            />
 
             {/* Edit Form Modal */}
             {editMode && (

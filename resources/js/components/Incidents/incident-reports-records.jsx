@@ -6,6 +6,7 @@ import EditIncidentForm from "./incident-reports-edit-form";
 import { router } from "@inertiajs/react";
 import ConfirmationModal from "../confirmation-modal";
 import { toast } from "react-hot-toast";
+import PdfModal from "../react-pdf";
 
 const IncidentRecords = ({ patient }) => {
     const [incidentRecords, setIncidentRecords] = useState([]);
@@ -14,7 +15,7 @@ const IncidentRecords = ({ patient }) => {
     const [editForm, setEditForm] = useState({ open: false, record: null });
     const [confirmOpen, setConfirmOpen] = useState(false);
     const [selectedIncidentId, setSelectedIncidentId] = useState(null);
-
+    const [previewUrl, setPreviewUrl] = useState(null);
 
     const handleEditClick = (record) => {
         setEditForm({ open: true, record });
@@ -39,7 +40,7 @@ const IncidentRecords = ({ patient }) => {
     };
 
     const onView = (id) => {
-        window.open(`/incident-reports/${id}/pdf`, "_blank");
+        setPreviewUrl(`/incident-reports/${id}/pdf`);
     };
 
     const onPreview = (id) => {
@@ -173,8 +174,14 @@ const IncidentRecords = ({ patient }) => {
 
                 ))
             ) : (
-              <p className="text-green-600 text-center">No incident reports found.</p>
+                <p className="text-green-600 text-center">No incident reports found.</p>
             )}
+
+            <PdfModal
+                isOpen={previewUrl !== null}
+                onClose={() => setPreviewUrl(null)}
+                pdfUrl={previewUrl}
+            />
 
             {editForm.open && (
                 <EditIncidentForm

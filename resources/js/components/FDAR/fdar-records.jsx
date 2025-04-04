@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Eye, Printer, Pencil, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import EditFDARModal from "./FDARSteps/edit-fdar-forms"; // ✅ Use the modal
+import PdfModal from "../react-pdf";
 
 const FDARRecords = ({ fdarForms, onEdit, onDelete }) => {
     const [expandedForms, setExpandedForms] = useState({});
@@ -17,7 +18,7 @@ const FDARRecords = ({ fdarForms, onEdit, onDelete }) => {
     };
 
     const onView = (id) => {
-        window.open(`/fdar/${id}/pdf`, "_blank");
+        setPreviewUrl(`/fdar/${id}/pdf`);  // Set the URL for the PDF
     };
 
     const onPreview = (id) => {
@@ -174,6 +175,12 @@ const FDARRecords = ({ fdarForms, onEdit, onDelete }) => {
             ) : (
                 <p className="text-green-700 text-center">No FDAR records found.</p>
             )}
+
+            <PdfModal
+                isOpen={previewUrl !== null}
+                onClose={() => setPreviewUrl(null)}
+                pdfUrl={previewUrl}
+            />
 
             {previewUrl && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">

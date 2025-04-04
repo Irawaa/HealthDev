@@ -8,6 +8,7 @@ import ConfirmationModal from "../confirmation-modal";
 import { router } from "@inertiajs/react";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
+import PdfModal from "../react-pdf";
 
 const BPModal = ({ patient }) => {
   const [openForm, setOpenForm] = useState(false);
@@ -19,6 +20,7 @@ const BPModal = ({ patient }) => {
   const [editingReading, setEditingReading] = useState(null); // Track the reading being edited
   const [pageLoading, setPageLoading] = useState(false);
   const [selectedBPId, setSelectedBPId] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   // ✅ Load BP Forms & Readings Nested
   useEffect(() => {
@@ -78,7 +80,7 @@ const BPModal = ({ patient }) => {
   };
 
   const onView = (id) => {
-    window.open(`/bp-forms/${id}/pdf`, "_blank");
+    setPreviewUrl(`/bp-forms/${id}/pdf`);
   };
 
   const onPreview = (id) => {
@@ -221,6 +223,12 @@ const BPModal = ({ patient }) => {
           <p className="text-green-700 text-center">No BP forms found.</p>
         )}
       </div>
+
+      <PdfModal
+        isOpen={previewUrl !== null}
+        onClose={() => setPreviewUrl(null)}
+        pdfUrl={previewUrl}
+      />
 
       <ConfirmationModal
         open={confirmOpen}

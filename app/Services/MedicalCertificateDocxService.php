@@ -17,6 +17,8 @@ class MedicalCertificateDocxService
             return $condition ? '☑' : '☐';
         };
 
+        Log::info('📋 Incoming Medical Certificate Data', ['medicalCertificate' => $medicalCertificate]);
+
         $templatePath = storage_path('app/templates/Medical_Certificate.docx');
         $storageDir = storage_path('app/generated');
 
@@ -68,7 +70,7 @@ class MedicalCertificateDocxService
         $currentMonth = now()->month;
 
         // Determine the semester based on the month
-        $semester = ($currentMonth >= 1 && $currentMonth <= 6) ? 1 : (($currentMonth >= 8 && $currentMonth <= 12) ? 2 : null);
+        $semester = ($currentMonth >= 1 && $currentMonth <= 6) ? '1st' : (($currentMonth >= 8 && $currentMonth <= 12) ? '2nd' : null);
 
         $mobile = $patient['mobile'] ?? 'N/A';
         $telephone = $patient['telephone'] ?? 'N/A';
@@ -77,6 +79,8 @@ class MedicalCertificateDocxService
         if (!empty($telephone)) {
             $contactNumber .= " / " . $telephone;
         }
+
+        $school = "Pamantasan ng Cabuyao";
 
         $student = $medicalCertificate['patient']['student'] ?? null;
         $emergencyContactName = $student['emergency_contact_name'] ?? 'N/A';
@@ -87,9 +91,9 @@ class MedicalCertificateDocxService
         $programName = $patient['student']['program']['program_name'] ?? '   ';
 
         // ✅ Extract School Nurse Details
-        $schoolNurse = $medicalCertificate['schoolNurse'] ?? [];
+        $schoolNurse = $medicalCertificate['school_nurse'] ?? [];
         $schoolNurseDetails = [
-            'sn_n' => $schoolNurse['name'] ?? '    ',
+            'sn_n' => trim(($schoolNurse['fname'] ?? '') . ' ' . ($schoolNurse['lname'] ?? '')),
             'sn_r' => $schoolNurse['role'] ?? '    ',
             'sn_l' => $schoolNurse['license_no'] ?? '    ',
             'sn_p' => $schoolNurse['ptr_no'] ?? '    ',
@@ -100,9 +104,9 @@ class MedicalCertificateDocxService
         Log::info("✅ School Nurse Data", ['school_nurse' => $schoolNurseDetails]);
 
         // ✅ Extract School Physician Details
-        $schoolPhysician = $medicalCertificate['schoolPhysician'] ?? [];
+        $schoolPhysician = $medicalCertificate['school_physician'] ?? [];
         $schoolPhysicianDetails = [
-            'sp_n' => $schoolPhysician['name'] ?? '    ',
+            'sp_n' => trim(($schoolPhysician['fname'] ?? '') . ' ' . ($schoolPhysician['lname'] ?? '')),
             'sp_r' => $schoolPhysician['role'] ?? '    ',
             'sp_l' => $schoolPhysician['license_no'] ?? '    ',
             'sp_p' => $schoolPhysician['ptr_no'] ?? '    ',
@@ -123,22 +127,18 @@ class MedicalCertificateDocxService
         $notClearedFor = $medicalCertificate['not_cleared_for'] ?? '';
         $activitySpecification = $medicalCertificate['activity_specification'] ?? '';
 
-        // Desired length for the diagnosis (e.g., 100 characters)
-        $desiredLength = 88;
+        $desiredLength = 80;
 
-        // Check if diagnosis exists and if it is shorter than the desired length
-        $diagnosis = $medicalCertificate['diagnosis'] ?? '_______________________________________________________________________________________';
+        // Get the remarks and check if it's shorter than the desired length
+        $diagnosis = $medicalCertificate['diagnosis'] ?? '';
 
-        // The Unicode character for a blank space (U+2800)
-        $spaceCharacter = "_";
-
-        // If there's a diagnosis and it's shorter than the desired length, add the blank space character
-        if (!empty($diagnosis) && strlen($diagnosis) < $desiredLength) {
-            $diagnosis = str_pad($diagnosis, $desiredLength, $spaceCharacter);
-        } elseif (empty($diagnosis)) {
-            // If no diagnosis, just display a line of the blank space character
-            $diagnosis = str_repeat($spaceCharacter, $desiredLength);
+        // If the remarks are shorter, pad them with underscores
+        if (strlen($diagnosis) < $desiredLength) {
+            $diagnosis = str_pad($diagnosis, $desiredLength, '_');
         }
+
+        // Trim any extra underscores if the remarks were too long
+        $diagnosis = substr($diagnosis, 0, $desiredLength);
 
         // ✅ Prepare shortcode replacements
         $shortcodes = [
@@ -157,6 +157,8 @@ class MedicalCertificateDocxService
             'mob' => $mobile,
             'tel' => $telephone,
             'con' => $contactNumber,
+
+            'sch' => $school,
 
             'ecn' => $emergencyContactName,
             'ecno' => $emergencyContactNo,

@@ -127,18 +127,23 @@ const DentalRecordDialog = ({ patient }) => {
 
     return (
         <div>
-            <Button onClick={() => {
-                clearForm();
-                setIsOpen(true);
-            }}>
-                New Dental Record
-            </Button>
+            <div className="p-4 bg-green-50 rounded-lg shadow-md">
+                <h2 className="text-xl font-semibold text-green-800">FDAR Records</h2>
+                <Button
+                    className="mt-4 bg-blue-600 text-white px-4 py-2 mb-3 rounded shadow-md hover:bg-blue-700 transition"
+                    onClick={() => {
+                        clearForm();
+                        setIsOpen(true);
+                    }}>
+                    New Dental Record
+                </Button>
 
-            <DentalRecordList
-                records={records}
-                patient={patient}
-                onEdit={handleEdit}
-            />
+                <DentalRecordList
+                    records={records}
+                    patient={patient}
+                    onEdit={handleEdit}
+                />
+            </div>
 
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogContent className="w-full max-w-5xl p-8 mx-auto bg-white rounded-lg shadow-lg flex flex-col items-center">
