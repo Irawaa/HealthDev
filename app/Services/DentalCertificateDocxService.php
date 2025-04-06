@@ -48,7 +48,7 @@ class DentalCertificateDocxService
         $gender = ($patient['gender'] === '0' || $patient['gender'] === 0) ? 'Female' : 'Male';
         $age = isset($patient['birthdate']) ? Carbon::parse($patient['birthdate'])->age : 'N/A';
 
-        $contact = ($patient['mobile'] ?? 'N/A') . ' / ' . ($patient['telephone'] ?? 'N/A');
+        // $contact = ($patient['mobile'] ?? 'N/A') . ' / ' . ($patient['telephone'] ?? 'N/A');
 
         $programDescription = $patient['student']['program']['description'] ?? 'N/A';
         $collegeDescription = $patient['student']['college']['description'] ?? 'N/A';
@@ -160,7 +160,7 @@ class DentalCertificateDocxService
             'program_department' => $programDescription,
             'college_department' => $collegeDescription,
             'date' => now()->format('Y-m-d'),
-            'con' => $contact,
+            // 'con' => $contact,
             'emc' => $emergencyContactName,
             'emr' => $patient['student']['guardian_relation'] ?? 'N/A',
             'emp' => $emergencyContactNumber,

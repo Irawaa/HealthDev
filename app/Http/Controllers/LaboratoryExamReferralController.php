@@ -6,6 +6,7 @@ use App\Models\LaboratoryExamReferral;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use App\Services\LaboratoryExamReferralDocxService;
 
 class LaboratoryExamReferralController extends Controller
 {
@@ -146,5 +147,102 @@ class LaboratoryExamReferralController extends Controller
             ]);
             return back()->withErrors('Failed to delete laboratory exam referral. Please try again.');
         }
+    }
+
+    public function viewPDF($id)
+    {
+        Log::info("📥 Fetching Laboratory Exam Referral details for PDF generation", [
+            'lab_exam_referral_id' => $id
+        ]);
+
+        // ✅ Fetch lab referral with necessary relationships
+        $labReferral = LaboratoryExamReferral::with([
+            'patient' => function ($query) {
+                $query->with([
+                    'student' => function ($q) {
+                        $q->select(
+                            'patient_id',
+                            'stud_id',
+                            'address_house',
+                            'address_brgy',
+                            'address_citytown',
+                            'address_province',
+                            'address_zipcode',
+                            'emergency_contact_name',
+                            'emergency_contact_no',
+                            'guardian_relation',
+                            'program_id',
+                            'college_id'
+                        )->with(['program', 'college']);
+                    },
+                    'personnel' => function ($q) {
+                        $q->select(
+                            'patient_id',
+                            'employee_id',
+                            'res_brgy',
+                            'res_city',
+                            'res_prov',
+                            'res_region',
+                            'res_zipcode',
+                            'dept_id',
+                            'college_id',
+                            'emergency_contact_person',
+                            'emergency_contact_number',
+                        )->with(['department', 'college']);
+                    },
+                    'nonpersonnel' => function ($q) {
+                        $q->select('patient_id', 'affiliation');
+                    }
+                ]);
+            },
+            'recordedBy',
+            'schoolPhysician' => function ($query) {
+                $query->select('staff_id', 'fname', 'lname', 'role', 'ext', 'license_no', 'ptr_no', 'email', 'contact_no');
+            },
+            'schoolNurse' => function ($query) {
+                $query->select('staff_id', 'fname', 'lname', 'role', 'ext', 'license_no', 'ptr_no', 'email', 'contact_no');
+            }
+        ])->findOrFail($id);
+
+        // ✅ Log fetched lab referral details
+        Log::info("✅ Lab Exam Referral retrieved successfully", [
+            'lab_exam_referral' => $labReferral->toArray()
+        ]);
+
+        // ✅ Log Patient Data
+        Log::info("👤 Patient Data", ['patient' => $labReferral->patient]);
+
+        // ✅ Extract school physician details
+        $schoolPhysician = $labReferral->schoolPhysician ? [
+            'name' => "{$labReferral->schoolPhysician->fname} {$labReferral->schoolPhysician->lname}",
+            'ext' => $labReferral->schoolPhysician->ext,
+            'role' => $labReferral->schoolPhysician->role,
+            'license_no' => $labReferral->schoolPhysician->license_no,
+            'ptr_no' => $labReferral->schoolPhysician->ptr_no,
+            'email' => $labReferral->schoolPhysician->email,
+            'contact_no' => $labReferral->schoolPhysician->contact_no
+        ] : [];
+
+        Log::info("🩺 School Physician Data", ['school_physician' => $schoolPhysician]);
+
+        // ✅ Extract school nurse details
+        $schoolNurse = $labReferral->schoolNurse ? [
+            'name' => "{$labReferral->schoolNurse->fname} {$labReferral->schoolNurse->lname}",
+            'ext' => $labReferral->schoolNurse->ext,
+            'role' => $labReferral->schoolNurse->role,
+            'license_no' => $labReferral->schoolNurse->license_no,
+            'ptr_no' => $labReferral->schoolNurse->ptr_no,
+            'email' => $labReferral->schoolNurse->email,
+            'contact_no' => $labReferral->schoolNurse->contact_no
+        ] : [];
+
+        Log::info("👩‍⚕️ School Nurse Data", ['school_nurse' => $schoolNurse]);
+
+        // ✅ Log before passing data to the service
+        Log::info("📄 Passing data to generate Laboratory Exam Referral PDF", ['lab_exam_referral_id' => $id]);
+
+        return LaboratoryExamReferralDocxService::generatePDF(
+            labReferral: $labReferral->toArray(),
+        );
     }
 }

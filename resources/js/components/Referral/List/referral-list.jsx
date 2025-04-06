@@ -5,6 +5,7 @@ import { router } from "@inertiajs/react";
 import { toast } from "react-hot-toast";
 import ConfirmationModal from "@/components/confirmation-modal";
 import ReferralForm from "@/components/Referral/Form/referral-form"; // ✅ Import Referral Form
+import PdfModal from "@/components/react-pdf";
 
 const ReferralList = ({ patient }) => {
     const [filterType, setFilterType] = useState("general");
@@ -14,6 +15,7 @@ const ReferralList = ({ patient }) => {
     const [selectedRefId, setSelectedRefId] = useState(null);
     const [editMode, setEditMode] = useState(false);
     const [editingReferral, setEditingReferral] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
 
     useEffect(() => {
         setReferrals(patient?.laboratory_exam_referrals ?? []);
@@ -25,6 +27,20 @@ const ReferralList = ({ patient }) => {
 
     const toggleExpand = (id) => {
         setExpanded(expanded === id ? null : id);
+    };
+
+    const onView = (id) => {
+        setPreviewUrl(`/laboratory-exam-referrals/${id}/pdf`);  // Set the URL for the PDF
+    };
+
+    const onPreview = (id) => {
+        const printWindow = window.open(`/laboratory-exam-referrals/preview/${id}`, "_blank");
+        if (printWindow) {
+            printWindow.onload = () => {
+                printWindow.focus();
+                printWindow.print();
+            };
+        }
     };
 
     const handleDeleteClick = (id) => {
@@ -164,14 +180,14 @@ const ReferralList = ({ patient }) => {
                                     <div className="flex justify-end gap-2 mt-4">
                                         <button
                                             className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition"
-                                            onClick={() => alert(`Viewing referral #${ref.id}`)}
+                                            onClick={() => onView(ref.id)}
                                         >
                                             <Eye size={18} /> View
                                         </button>
 
                                         <button
                                             className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-lg shadow hover:bg-yellow-600 transition"
-                                            onClick={() => handlePrint(ref.id)}
+                                            onClick={() => onPreview(ref.id)}
                                         >
                                             <Printer size={18} /> Print
                                         </button>
@@ -198,6 +214,12 @@ const ReferralList = ({ patient }) => {
             ) : (
                 <p className="text-green-600 text-center mt-4">No referrals available.</p>
             )}
+
+            <PdfModal
+                isOpen={previewUrl !== null}
+                onClose={() => setPreviewUrl(null)}
+                pdfUrl={previewUrl}
+            />
 
             {/* 📝 Edit Form Modal */}
             {editMode && (

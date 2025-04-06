@@ -142,6 +142,8 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/laboratory-exam-referrals', [LaboratoryExamReferralController::class, 'store'])->name('laboratory-exam-referrals.store');
     Route::put('/laboratory-exam-referrals/{id}', [LaboratoryExamReferralController::class, 'update'])->name('laboratory-exam-referrals.update');
     Route::delete('/laboratory-exam-referrals/{id}', [LaboratoryExamReferralController::class, 'destroy'])->name('laboratory-exam-referrals.destroy');
+    Route::get('/laboratory-exam-referrals/{id}/pdf', [LaboratoryExamReferralController::class, 'viewPDF'])->name('laboratory-exam-referrals.pdf');
+    Route::get('/laboratory-exam-referrals/preview/{id}', [LaboratoryExamReferralController::class, 'preview'])->name('laboratory-exam-referrals.preview');
 
     // --- Logout ---
     Route::post('/logout', [AuthenticateController::class, 'destroy'])->name('logout');
