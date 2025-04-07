@@ -128,7 +128,7 @@ const DentalRecordDialog = ({ patient }) => {
     return (
         <div>
             <div className="p-4 bg-green-50 rounded-lg shadow-md">
-                <h2 className="text-xl font-semibold text-green-800">Dental Records</h2>
+                <h2 className="text-xl font-semibold text-green-800">FDAR Records</h2>
                 <Button
                     className="mt-4 bg-blue-600 text-white px-4 py-2 mb-3 rounded shadow-md hover:bg-blue-700 transition"
                     onClick={() => {

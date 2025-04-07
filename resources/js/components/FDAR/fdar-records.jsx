@@ -4,6 +4,19 @@ import { Eye, Printer, Pencil, Trash2, ChevronDown, ChevronUp } from "lucide-rea
 import EditFDARModal from "./FDARSteps/edit-fdar-forms"; // ✅ Use the modal
 import PdfModal from "../react-pdf";
 
+const formatDateTime = (dateTime) => {
+    const options = {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+    };
+    return new Date(dateTime).toLocaleDateString("en-US", options);
+};
+
 const FDARRecords = ({ fdarForms, onEdit, onDelete }) => {
     const [expandedForms, setExpandedForms] = useState({});
     const [editingForm, setEditingForm] = useState(null);
@@ -62,37 +75,36 @@ const FDARRecords = ({ fdarForms, onEdit, onDelete }) => {
     return (
         <div className="mt-4 space-y-3">
             {fdarForms.length > 0 ? (
-                fdarForms.map((form) => (
+                fdarForms.map((form, index) => (
                     <motion.div
                         key={form.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3 }}
-                        className="bg-white p-5 rounded-2xl shadow-md border border-gray-200 transition hover:shadow-lg"
+                        className="bg-white p-6 rounded-2xl shadow-xl border border-green-300 transition hover:shadow-2xl"
                     >
-                        <div
-                            className="flex justify-between items-center cursor-pointer"
-                            onClick={() => toggleForm(form.id)}
-                        >
-                            <p className="font-medium text-gray-800">
-                                <span className="font-semibold">FDAR Entry:</span>{" "}
-                                {new Date(form.created_at).toLocaleString("en-US", {
-                                    year: "numeric",
-                                    month: "long",
-                                    day: "numeric",
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                    second: "2-digit",
-                                    hour12: true,
-                                })}
-                            </p>
-                            <div className="flex items-center gap-3">
-                                {expandedForms[form.id] ? (
-                                    <ChevronUp size={20} className="text-gray-600" />
-                                ) : (
-                                    <ChevronDown size={20} className="text-gray-600" />
-                                )}
+                        {/* Title Card */}
+                        <div className="flex justify-between items-center cursor-pointer">
+                            <div>
+                                <h3 className="text-lg font-semibold text-green-600">
+                                    FDAR Record #{index + 1}
+                                </h3>
+                                <p className="text-sm text-gray-600">
+                                    Recorded: {formatDateTime(form.created_at)}
+                                </p>
                             </div>
+                            {/* Button for expanding/collapsing */}
+                            <button
+                                className="flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-green-400 via-green-500 to-green-600 text-white rounded-lg shadow-md hover:bg-gradient-to-r hover:from-green-500 hover:via-green-600 hover:to-green-700 transition"
+                                onClick={() => toggleForm(form.id)}
+                            >
+                                {expandedForms[form.id] ? (
+                                    <ChevronUp size={20} className="text-white" />
+                                ) : (
+                                    <ChevronDown size={20} className="text-white" />
+                                )}
+                                {expandedForms[form.id] ? "Collapse" : "Expand"}
+                            </button>
                         </div>
 
                         <motion.div
@@ -104,9 +116,8 @@ const FDARRecords = ({ fdarForms, onEdit, onDelete }) => {
                             transition={{ duration: 0.3 }}
                             className={`overflow-hidden ${expandedForms[form.id] ? "mt-3" : ""}`}
                         >
-                            <div className="space-y-2 bg-gray-50 border border-gray-300 p-4 rounded-md shadow-sm">
+                            <div className="space-y-3 bg-green-50 border border-green-200 p-4 rounded-md shadow-sm">
                                 <div className="grid grid-cols-2 gap-3 text-gray-700">
-                                    {/* FDAR Main Structure */}
                                     <p>
                                         <span className="font-semibold">Focus:</span> {form.all_diseases && form.all_diseases.length > 0
                                             ? form.all_diseases.map(d => d.disease_name || d.custom_disease).join(", ")
@@ -116,8 +127,7 @@ const FDARRecords = ({ fdarForms, onEdit, onDelete }) => {
                                     <p><span className="font-semibold">Action:</span> {form.action || "No action recorded"}</p>
                                     <p><span className="font-semibold">Response:</span> {form.response || "No response recorded"}</p>
 
-                                    {/* Medical Information Section */}
-                                    <div className="col-span-2 border-t border-gray-300 pt-2 mt-2">
+                                    <div className="col-span-2 border-t border-green-200 pt-2 mt-2">
                                         <p><span className="font-semibold">Blood Pressure:</span> {form.blood_pressure || "N/A"}</p>
                                         <p><span className="font-semibold">Weight:</span> {form.weight || "N/A"} kg</p>
                                         <p><span className="font-semibold">Height:</span> {form.height || "N/A"} m</p>
@@ -131,37 +141,35 @@ const FDARRecords = ({ fdarForms, onEdit, onDelete }) => {
                                     </div>
                                 </div>
 
+                                <div className="border-t border-green-300 mt-3 pt-3" />
+
                                 <div className="flex justify-end gap-3 mt-3">
-                                    {/* View Button */}
                                     <button
-                                        className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition"
+                                        className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition"
                                         onClick={() => onView(form.id)}
                                     >
                                         <Eye size={18} />
                                         View
                                     </button>
 
-                                    {/* Print Button */}
                                     <button
-                                        className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-lg shadow hover:bg-yellow-600 transition"
+                                        className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-lg shadow-md hover:bg-yellow-600 transition"
                                         onClick={() => onPreview(form.id)}
                                     >
                                         <Printer size={18} />
                                         Print
                                     </button>
 
-                                    {/* Edit Button */}
                                     <button
-                                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+                                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition"
                                         onClick={() => handleEditClick(form)}
                                     >
                                         <Pencil size={18} />
                                         Edit
                                     </button>
 
-                                    {/* Delete Button */}
                                     <button
-                                        className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 transition"
+                                        className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 transition"
                                         onClick={() => onDelete(form.id)}
                                     >
                                         <Trash2 size={18} />
@@ -196,7 +204,6 @@ const FDARRecords = ({ fdarForms, onEdit, onDelete }) => {
                 </div>
             )}
 
-            {/* ✅ Render EditFDARModal when editingForm is set */}
             {editingForm && (
                 <EditFDARModal
                     isOpen={isModalOpen}

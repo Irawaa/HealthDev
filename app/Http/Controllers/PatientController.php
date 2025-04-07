@@ -214,7 +214,8 @@ class PatientController extends Controller
             case 'prescription':
                 $relations['prescriptions'] = fn($query) => $query->select(
                     'patient_id',
-                    'prescription_number'
+                    'prescription_number',
+                    'created_at'
                 )->latest();
                 break;
 

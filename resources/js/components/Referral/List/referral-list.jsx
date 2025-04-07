@@ -177,20 +177,25 @@ const ReferralList = ({ patient }) => {
                                     )}
 
                                     {/* 📌 Action Buttons */}
+                                    {/* 📌 Action Buttons */}
                                     <div className="flex justify-end gap-2 mt-4">
-                                        <button
-                                            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition"
-                                            onClick={() => onView(ref.id)}
-                                        >
-                                            <Eye size={18} /> View
-                                        </button>
+                                        {filterType === "lab_exam" && (
+                                            <>
+                                                <button
+                                                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition"
+                                                    onClick={() => onView(ref.id)}
+                                                >
+                                                    <Eye size={18} /> View
+                                                </button>
 
-                                        <button
-                                            className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-lg shadow hover:bg-yellow-600 transition"
-                                            onClick={() => onPreview(ref.id)}
-                                        >
-                                            <Printer size={18} /> Print
-                                        </button>
+                                                <button
+                                                    className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-lg shadow hover:bg-yellow-600 transition"
+                                                    onClick={() => onPreview(ref.id)}
+                                                >
+                                                    <Printer size={18} /> Print
+                                                </button>
+                                            </>
+                                        )}
 
                                         <button
                                             className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition"

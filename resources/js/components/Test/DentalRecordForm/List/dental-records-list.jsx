@@ -6,20 +6,6 @@ import { toast } from "react-hot-toast";
 import DentalViewChart from "../components/dental-view-chart";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { motion, AnimatePresence } from "framer-motion";
-import { Eye, Pencil, Trash2, ChevronDown, ChevronUp } from "lucide-react"; // Add icons for actions
-
-const formatDateTime = (dateTime) => {
-    const options = {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-    };
-    return new Date(dateTime).toLocaleDateString("en-US", options);
-};
 
 const DentalRecordsList = ({ patient, onEdit }) => {
     const [records, setRecords] = useState(patient?.dental_records || []);
@@ -27,7 +13,6 @@ const DentalRecordsList = ({ patient, onEdit }) => {
     const [pageLoading, setPageLoading] = useState(false);
     const [selectedRecordId, setSelectedRecordId] = useState(null);
     const [previewRecord, setPreviewRecord] = useState(null);
-    const [expandedRecord, setExpandedRecord] = useState(null);
 
     useEffect(() => {
         setRecords(patient?.dental_records || []);
@@ -68,77 +53,42 @@ const DentalRecordsList = ({ patient, onEdit }) => {
         setPreviewRecord(null);
     };
 
-    const toggleRecordDetails = (id) => {
-        if (expandedRecord === id) {
-            setExpandedRecord(null);
-        } else {
-            setExpandedRecord(id);
-        }
-    };
-
     return (
-        <div className="space-y-6">
+        <div>
             {records.length > 0 ? (
-                records.map((record, index) => (
+                records.map((record) => (
                     <motion.div
                         key={record.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3 }}
-                        className="bg-white p-6 rounded-xl shadow-lg border border-gray-200 transition-transform transform hover:scale-105 hover:shadow-xl"
+                        className="p-4 bg-white shadow-md rounded-lg flex justify-between mb-4"
                     >
-                        <div className="flex justify-between items-center cursor-pointer">
-                            <div>
-                                <h3 className="text-lg font-semibold text-green-600">
-                                    Dental Record #{index + 1}
-                                </h3>
-                                <p className="text-sm text-gray-600">
-                                    Recorded: {formatDateTime(record.created_at)}
-                                </p>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <Button onClick={() => handlePreview(record)} className="bg-blue-600 text-white p-2 rounded-md flex items-center gap-2">
-                                    <Eye size={16} /> View Chart
-                                </Button>
-                                <Button onClick={() => onEdit(record)} className="bg-green-600 text-white p-2 rounded-md flex items-center gap-2">
-                                    <Pencil size={16} /> Edit
-                                </Button>
-                                <Button onClick={() => handleDeleteClick(record.id)} className="bg-red-600 text-white p-2 rounded-md flex items-center gap-2">
-                                    <Trash2 size={16} /> Delete
-                                </Button>
-                            </div>
+                        <div>
+                            <p><strong>Gingival Status:</strong> {record.gingival_status}</p>
+                            <p><strong>Plaque Deposit:</strong> {record.plaque_deposit}</p>
+                            <p><strong>Other Treatments:</strong> {record.other_treatments || "None"}</p>
+                            <p><strong>Recommended Treatment:</strong> {record.recommended_treatment || "None"}</p>
+                            <p><strong>Recorded At:</strong> {new Date(record.created_at).toLocaleDateString()}</p>
                         </div>
-
-                        <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{
-                                height: expandedRecord === record.id ? "auto" : 0,
-                                opacity: expandedRecord === record.id ? 1 : 0,
-                            }}
-                            transition={{ duration: 0.3 }}
-                            className={`overflow-hidden mt-4`}
-                        >
-                            <div className="border-t border-green-300 mt-1 pt-3" />
-                            <div className="space-y-3 text-gray-700">
-                                <p><strong>Gingival Status:</strong> {record.gingival_status}</p>
-                                <p><strong>Plaque Deposit:</strong> {record.plaque_deposit}</p>
-                                <p><strong>Other Treatments:</strong> {record.other_treatments || "None"}</p>
-                                <p><strong>Recommended Treatment:</strong> {record.recommended_treatment || "None"}</p>
-                            </div>
-                        </motion.div>
-
-                        <Button
-                            onClick={() => toggleRecordDetails(record.id)}
-                            className="mt-4 text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:from-green-500 hover:via-green-600 hover:to-green-700 p-2 rounded-md transition-colors"
-                        >
-                            {expandedRecord === record.id ? "Hide Details" : "Show Details"}
-                        </Button>
+                        <div className="space-x-2">
+                            <Button onClick={() => handlePreview(record)} className="bg-blue-500 text-white">
+                                View Chart
+                            </Button>
+                            <Button onClick={() => onEdit(record)} className="bg-green-600 text-white">
+                                Edit
+                            </Button>
+                            <Button onClick={() => handleDeleteClick(record.id)} className="bg-red-600 text-white">
+                                Delete
+                            </Button>
+                        </div>
                     </motion.div>
                 ))
             ) : (
-                <p className="text-center text-green-600">No dental records available.</p>
+                <p className="text-green-600 text-center mt-4">No dental records available.</p>
             )}
 
+            {/* Confirmation Modal */}
             <ConfirmationModal
                 open={confirmOpen}
                 onClose={() => setConfirmOpen(false)}
@@ -148,6 +98,7 @@ const DentalRecordsList = ({ patient, onEdit }) => {
                 actionType="Remove"
             />
 
+            {/* Preview Mode with Framer Motion */}
             <AnimatePresence>
                 {previewRecord && (
                     <Dialog open={!!previewRecord} onOpenChange={closePreview}>
@@ -177,6 +128,7 @@ const DentalRecordsList = ({ patient, onEdit }) => {
                 )}
             </AnimatePresence>
 
+            {/* Page Loading Indicator */}
             {pageLoading && (
                 <motion.div
                     className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[9999]"

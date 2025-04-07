@@ -72,9 +72,9 @@ class BPFormDocxService
         // Extract nurse and physician details
         $schoolNurse = $bpForm['school_nurse'] ?? [];
 
-        $departmentName = isset($bpForm['patient']['personnel']['department'])
-            ? $bpForm['patient']['personnel']['department']['name']
-            : $bpForm['patient']['personnel']['college']['name'];
+        // $departmentName = isset($bpForm['patient']['personnel']['department'])
+        //     ? $bpForm['patient']['personnel']['department']['name']
+        //     : $bpForm['patient']['personnel']['college']['name'];
 
         // Prepare shortcodes
         $shortcodes = [
@@ -84,7 +84,7 @@ class BPFormDocxService
             'age' => isset($patient['birthdate']) ? Carbon::parse($patient['birthdate'])->age : 'N/A',
             'g' => $gender,
             'pc' => $programCollege,
-            'dept' => $departmentName,
+            'dept' => $programCollege,
             'date' => now()->format('Y-m-d'),
             'time' => now()->format('H:i'),
             'status' => $bpForm['status'] ?? 'Stable',

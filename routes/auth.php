@@ -7,6 +7,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\NonPersonnelController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\DentalRecordController;
 use App\Http\Controllers\FDARFormController;
@@ -49,9 +50,7 @@ Route::middleware(['web', 'admin'])->group(function () {
 Route::middleware(['web', 'auth'])->group(function () {
 
     // --- Dashboard (Admins and Regular Users) ---
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/medical', [MedicalRecordController::class, 'index'])->name('medical');
 

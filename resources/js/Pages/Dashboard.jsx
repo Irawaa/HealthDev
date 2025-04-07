@@ -17,46 +17,7 @@ import {
     Legend,
     ArcElement, // For Pie chart
 } from "chart.js"; // Import required chart.js components
-
-// Dummy data for records
-const dummyData = {
-    records: 120,
-    consultations: 45,
-    referrals: 30,
-    otherMetrics: 55,
-};
-
-// Recent patients who had a consultation
-const recentPatients = [
-    { id: 1, name: "John Doe", diagnosis: "Flu", consultationDate: "2025-03-05" },
-    { id: 2, name: "Jane Smith", diagnosis: "Cold", consultationDate: "2025-03-06" },
-    { id: 3, name: "Bob Johnson", diagnosis: "Headache", consultationDate: "2025-03-07" },
-];
-
-// Dummy chart data for Line Chart
-const chartData = {
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-    datasets: [
-        {
-            label: "Consultations",
-            data: [100, 150, 200, 175, 225, 250],
-            borderColor: "rgba(75, 192, 192, 1)", // Gradient color for line
-            backgroundColor: "rgba(75, 192, 192, 0.2)", // Gradient fill
-            fill: true, // To fill the area under the line
-        },
-    ],
-};
-
-// Dummy pie chart data
-const pieChartData = {
-    labels: ["Consultations", "Referrals", "Records", "Other Metrics"],
-    datasets: [
-        {
-            data: [45, 30, 120, 55],
-            backgroundColor: ["#36A2EB", "#FFCE56", "#4BC0C0", "#FF6384"],
-        },
-    ],
-};
+import { usePage } from "@inertiajs/react";
 
 ChartJS.register(
     CategoryScale,
@@ -69,9 +30,65 @@ ChartJS.register(
     ArcElement // For Pie chart
 );
 
-const Dashboard = () => {
+const Dashboard = ({
+    totalFdarRecords,
+    totalBpRecords,
+    totalDentalCertificates,
+    totalLaboratoryExamReferrals,
+    totalMedicalCertificates,
+    totalPreParticipatoryRecords,
+    totalPrescriptions,
+    totalDentalRecords,
+    totalMedicalRecords,
+    totalGeneralReferrals,
+    totalConsultations,
+    totalRecords,
+    totalReferred,
+    recentPatients = [],
+}) => {
+
+
+    console.log("Dashboard Props:", totalBpRecords);
     const [time, setTime] = useState(new Date().toLocaleTimeString());
     const [weather, setWeather] = useState("Sunny");
+
+    // Dummy data for records
+    const dashboardData = {
+        records: totalRecords ?? 0, // Use 0 if totalRecords is undefined or null
+        consultations: totalConsultations ?? 0, // Use 0 if totalConsultations is undefined or null
+        referrals: totalReferred ?? 0, // Use 0 if totalReferred is undefined or null
+        otherMetrics: totalPrescriptions ?? 0, // Use 0 if totalPrescriptions is undefined or null
+    };
+
+    // Dummy chart data for Line Chart
+    const chartData = {
+        labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+        datasets: [
+            {
+                label: "Consultations",
+                data: [100, 150, 200, 175, 225, 250],
+                borderColor: "rgba(75, 192, 192, 1)", // Gradient color for line
+                backgroundColor: "rgba(75, 192, 192, 0.2)", // Gradient fill
+                fill: true, // To fill the area under the line
+            },
+        ],
+    };
+
+    // Dummy pie chart data
+    const pieChartData = {
+        labels: ["Consultations", "Referrals", "Records", "Prescriptions"],
+        datasets: [
+            {
+                data: [
+                    totalConsultations ?? 0, // Use 0 if totalConsultations is undefined or null
+                    totalReferred ?? 0, // Use 0 if totalReferred is undefined or null
+                    totalRecords ?? 0, // Use 0 if totalRecords is undefined or null
+                    totalPrescriptions ?? 0 // Use 0 if totalPrescriptions is undefined or null
+                ],
+                backgroundColor: ["#36A2EB", "#FFCE56", "#4BC0C0", "#FF6384"],
+            },
+        ],
+    };
 
     // Update time every minute
     useEffect(() => {
@@ -97,7 +114,7 @@ const Dashboard = () => {
                             <h2 className="text-xl font-bold">Number of Records</h2>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-3xl">{dummyData.records}</p>
+                            <p className="text-3xl">{dashboardData.records}</p>
                             <p className="text-sm">Total records in the system</p>
                         </CardContent>
                         <CardFooter>
@@ -111,7 +128,7 @@ const Dashboard = () => {
                             <h2 className="text-xl font-bold">Consultations</h2>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-3xl">{dummyData.consultations}</p>
+                            <p className="text-3xl">{dashboardData.consultations}</p>
                             <p className="text-sm">Total consultations this month</p>
                         </CardContent>
                         <CardFooter>
@@ -125,7 +142,7 @@ const Dashboard = () => {
                             <h2 className="text-xl font-bold">Referrals</h2>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-3xl">{dummyData.referrals}</p>
+                            <p className="text-3xl">{dashboardData.referrals}</p>
                             <p className="text-sm">Total referrals made</p>
                         </CardContent>
                         <CardFooter>
@@ -153,10 +170,10 @@ const Dashboard = () => {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {recentPatients.map((patient) => (
-                                            <TableRow key={patient.id} className="cursor-pointer hover:bg-gray-100">
+                                        {(recentPatients ?? []).map((patient) => (
+                                            <TableRow key={`${patient.id}-${patient.consultationDate}-${patient.createdAt}`} className="cursor-pointer hover:bg-gray-100">
                                                 <TableCell className="border px-4 py-2">{patient.name}</TableCell>
-                                                <TableCell className="border px-4 py-2">{patient.diagnosis}</TableCell>
+                                                <TableCell className="border px-4 py-2">{patient.record}</TableCell>
                                                 <TableCell className="border px-4 py-2">{patient.consultationDate}</TableCell>
                                             </TableRow>
                                         ))}

@@ -1,13 +1,7 @@
 import React, { useState, useEffect } from "react";
 
-const DentalViewChart = ({ record }) => {
-    console.log(record);
-    const [toothDesigns, setToothDesigns] = useState({});
-    const [isModalVisible, setIsModalVisible] = useState(false);
-    const [selectedTooth, setSelectedTooth] = useState(null);
-    const [selectedDesign, setSelectedDesign] = useState("None");
-    const [selectedSymbol, setSelectedSymbol] = useState("");
-    const [remarks, setRemarks] = useState("");
+const ToothChart = ({ selectedDesign, onToothClick, dentalRecordChart }) => {
+    const [toothDesigns, setToothDesigns] = useState(dentalRecordChart || {});
 
     const primaryTeeth = [
         { numbers: [55, 54, 53, 52, 51, 61, 62, 63, 64, 65] },
@@ -21,25 +15,26 @@ const DentalViewChart = ({ record }) => {
 
     const molarTeeth = [14, 47, 13, 26, 65, 37];
 
-    // Pre-populate tooth designs from `record.dental_record_chart`
-    useEffect(() => {
-        const designs = {};
-
-        if (record && record.dental_record_chart) {
-            Object.keys(record.dental_record_chart).forEach((key) => {
-                const tooth = record.dental_record_chart[key];
-                designs[tooth.number] = {
-                    teeth: tooth.number,
-                    type: tooth.type,
-                    design: tooth.design,
-                    symbol: tooth.symbol,
-                    remarks: tooth.remarks
-                };
-            });
+    const handleToothClick = (number, type) => {
+        // Call the parent onToothClick function when a tooth is clicked
+        if (onToothClick) {
+            onToothClick(number, type);
         }
 
-        setToothDesigns(designs);
-    }, [record]);
+        // Existing logic for updating tooth designs
+        console.log(`Tooth clicked: ${number}, Type: ${type}, Selected Design: ${selectedDesign}`); // Log when a tooth is clicked
+
+        setToothDesigns((prevState) => {
+            const updatedDesigns = { ...prevState, [number]: { teeth: number, type, design: selectedDesign } };
+            console.log("Updated tooth designs:", updatedDesigns); // Log the updated tooth designs state
+            return updatedDesigns;
+        });
+    };
+
+    useEffect(() => {
+        setToothDesigns(dentalRecordChart);
+      }, [dentalRecordChart]);
+
 
     const renderDesign = (design, isMolar) => {
         switch (design) {
@@ -275,54 +270,53 @@ const DentalViewChart = ({ record }) => {
         }
     };
 
-    const handleToothClick = (tooth) => {
-        const selectedToothDetails = toothDesigns[tooth.number] || {};
-        setSelectedTooth(tooth);
-        setSelectedDesign(selectedToothDetails.design || "None");
-        setSelectedSymbol(selectedToothDetails.symbol || "");
-        setRemarks(selectedToothDetails.remarks || "");
-        setIsModalVisible(true);
-    };
-
-    const closeModal = () => {
-        setIsModalVisible(false);
-        setSelectedTooth(null);
-    };
-
     const renderToothSVG = (number, type) => {
-        const isMolar = molarTeeth.includes(number);
-        const toothDesign = toothDesigns[number];
-        const design = toothDesign ? toothDesign.design : "None";
+        const isMolar = molarTeeth.includes(number); // Check if the tooth is a molar
+        const toothDesign = toothDesigns[number]; // Get the design for the specific tooth
+        const design = toothDesign ? toothDesign.design : "None"; // Default design if none selected
 
         return (
             <svg
                 viewBox="0 0 100 100"
                 className="w-12 h-12 cursor-pointer"
-                onClick={() => handleToothClick({ number, design })}
+                onClick={() => onToothClick(number, type)}
             >
                 <defs>
+                    {/* Clip path to ensure design stays inside the outer circle */}
                     <clipPath id="circleClip">
-                        <circle cx="50" cy="50" r="45" />
+                        <circle cx="50" cy="50" r="45" /> {/* Outer circle */}
                     </clipPath>
                     <clipPath id="innerCircleClip">
-                        <circle cx="50" cy="50" r="25" />
+                        <circle cx="50" cy="50" r="25" /> {/* Inner circle */}
                     </clipPath>
                 </defs>
+
+                {/* Outer circle with no initial fill */}
                 <circle
                     cx="50"
                     cy="50"
                     r="45"
                     stroke="black"
                     strokeWidth="2"
-                    fill="none"
+                    fill="none" // No fill for outer circle initially
                 />
+
                 {isMolar ? (
                     <>
                         <line x1="15" y1="15" x2="35" y2="35" stroke="black" strokeWidth="2" />
                         <line x1="65" y1="65" x2="85" y2="85" stroke="black" strokeWidth="2" />
                         <line x1="85" y1="15" x2="65" y2="35" stroke="black" strokeWidth="2" />
                         <line x1="35" y1="65" x2="15" y2="85" stroke="black" strokeWidth="2" />
-                        <circle cx="50" cy="50" r="25" stroke="black" strokeWidth="2" fill="white" />
+
+                        {/* Inner circle for molars */}
+                        <circle
+                            cx="50"
+                            cy="50"
+                            r="25"
+                            stroke="black"
+                            strokeWidth="2"
+                            fill="white" // Inner circle fill for molars
+                        />
                     </>
                 ) : (
                     <>
@@ -331,7 +325,8 @@ const DentalViewChart = ({ record }) => {
                     </>
                 )}
 
-                {design !== "None" && renderDesign(design, isMolar)}
+                {/* Render the selected design */}
+                {design !== "None" && renderDesign(design, isMolar)} {/* Render the selected design */}
             </svg>
         );
     };
@@ -353,109 +348,19 @@ const DentalViewChart = ({ record }) => {
 
     return (
         <div>
-            <div>
-                <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-center mb-2">Primary Teeth</h3>
-                    {renderTeeth(primaryTeeth, "Primary")}
-                </div>
-                <div>
-                    <h3 className="text-lg font-semibold text-center mb-2">Permanent Teeth</h3>
-                    {renderTeeth(permanentTeeth, "Permanent")}
-                </div>
+            {/* Primary Teeth */}
+            <div className="mb-6">
+                <h3 className="text-lg font-semibold text-center mb-2">Primary Teeth</h3>
+                {renderTeeth(primaryTeeth, "Primary")}
             </div>
 
-
-            {isModalVisible && (
-                <div className="fixed bottom-0 left-0 w-full bg-white shadow-lg z-20 p-4 rounded-tl-xl border-t border-gray-300 overflow-y-auto">
-                    <button
-                        onClick={closeModal}
-                        className="absolute top-2 right-2 bg-red-500 text-white py-2 px-4 rounded-lg font-semibold"
-                    >
-                        Close
-                    </button>
-                    <h3 className="text-lg font-semibold text-green-700 mb-4">
-                        Dental Information for Tooth {selectedTooth.number}
-                    </h3>
-
-                    {/* Design Selection Input (disabled) */}
-                    <div className="mb-4">
-                        <label className="text-sm font-semibold">Tooth Design:</label>
-                        <select
-                            className="mt-2 p-2 border border-gray-300 rounded-lg w-full"
-                            value={selectedDesign}
-                            disabled // Make this field non-editable
-                        >
-                            <option value="None">None</option>
-                            <option value="Filled">Filled</option>
-                            <option value="DiagonalLeft">Diagonal Left</option>
-                            <option value="DiagonalRight">Diagonal Right</option>
-                            <option value="DiagonalTop">Diagonal Top</option>
-                            <option value="DiagonalBottom">Diagonal Bottom</option>
-                            <option value="UpperLeftDot">Upper Left Dot</option>
-                            <option value="BottomLeftDot">Bottom Left Dot</option>
-                            <option value="LeftDot">Left Dot</option>
-                            <option value="RightDot">Right Dot</option>
-                            <option value="BottomRightDot">Bottom Right Dot</option>
-                            <option value="TopRightDot">Top Right Dot</option>
-                            <option value="BottomDot">Bottom Dot</option>
-                        </select>
-                    </div>
-
-                    {/* Combined Symbols Dropdown (disabled) */}
-                    <div className="mb-4">
-                        <label className="text-sm font-semibold">Tooth Symbol:</label>
-                        <select
-                            className="mt-2 p-2 border border-gray-300 rounded-lg w-full"
-                            value={selectedSymbol}
-                            disabled // Make this field non-editable
-                        >
-                            <option value="">Select a Symbol</option>
-                            <optgroup label="Symbols for Mouth Examination">
-                                <option value="X">X - Carious tooth indicated for extraction</option>
-                                <option value="C">C - Carious tooth indicated for filling</option>
-                                <option value="RF">RF - Root fragment</option>
-                                <option value="M">M - Missing</option>
-                                <option value="F2">F2 - Permanently filled tooth with recurrence of decay</option>
-                                <option value="Heavy shade">Heavy shade - Permanent filling</option>
-                                <option value="Outline of filling">Outline of filling - Tooth with temporary filling</option>
-                            </optgroup>
-
-                            <optgroup label="Artificial Restoration">
-                                <option value="JC">JC - Jacket Crown</option>
-                                <option value="AB">AB - Abutment</option>
-                                <option value="P">P - Pontic</option>
-                                <option value="I">I - Inlay</option>
-                                <option value="RPD">RPD - Removable Partial Denture</option>
-                                <option value="FB">FB - Fixed Bridge</option>
-                                <option value="CD">CD - Complete Denture</option>
-                            </optgroup>
-
-                            <optgroup label="Symbols for Accomplishment">
-                                <option value="OP">OP - Oral Prophylaxis</option>
-                                <option value="Xt">Xt - Extracted Permanent Tooth</option>
-                                <option value="Ag F">Ag F - Amalgam Filling</option>
-                                <option value="Sy F">Sy F - Synthetic Porcelain</option>
-                                <option value="GIC">GIC - Glass Ionomer Cement</option>
-                                <option value="ZnO F">ZnO F - Zinc Oxide Filling</option>
-                                <option value="R">R - Referred to Private Dentist</option>
-                            </optgroup>
-                        </select>
-                    </div>
-
-                    {/* Remarks Input (disabled) */}
-                    <div className="mb-4">
-                        <label className="text-sm font-semibold">Remarks:</label>
-                        <textarea
-                            className="mt-2 p-2 border border-gray-300 rounded-lg w-full"
-                            placeholder="Enter remarks..."
-                            value={remarks}
-                            disabled // Make this field non-editable
-                        />
-                    </div>
-                </div>
-            )}
+            {/* Permanent Teeth */}
+            <div>
+                <h3 className="text-lg font-semibold text-center mb-2">Permanent Teeth</h3>
+                {renderTeeth(permanentTeeth, "Permanent")}
+            </div>
         </div>
     );
 };
 
-export default DentalViewChart;
+export default ToothChart;
