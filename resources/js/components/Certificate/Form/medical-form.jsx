@@ -155,7 +155,7 @@ const MedicalForm = ({ setOpen, patient, certificate }) => {
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
             onSubmit={handleSubmit}
-            className="w-full max-w-lg mx-auto p-6 bg-green-50 shadow-xl rounded-lg border border-green-400"
+            className="w-full max-w-lg mx-auto p-6 bg-white shadow-xl rounded-lg"
         >
 
             <div className="max-h-[60vh] overflow-y-auto px-3 space-y-5">
@@ -170,7 +170,7 @@ const MedicalForm = ({ setOpen, patient, certificate }) => {
                         value={data.diagnosis}
                         onChange={handleInputChange}
                         placeholder="Enter diagnosis here..."
-                        className="w-full border border-green-500 rounded-md p-2 bg-white focus:ring-2 focus:ring-green-600 transition"
+                        className="w-full rounded-md p-2 bg-white focus:ring-2 focus:ring-green-600 transition"
                         required
                     />
                 </div>
@@ -197,7 +197,7 @@ const MedicalForm = ({ setOpen, patient, certificate }) => {
                             value={data.advised_medication_rest}
                             onChange={handleInputChange}
                             min={new Date().toISOString().split("T")[0]} // ✅ Disable past dates
-                            className="border border-green-500 p-2 rounded-md w-full bg-white focus:ring-2 focus:ring-green-600 transition mt-2"
+                            className="p-2 rounded-md w-full bg-white focus:ring-2 focus:ring-green-600 transition mt-2"
                             required={data.advised_medication_rest_required}
                         />
                     )}
@@ -227,7 +227,7 @@ const MedicalForm = ({ setOpen, patient, certificate }) => {
                             value={data.purpose_other}
                             onChange={handleInputChange}
                             placeholder="Specify other purpose"
-                            className="border border-green-500 p-2 rounded-md w-full focus:ring-2 focus:ring-green-600 transition mt-2"
+                            className="p-2 rounded-md w-full focus:ring-2 focus:ring-green-600 transition mt-2"
                             required
                         />
                     )}
@@ -316,7 +316,7 @@ const MedicalForm = ({ setOpen, patient, certificate }) => {
                                                 value={data.activity_specification}
                                                 onChange={handleInputChange}
                                                 placeholder="Specify Activity"
-                                                className="border border-green-500 p-2 rounded-md w-full focus:ring-2 focus:ring-green-600 transition"
+                                                className="p-2 rounded-md w-full focus:ring-2 focus:ring-green-600 transition"
                                                 required
                                             />
                                         </motion.div>
@@ -340,7 +340,7 @@ const MedicalForm = ({ setOpen, patient, certificate }) => {
                         required
                         className="mt-2"
                     >
-                        <SelectTrigger className="w-full border border-green-500 bg-white p-2 rounded-md focus:ring-2 focus:ring-green-600 transition">
+                        <SelectTrigger className="w-full bg-white p-2 rounded-md focus:ring-2 focus:ring-green-600 transition">
                             <SelectValue>
                                 {physicianStaff.find((physician) => physician.staff_id == data.school_physician_id)
                                     ? `${physicianStaff.find((physician) => physician.staff_id == data.school_physician_id)?.lname}, 

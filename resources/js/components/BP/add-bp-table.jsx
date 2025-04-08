@@ -268,7 +268,7 @@ const AddBPTable = ({ open, setOpen, patient }) => {
 
         {/* Submit & Cancel Buttons */}
         <DialogFooter className="mt-6 flex justify-between">
-          <Button onClick={() => setOpen(false)} className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600">
+          <Button onClick={() => setOpen(false)} className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-green-600">
             Cancel
           </Button>
           <Button

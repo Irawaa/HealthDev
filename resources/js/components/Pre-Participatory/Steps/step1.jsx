@@ -115,7 +115,9 @@ const Step1 = ({ formData, setFormData, errors }) => {
           { key: "temperature", label: "Temperature (°C)" },
         ].map(({ key, label, bp }) => (
           <div key={key} className="flex flex-col">
-            <label className="text-sm font-medium text-gray-700">{label}</label>
+            <label className="text-sm font-medium text-gray-700">
+              {label} <span className="text-red-500">*</span> {/* Red asterisk */}
+            </label>
             <input
               type="text"
               name={key}

@@ -1,6 +1,6 @@
 const Step3 = ({ data, setData, errors }) => {
     return (
-        <div className="bg-white p-6 rounded-lg shadow-md">
+        <div className="p-6">
             <h3 className="text-xl font-semibold text-green-700 mb-4 text-center">
                 Recommended Treatment
             </h3>

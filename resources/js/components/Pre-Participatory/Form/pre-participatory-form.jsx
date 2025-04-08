@@ -247,7 +247,7 @@ const PreParticipatoryForm = ({ open, setOpen, onSave, selectedEvaluation, patie
                 </Button>
               )}
               <Button
-                className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg"
+                className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg"
                 onClick={nextStep}
               >
                 Next →

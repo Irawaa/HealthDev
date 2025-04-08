@@ -43,7 +43,7 @@ const GeneralReferralForm = ({ setOpen, patient, referral }) => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md border border-green-500 max-w-2xl mx-auto">
+    <div className="bg-white p-6 max-w-2xl mx-auto">
       <h2 className="text-green-700 font-bold text-2xl text-center mb-4">
         {isEditMode ? "Edit General Referral" : "New General Referral"}
       </h2>
@@ -137,10 +137,10 @@ const GeneralReferralForm = ({ setOpen, patient, referral }) => {
           </select>
         </div>
 
-        <div className="col-span-2 flex flex-col sm:flex-row gap-3 mt-6">
+        <div className="col-span-2 flex justify-end mt-6">
           <Button
             type="submit"
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded w-full sm:w-auto transition-all"
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition-all"
             disabled={processing}
           >
             {processing ? (isEditMode ? "Updating..." : "Saving...") : isEditMode ? "Update" : "Save"}

@@ -88,7 +88,7 @@ const LaboratoryForm = ({ setOpen, patient, referral }) => {
   };
 
   return (
-    <motion.div className="space-y-4 p-4 bg-white rounded-lg shadow-md border border-green-500 w-full max-w-2xl mx-auto">
+    <motion.div className="space-y-4 p-4 bg-white w-full max-w-2xl mx-auto">
       <h2 className="text-green-700 font-bold text-xl text-center">
         {isEditMode ? "Edit Laboratory Referral" : "New Laboratory Referral"}
       </h2>

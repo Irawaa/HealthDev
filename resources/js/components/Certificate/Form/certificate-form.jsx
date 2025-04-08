@@ -18,7 +18,7 @@ const CertificateForm = ({ open, setOpen, onSave, patient, certificate = null })
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent className="bg-green-50 shadow-xl rounded-lg p-6 w-full max-w-lg mx-auto overflow-hidden">
+            <DialogContent className="bg-white p-0 w-full">
                 <DialogHeader>
                     <DialogTitle className="text-2xl font-bold text-green-800 text-center">
                         {isEditMode ? "Edit Certificate" : "Create Certificate"}

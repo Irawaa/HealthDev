@@ -76,12 +76,12 @@ const DentalForm = ({ setOpen, patient, certificate = null }) => {
     return (
         <form
             onSubmit={handleSubmit}
-            className="w-full max-w-lg mx-auto p-4 bg-green-50 shadow-lg rounded-lg border border-green-300"
+            className="w-full max-w-lg mx-auto p-4"
         >
             <div className="max-h-[60vh] overflow-y-auto px-2 space-y-4">
 
                 {/* Dental Procedures */}
-                <label className="font-bold text-lg text-green-900">Dental Procedures:</label>
+                <label className="font-bold text-lg text-green-900">Dental Procedures:<span className="text-red-500">*</span></label>
                 <div className="grid grid-cols-2 gap-2 border-b border-green-300 pb-2">
                     {[
                         { label: "Mouth Examination", field: "mouth_examination" },
@@ -101,7 +101,7 @@ const DentalForm = ({ setOpen, patient, certificate = null }) => {
                 </div>
 
                 {/* Remarks */}
-                <label className="font-bold text-lg text-green-900">Remarks:</label>
+                <label className="font-bold text-lg text-green-900">Remarks:<span className="text-red-500">*</span></label>
                 <Textarea
                     name="remarks"
                     value={data.remarks}
@@ -114,8 +114,7 @@ const DentalForm = ({ setOpen, patient, certificate = null }) => {
                 <hr className="border-green-300 my-4" />
 
                 {/* School Dentist Selection */}
-                {/* School Dentist Selection */}
-                <label className="font-bold text-lg text-green-900">School Dentist:</label>
+                <label className="font-bold text-lg text-green-900">School Dentist:<span className="text-red-500">*</span></label>
                 <Select
                     value={data.school_dentist_id}
                     onValueChange={(value) => handleSelectChange("school_dentist_id", value)}

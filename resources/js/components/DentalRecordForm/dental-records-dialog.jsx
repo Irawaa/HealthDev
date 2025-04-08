@@ -172,12 +172,27 @@ const DentalRecordDialog = ({ patient }) => {
                     {/* Navigation Buttons */}
                     <DialogFooter className="w-full flex justify-center mt-4 gap-4">
                         {step > 1 && (
-                            <Button variant="outline" onClick={() => setStep(step - 1)}>Back</Button>
+                            <Button
+                                className="bg-gray-300 hover:bg-gray-400 text-gray-800"
+                                onClick={() => setStep(step - 1)}
+                            >
+                                Back
+                            </Button>
                         )}
+
                         {step < 3 ? (
-                            <Button onClick={() => setStep(step + 1)}>Next</Button>
+                            <Button
+                                className="bg-green-600 hover:bg-green-700 text-white"
+                                onClick={() => setStep(step + 1)}
+                            >
+                                Next
+                            </Button>
                         ) : (
-                            <Button onClick={handleSave} disabled={processing}>
+                            <Button
+                                className="bg-green-600 hover:bg-green-700 text-white"
+                                onClick={handleSave}
+                                disabled={processing}
+                            >
                                 {isEditMode ? "Update" : "Save"}
                             </Button>
                         )}
