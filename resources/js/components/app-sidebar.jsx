@@ -1,4 +1,4 @@
-import * as React from "react"
+import React, { useState } from "react";
 import {
   AudioWaveform,
   BookOpen,
@@ -13,11 +13,10 @@ import {
   Stethoscope,
   FileText,
   BarChart
-} from "lucide-react"
+} from "lucide-react";
 
-import { NavMain } from "@/components/nav-main"
-import { NavProjects } from "@/components/nav-projects"
-// import { NavUser } from "@/components/nav-user"
+import { NavMain } from "@/components/nav-main";
+import { NavProjects } from "@/components/nav-projects";
 import {
   Sidebar,
   SidebarContent,
@@ -26,13 +25,13 @@ import {
   SidebarMenuItem,
   SidebarMenu,
   SidebarHeader,
-  SidebarRail,
-} from "@/components/ui/sidebar"
-import { ScrollArea } from "./ui/scroll-area"
+  SidebarRail
+} from "@/components/ui/sidebar";
+import { ScrollArea } from "./ui/scroll-area";
 
 import { Link, usePage } from "@inertiajs/react";
 
-// This is sample data.
+// Sample data
 const data = {
   user: {
     name: "shadcn",
@@ -79,22 +78,38 @@ const data = {
       ],
     },
   ],
-}
+};
 
-export function AppSidebar({ ...props }) {
-
+export function AppSidebar(props) {
   const { auth } = usePage().props;
   const isAdmin = auth?.user?.role === "admin";
 
+  // State to control sidebar collapse and expanded items
+  const [collapsed, setCollapsed] = useState(true);
+  const [expandedItems, setExpandedItems] = useState({});
+
+  // Filter navMain items based on the user's role
   const filteredNavMain = data.navMain.map((section) => ({
     ...section,
-    items: section.items.filter(
-      (item) => isAdmin || item.title !== "Clinic Staff"
-    ),
+    items: section.items.filter((item) => isAdmin || item.title !== "Clinic Staff"),
   }));
 
+  // Toggle sub-menu expansion and sidebar collapse
+  const toggleSubMenu = (sectionTitle) => {
+    setExpandedItems((prevState) => {
+      const isCurrentlyExpanded = prevState[sectionTitle];
+      return {
+        ...prevState,
+        [sectionTitle]: !isCurrentlyExpanded,
+      };
+    });
+
+    // Set collapsed to false when a sub-menu icon is clicked
+    setCollapsed(false); // This will expand the sidebar fully
+  };
+
   return (
-    (<Sidebar collapsible="icon" {...props}>
+    <Sidebar collapsible="icon" collapsed={collapsed} onCollapseChange={setCollapsed} {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -114,15 +129,22 @@ export function AppSidebar({ ...props }) {
 
       <SidebarContent>
         <ScrollArea>
-          <NavMain items={filteredNavMain} />
+          <NavMain
+            items={filteredNavMain}
+            toggleSubMenu={toggleSubMenu}
+            expandedItems={expandedItems}
+          />
           <NavProjects projects={data.projects} />
         </ScrollArea>
       </SidebarContent>
+
       <SidebarFooter className="transition-all duration-200 flex justify-center items-center p-3 text-sm text-muted-foreground data-[collapsed=true]:text-center">
         <span className="hidden data-[collapsed=true]:block">v0.1</span>
         <span className="block data-[collapsed=true]:hidden">v0.1</span>
       </SidebarFooter>
+
       <SidebarRail />
-    </Sidebar>)
+    </Sidebar>
   );
 }
+
