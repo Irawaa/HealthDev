@@ -52,13 +52,13 @@ const PatientProfile = ({ patient, colleges, departments, commonDiseases, physic
   const handleTabChange = (newTab) => {
     // Get current URL query parameters
     const params = new URLSearchParams(window.location.search);
-  
+
     console.log("Patient ID:", patient?.patient_id);
     console.log("Active Tab:", newTab);
-  
+
     // Add or update the activeTab parameter
     params.set("activeTab", newTab);
-  
+
     // Preserve the current search params and add the activeTab to the query string
     if (patient?.patient_id && newTab) {
       router.visit(`/patients/${patient.patient_id}?${params.toString()}`, {
@@ -66,7 +66,7 @@ const PatientProfile = ({ patient, colleges, departments, commonDiseases, physic
         preserveScroll: true,
       });
     }
-  };  
+  };
 
   const onTabChange = (newTab) => {
     setActiveTab(newTab);
@@ -161,15 +161,17 @@ const PatientProfile = ({ patient, colleges, departments, commonDiseases, physic
                     {/* Avatar & Name Section */}
                     <Card className="w-full flex flex-col bg-white rounded-lg shadow-lg p-6 space-y-6">
                       <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
-                        <Avatar className="w-32 h-32 sm:w-40 sm:h-40 border-4 border-gray-500 shadow-md">
+                        <Avatar className="w-32 h-32 sm:w-40 sm:h-40 border-4 border-green-500 shadow-md">
                           <AvatarImage src={patient.avatar ? patient.avatar : "/images/default_avatar.jpg"} alt="Avatar" />
-                          <AvatarFallback>{patient.fname?.charAt(0)}{patient.lname?.charAt(0)}</AvatarFallback>
+                          <AvatarFallback className="bg-green-500 text-white">
+                            {patient.fname?.charAt(0)}{patient.lname?.charAt(0)}
+                          </AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col items-center text-center">
                           <h2 className="text-2xl font-bold text-gray-900">
                             {fullName.charAt(0).toUpperCase() + fullName.slice(1)}
                           </h2>
-                          <Badge className="mt-2 px-4 py-1 text-sm sm:text-md font-semibold rounded-md">
+                          <Badge className="mt-2 px-4 py-1 text-sm sm:text-md font-semibold rounded-md bg-green-500 text-white">
                             {patient.type.charAt(0).toUpperCase() + patient.type.slice(1)}
                           </Badge>
                         </div>

@@ -145,7 +145,7 @@ const PatientProfile = ({ patient, onClose, onSave, colleges, departments }) => 
           <Card className="w-full flex flex-col bg-white rounded-lg shadow-lg p-6 space-y-6">
             {/* ✅ Avatar & Name Section - Centered & Improved */}
             <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
-              <Avatar className="w-32 h-32 sm:w-40 sm:h-40 border-4 border-gray-500 shadow-md" src="/default-avatar.png" alt="Avatar" />
+              <Avatar className="w-32 h-32 sm:w-40 sm:h-40 border-4 border-green-500 shadow-md" src="/default-avatar.png" alt="Avatar" />
               <div className="flex flex-col items-center text-center">
                 {isEditing ? (
                   <input
@@ -158,7 +158,7 @@ const PatientProfile = ({ patient, onClose, onSave, colleges, departments }) => 
                 ) : (
                   <h2 className="text-2xl font-bold text-gray-900">{fullName}</h2>
                 )}
-                <Badge className="mt-2 px-4 py-1 text-sm sm:text-md font-semibold rounded-md">
+                <Badge className="mt-2 px-4 py-1 text-sm sm:text-md font-semibold rounded-md bg-green-500 text-white">
                   {patient.type}
                 </Badge>
               </div>
